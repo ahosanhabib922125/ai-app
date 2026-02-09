@@ -116,5 +116,80 @@ export const PRESET_TEMPLATES = [
     name: "Obelisk",
     description: "High-tech infrastructure theme with 3D elements, terminal aesthetics, and cyber-security vibes.",
     path: "templates/futuristic.html"
+  },
+  {
+    name: "PropVision AI",
+    description: "Intelligent property staging platform with earthy tones, glass-panel effects, and elegant serif typography.",
+    path: "templates/PropVision-AI.html"
+  },
+  {
+    name: "PaPaya Stream",
+    description: "Dark-mode media streaming dashboard with modern tech aesthetic and custom UI components.",
+    path: "templates/abc.html"
+  },
+  {
+    name: "Aventra Design",
+    description: "Clean design system component library with glassmorphism effects and minimalist aesthetics.",
+    path: "templates/aventra.html"
+  },
+  {
+    name: "Noir Portfolio",
+    description: "Bold creative portfolio with deep purple tones, massive typography, and luminosity blend effects.",
+    path: "templates/designer-portfolio.html"
+  },
+  {
+    name: "FinanceFlow",
+    description: "Next-generation banking platform with smooth animations, blur transitions, and modern fintech UI.",
+    path: "templates/finance-flow.html"
+  },
+  {
+    name: "Finex Finance",
+    description: "Sophisticated dark-mode investment platform with scroll-triggered animations and editorial typography.",
+    path: "templates/finex-finance.html"
+  },
+  {
+    name: "Finex Gaming",
+    description: "Internet performance optimizer with ultra-dark theme, radial glows, and gaming-tech aesthetics.",
+    path: "templates/finex-gaming.html"
+  },
+  {
+    name: "Fluxer SaaS",
+    description: "Website builder platform with dark mode, interactive pricing plans, and orange accent energy.",
+    path: "templates/fluxer-saas.html"
+  },
+  {
+    name: "Ledger Pay",
+    description: "Monetization infrastructure SaaS with 3D rotations, marquee animations, and professional finance UI.",
+    path: "templates/ledger-saas.html"
+  },
+  {
+    name: "Ledgerly AI",
+    description: "AI-powered social growth tool with warm beige aesthetics, grid overlays, and premium elegant styling.",
+    path: "templates/ledgerly.html"
+  },
+  {
+    name: "Luminal Studio",
+    description: "Creative digital agency with massive hero typography, beam-drop animations, and dark interactive elements.",
+    path: "templates/luminal.html"
+  },
+  {
+    name: "Mindful Zen",
+    description: "Wellness and meditation platform with calming colors, fog effects, and serene glassmorphism cards.",
+    path: "templates/mindful.html"
+  },
+  {
+    name: "X.Studio",
+    description: "Dark-mode design studio portfolio with blue-purple palette, hover animations, and staggered reveals.",
+    path: "templates/portfolio-2.html"
+  },
+  {
+    name: "DevForge",
+    description: "Frontend engineer portfolio with ultra-dark theme, glass panels, monospace accents, and blur-reveal animations.",
+    path: "templates/portfolio.html"
+  },
+  {
+    name: "Prism SaaS",
+    description: "Modern SaaS landing page with light theme, 3D rotations, data visualization, and clean professional layout.",
+    path: "templates/prism-saas.html"
   }
 ];
