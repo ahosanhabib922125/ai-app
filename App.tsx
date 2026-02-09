@@ -7,7 +7,7 @@ import {
   ArrowRight, ChevronLeft, MessageSquare, Bot, User, BrainCircuit,
   Download, Package, Terminal, AlertTriangle,
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
-  PanelTop, Workflow, PanelTopOpen
+  PanelTop, Workflow, PanelTopOpen, Maximize
 } from 'lucide-react';
 import { generateArchitectureStream } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
@@ -547,6 +547,16 @@ const App: React.FC = () => {
     } finally {
       document.body.removeChild(iframe);
       setIsCopyingFigma(false);
+    }
+  };
+
+  const handleFullView = () => {
+    if (!activeFile || !files[activeFile]) return;
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.open();
+      newWindow.document.write(files[activeFile].content);
+      newWindow.document.close();
     }
   };
 
@@ -1184,6 +1194,15 @@ const App: React.FC = () => {
                       <span>Generating...</span>
                     </div>
                   )}
+                  {/* Full View Button */}
+                  <button
+                    onClick={handleFullView}
+                    className="ml-auto px-3 py-1.5 my-0.5 mr-1 rounded-lg text-xs font-bold flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                    title="Open in Full View"
+                  >
+                    <Maximize className="w-3.5 h-3.5" />
+                    Full View
+                  </button>
                 </div>
                 {/* Iframe Preview */}
                 <div className="flex-1 min-h-0 relative">
