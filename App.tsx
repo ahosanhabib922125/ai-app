@@ -555,53 +555,62 @@ const App: React.FC = () => {
     const newWindow = window.open('', '_blank');
     if (!newWindow) return;
 
-    // Store all files as a JS object in the new window
-    const allFiles: Record<string, string> = {};
+    // Encode all file contents as base64 to avoid script tag breaking
+    const encodedFiles: Record<string, string> = {};
     Object.values(files).forEach(f => {
-      allFiles[f.name] = f.content;
+      encodedFiles[f.name] = btoa(unescape(encodeURIComponent(f.content)));
     });
 
-    const shellHtml = `<!DOCTYPE html>
-<html><head>
-<title>${activeFile} - Full View</title>
-<style>
-  * { margin: 0; padding: 0; }
-  html, body { width: 100%; height: 100%; overflow: hidden; }
-  iframe { width: 100%; height: 100%; border: none; }
-  .nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid #e2e8f0; padding: 8px 16px; display: flex; align-items: center; gap: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  .nav-bar button { padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #475569; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-  .nav-bar button:hover { background: #f1f5f9; }
-  .nav-bar button.active { background: #4f46e5; color: white; border-color: #4f46e5; }
-  .nav-bar .title { font-size: 13px; font-weight: 700; color: #1e293b; margin-right: 12px; }
-  iframe { margin-top: 44px; height: calc(100% - 44px); }
-</style>
-</head><body>
-<div class="nav-bar">
-  <span class="title">Full View</span>
-  ${Object.keys(allFiles).map(name =>
-    `<button data-file="${name}" class="${name === activeFile ? 'active' : ''}" onclick="navigateTo('${name}')">${name}</button>`
-  ).join('')}
-</div>
-<iframe id="viewer"></iframe>
-<script>
-var pages = ${JSON.stringify(allFiles)};
+    const fileNames = Object.keys(encodedFiles);
+
+    const navScript = `
+function decode(b64) {
+  return decodeURIComponent(escape(atob(b64)));
+}
+var pages = ${JSON.stringify(encodedFiles)};
+var navInterceptor = '<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.getAttribute("href")){var h=a.getAttribute("href");if(h&&!h.startsWith("http")&&!h.startsWith("#")&&!h.startsWith("mailto:")&&!h.startsWith("tel:")){e.preventDefault();var f=h.split("/").pop().split("?")[0].split("#")[0];window.parent.navigateTo(f);}}});</scr'+'ipt>';
 function navigateTo(fileName) {
   if (!pages[fileName]) return;
   var iframe = document.getElementById('viewer');
-  var content = pages[fileName] + '<script>document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.getAttribute("href")){var h=a.getAttribute("href");if(h&&!h.startsWith("http")&&!h.startsWith("#")&&!h.startsWith("mailto:")&&!h.startsWith("tel:")){e.preventDefault();var f=h.split("/").pop().split("?")[0].split("#")[0];window.parent.navigateTo(f);}}})<\\/script>';
-  iframe.srcdoc = content;
+  iframe.srcdoc = decode(pages[fileName]) + navInterceptor;
   document.title = fileName + ' - Full View';
   document.querySelectorAll('.nav-bar button').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.file === fileName);
   });
 }
 navigateTo('${activeFile}');
-</script>
-</body></html>`;
+`;
 
     newWindow.document.open();
-    newWindow.document.write(shellHtml);
+    newWindow.document.write(`<!DOCTYPE html>
+<html><head>
+<title>${activeFile} - Full View</title>
+<style>
+  *{margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden}
+  iframe{width:100%;height:100%;border:none}
+  .nav-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid #e2e8f0;padding:8px 16px;display:flex;align-items:center;gap:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:auto}
+  .nav-bar button{padding:6px 14px;border-radius:8px;border:1px solid #e2e8f0;background:white;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+  .nav-bar button:hover{background:#f1f5f9}
+  .nav-bar button.active{background:#4f46e5;color:white;border-color:#4f46e5}
+  .nav-bar .title{font-size:13px;font-weight:700;color:#1e293b;margin-right:12px}
+  iframe{margin-top:44px;height:calc(100% - 44px)}
+</style>
+</head><body>
+<div class="nav-bar">
+  <span class="title">Full View</span>
+  ${fileNames.map(name =>
+    `<button data-file="${name}" class="${name === activeFile ? 'active' : ''}" onclick="navigateTo('${name}')">${name}</button>`
+  ).join('')}
+</div>
+<iframe id="viewer" sandbox="allow-scripts allow-same-origin"></iframe>
+</body></html>`);
     newWindow.document.close();
+
+    // Inject script after document is written to avoid parsing issues
+    const scriptEl = newWindow.document.createElement('script');
+    scriptEl.textContent = navScript;
+    newWindow.document.body.appendChild(scriptEl);
   };
 
   // --- COMPONENT: INPUT FORM (Refactored for reuse) ---
