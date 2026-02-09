@@ -1,0 +1,613 @@
+<html lang="en" class="scroll-smooth"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maison Aurum - Bespoke Interiors</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<!-- Geist Font -->
+<link href="https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/style.css" rel="stylesheet">
+<style>
+body { font-family: 'Geist Sans', sans-serif; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* Smooth transitions for slider */
+.slider-track { transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+/* Sequence animation intro */
+@keyframes animationIn {
+0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
+}
+/* Mobile Menu Animation */
+#mobile-menu { transition: opacity 0.3s ease, transform 0.3s ease; }
+#mobile-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+#mobile-menu.closed { opacity: 0; pointer-events: none; transform: translateY(-10px); }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+// Intersection Observer for Scroll Animations
+const observer = new IntersectionObserver((entries) => {
+entries.forEach((entry) => {
+if (entry.isIntersecting) {
+entry.target.classList.add("animate");
+observer.unobserve(entry.target);
+}
+});
+}, { threshold: 0.1, rootMargin: "0px 0px -5% 0px" });
+// Inject styles for animation trigger
+const style = document.createElement("style");
+style.textContent = `
+.animate-on-scroll { opacity: 0; transform: translateY(20px); filter: blur(5px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.animate-on-scroll.animate { opacity: 1; transform: translateY(0); filter: blur(0); }
+`;
+document.head.appendChild(style);
+document.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
+// Mobile Menu Logic
+const menuBtn = document.getElementById('menu-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+const menuIcon = menuBtn.querySelector('iconify-icon');
+let isMenuOpen = false;
+menuBtn.addEventListener('click', () => {
+isMenuOpen = !isMenuOpen;
+if (isMenuOpen) {
+mobileMenu.classList.remove('closed');
+mobileMenu.classList.add('open');
+menuIcon.setAttribute('icon', 'solar:close-circle-linear');
+document.body.style.overflow = 'hidden';
+} else {
+mobileMenu.classList.remove('open');
+mobileMenu.classList.add('closed');
+menuIcon.setAttribute('icon', 'solar:hamburger-menu-linear');
+document.body.style.overflow = '';
+}
+});
+// Testimonial Slider Logic
+const track = document.getElementById('testimonial-track');
+const prevBtn = document.getElementById('prev-voice');
+const nextBtn = document.getElementById('next-voice');
+const slides = document.querySelectorAll('.testimonial-slide');
+let currentIndex = 0;
+function updateSlider() {
+const slideWidth = slides[0].clientWidth;
+track.style.transform = `translateX(-${currentIndex * 100}%)`;
+// Update opacity for focus effect
+slides.forEach((slide, index) => {
+if(index === currentIndex) {
+slide.style.opacity = '1';
+} else {
+slide.style.opacity = '0.3';
+}
+});
+}
+// Initialize opacity
+updateSlider();
+nextBtn.addEventListener('click', () => {
+if (currentIndex < slides.length - 1) {
+currentIndex++;
+updateSlider();
+} else {
+currentIndex = 0; // Loop back
+updateSlider();
+}
+});
+prevBtn.addEventListener('click', () => {
+if (currentIndex > 0) {
+currentIndex--;
+updateSlider();
+} else {
+currentIndex = slides.length - 1; // Loop to end
+updateSlider();
+}
+});
+});
+</script></head>
+<body class="bg-zinc-50 text-zinc-900 antialiased selection:bg-amber-200 selection:text-amber-900 overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-zinc-950/90 backdrop-blur-md text-white">
+        <div class="max-w-screen-2xl mx-auto px-6 h-20 flex items-center justify-between relative z-50">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <iconify-icon icon="solar:armchair-2-linear" width="24" stroke-width="1.5" class="text-amber-400"></iconify-icon>
+                <span class="text-lg font-light tracking-[0.15em] uppercase">Maison Aurum</span>
+            </div>
+            
+            <!-- Desktop Links -->
+            <div class="hidden md:flex items-center gap-10 text-xs font-medium tracking-widest text-zinc-400 uppercase">
+                <a href="#" class="hover:text-amber-400 transition-colors">Atelier</a>
+                <a href="#" class="hover:text-amber-400 transition-colors">Residences</a>
+                <a href="#" class="hover:text-amber-400 transition-colors">Bespoke</a>
+                <a href="#" class="hover:text-amber-400 transition-colors">Journal</a>
+            </div>
+
+            <!-- Icons & Mobile Toggle -->
+            <div class="flex items-center gap-6">
+                <button class="hidden md:block text-zinc-400 hover:text-white transition-colors">
+                    <iconify-icon icon="solar:magnifer-linear" width="20" stroke-width="1.5"></iconify-icon>
+                </button>
+                <button class="hidden md:block text-zinc-400 hover:text-white transition-colors relative">
+                    <iconify-icon icon="solar:bag-5-linear" width="20" stroke-width="1.5"></iconify-icon>
+                    <span class="absolute -top-1 -right-1 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                </button>
+                <!-- Hamburger Button -->
+                <button id="menu-btn" class="md:hidden text-zinc-400 hover:text-white transition-colors z-50">
+                    <iconify-icon icon="solar:hamburger-menu-linear" width="24" stroke-width="1.5"></iconify-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="fixed inset-0 bg-zinc-950 z-40 flex flex-col pt-32 px-6 closed md:hidden h-screen">
+            <div class="flex flex-col gap-8 text-2xl font-light tracking-tight text-white/90">
+                <a href="#" class="border-b border-white/10 pb-4 flex justify-between items-center group">
+                    <span>Atelier</span>
+                    <iconify-icon icon="solar:arrow-right-linear" width="24" class="opacity-0 group-hover:opacity-100 transition-opacity text-amber-500"></iconify-icon>
+                </a>
+                <a href="#" class="border-b border-white/10 pb-4 flex justify-between items-center group">
+                    <span>Residences</span>
+                    <iconify-icon icon="solar:arrow-right-linear" width="24" class="opacity-0 group-hover:opacity-100 transition-opacity text-amber-500"></iconify-icon>
+                </a>
+                <a href="#" class="border-b border-white/10 pb-4 flex justify-between items-center group">
+                    <span>Bespoke Services</span>
+                    <iconify-icon icon="solar:arrow-right-linear" width="24" class="opacity-0 group-hover:opacity-100 transition-opacity text-amber-500"></iconify-icon>
+                </a>
+                <a href="#" class="border-b border-white/10 pb-4 flex justify-between items-center group">
+                    <span>Journal</span>
+                    <iconify-icon icon="solar:arrow-right-linear" width="24" class="opacity-0 group-hover:opacity-100 transition-opacity text-amber-500"></iconify-icon>
+                </a>
+            </div>
+            <div class="mt-auto mb-12 flex flex-col gap-4">
+                <button class="w-full py-4 bg-amber-50 text-zinc-950 uppercase text-xs font-bold tracking-widest rounded-sm">
+                    Client Login
+                </button>
+                <div class="flex justify-between text-zinc-500 text-xs uppercase tracking-widest mt-4">
+                    <span>Milan</span>
+                    <span>Tokyo</span>
+                    <span>New York</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative w-full h-[850px] bg-zinc-900 overflow-hidden">
+        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/42c2221e-d39c-4d8a-962e-002d6c18346d_3840w.webp" alt="Luxury Interior" class="absolute inset-0 w-full h-full object-cover opacity-50">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/80"></div>
+
+        <div class="relative z-10 h-full max-w-screen-2xl mx-auto px-6 flex flex-col justify-center">
+            <div class="max-w-4xl pt-20">
+                <div class="flex items-center gap-3 text-amber-400 mb-6 animate-on-scroll">
+                    <span class="w-8 h-[1px] bg-amber-400"></span>
+                    <span class="text-xs font-medium tracking-[0.2em] uppercase">Est. 1924 • Milan</span>
+                </div>
+                <h1 class="text-5xl md:text-9xl font-normal text-white tracking-tighter leading-[0.95] mb-8 animate-on-scroll">
+                    Silence in <br>
+                    <span class="text-white/50 italic font-light font-serif">Absolute Form.</span>
+                </h1>
+                <p class="text-lg text-zinc-300 max-w-xl font-light leading-relaxed animate-on-scroll">
+                    An anthology of materials curated for the discerning few. We sculpt spaces where heritage meets the avant-garde, creating sanctuaries of profound calm.
+                </p>
+            </div>
+
+            <!-- Floating Product Card (Bottom Left) -->
+            <div class="absolute bottom-12 left-6 md:left-12 bg-zinc-950/80 backdrop-blur-xl border border-white/5 p-5 pr-8 rounded-sm flex items-center gap-5 max-w-sm animate-on-scroll hidden md:flex">
+                <div class="w-16 h-16 bg-zinc-800 rounded-sm flex items-center justify-center overflow-hidden border border-white/5">
+                    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/adb40faa-c523-44f7-9f91-cdc8f6182daf_320w.webp" class="w-full h-full object-cover opacity-90">
+                </div>
+                <div>
+                    <div class="text-white text-sm font-medium tracking-wide">The Sovereign Chair</div>
+                    <div class="text-amber-500 text-xs mt-1">$12,400.00</div>
+                </div>
+                <button class="ml-auto w-10 h-10 rounded-full border border-white/10 text-white flex items-center justify-center hover:bg-amber-500 hover:border-amber-500 hover:text-black transition duration-300">
+                    <iconify-icon icon="solar:arrow-right-linear" width="20" stroke-width="1.5"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Discover Button (Bottom Right) -->
+            <div class="absolute bottom-12 right-6 md:right-12 animate-on-scroll">
+                <button class="bg-amber-50 text-zinc-950 px-8 py-4 rounded-full font-medium text-xs tracking-widest uppercase flex items-center gap-3 hover:bg-white transition-colors shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                    Explore 2025 Collection
+                    <iconify-icon icon="solar:arrow-right-down-linear" width="18" stroke-width="1.5"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Philosophy Section -->
+    <section class="py-24 md:py-32 bg-white">
+        <div class="max-w-screen-2xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+                <!-- Main Text -->
+                <div class="lg:col-span-8 animate-on-scroll">
+                    <div class="flex items-center gap-2 mb-8">
+                        <iconify-icon icon="solar:diamond-linear" width="18" stroke-width="1.5" class="text-amber-600"></iconify-icon>
+                        <span class="text-xs text-zinc-400 font-medium uppercase tracking-widest">The Philosophy</span>
+                    </div>
+                    <h2 class="text-3xl md:text-6xl font-light tracking-tighter text-zinc-900 leading-[1.1]">
+                        True luxury is the absence of noise. We refine 
+                        <span class="text-zinc-400 italic font-serif">raw matter</span> 
+                        into objects of desire, ensuring every curve serves a purpose and every texture tells a 
+                        <span class="text-amber-700 bg-amber-50 px-2 rounded-sm inline-block transform -rotate-1">timeless story.</span> 
+                    </h2>
+                    <div class="mt-10">
+                         <a href="#" class="text-xs font-bold text-zinc-900 border-b border-zinc-200 pb-2 hover:border-amber-500 transition-colors inline-flex items-center gap-2 tracking-widest uppercase">
+                            Read The Manifesto <iconify-icon icon="solar:arrow-right-up-linear" width="16" stroke-width="1.5"></iconify-icon>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Features Grid -->
+                <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-12 mt-20 border-t border-zinc-100 pt-20">
+                    <div class="group animate-on-scroll">
+                        <span class="block text-xs font-mono text-amber-600 mb-6">NO. 01</span>
+                        <h3 class="text-xl font-medium text-zinc-900 mb-4 tracking-tight">Architectural Integrity</h3>
+                        <p class="text-sm text-zinc-500 leading-relaxed font-light">
+                            Structures inspired by brutalist foundations, softened by organic materials to create a commanding yet welcoming presence.
+                        </p>
+                    </div>
+                    <div class="group animate-on-scroll">
+                        <span class="block text-xs font-mono text-amber-600 mb-6">NO. 02</span>
+                        <h3 class="text-xl font-medium text-zinc-900 mb-4 tracking-tight">Rare Earth Materials</h3>
+                        <p class="text-sm text-zinc-500 leading-relaxed font-light">
+                            Sourced from exclusive quarries and sustainable forests. We utilize Italian Travertine, American Walnut, and Belgian Linen.
+                        </p>
+                    </div>
+                    <div class="group animate-on-scroll">
+                        <span class="block text-xs font-mono text-amber-600 mb-6">NO. 03</span>
+                        <h3 class="text-xl font-medium text-zinc-900 mb-4 tracking-tight">Heirloom Quality</h3>
+                        <p class="text-sm text-zinc-500 leading-relaxed font-light">
+                            Built not just to last, but to age gracefully. Each piece develops a unique patina that chronicles your legacy.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Showcase Section -->
+    <section class="py-20 bg-zinc-100 border-y border-zinc-200">
+        <div class="max-w-screen-2xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 animate-on-scroll">
+                <div>
+                    <span class="text-xs font-medium text-zinc-500 uppercase tracking-widest">Global Commission</span>
+                    <h2 class="text-3xl font-light text-zinc-900 mt-3 tracking-tight">Elegance in <br>Every Meridian</h2>
+                </div>
+                <!-- Partner Logos -->
+                <div class="flex gap-10 opacity-30 grayscale mt-8 md:mt-0">
+                    <iconify-icon icon="simple-icons:ritzcarlton" width="80" height="30"></iconify-icon>
+                    <iconify-icon icon="simple-icons:fourseasons" width="80" height="30"></iconify-icon>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Image Card -->
+                <div class="relative overflow-hidden group rounded-sm animate-on-scroll">
+                    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/f189fef4-0e57-45ad-a475-77c6a899e8d4_1600w.webp" alt="Villa Interior" class="w-full h-[600px] object-cover transition duration-1000 group-hover:scale-105 filter brightness-90">
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <div class="text-xs font-mono text-white/80 mb-1">LOCATION: KYOTO, JAPAN</div>
+                        <div class="text-2xl font-light tracking-tight">The Stone House Residence</div>
+                    </div>
+                </div>
+
+                <!-- Detail Card -->
+                <div class="bg-white p-12 md:p-16 flex flex-col justify-center border border-zinc-200 rounded-sm animate-on-scroll">
+                    <div class="flex items-center justify-between mb-10">
+                        <span class="text-sm font-semibold text-zinc-900 tracking-wide">CASE STUDY 09</span>
+                        <span class="px-3 py-1 bg-amber-50 text-amber-700 text-[10px] uppercase tracking-wider font-bold rounded-sm">Private Estate</span>
+                    </div>
+                    <p class="text-2xl text-zinc-600 font-light leading-relaxed mb-10 tracking-tight">
+                        "The brief was silence. We delivered a sanctuary where light dances on raw concrete and warm oak, creating a seamless dialogue between the architecture and the natural world surrounding it."
+                    </p>
+                    <div class="flex items-center gap-6 mt-auto group cursor-pointer">
+                        <button class="w-14 h-14 rounded-full border border-zinc-200 flex items-center justify-center group-hover:bg-zinc-900 group-hover:border-zinc-900 group-hover:text-white transition-all duration-300">
+                            <iconify-icon icon="solar:arrow-right-linear" width="24" stroke-width="1.5"></iconify-icon>
+                        </button>
+                        <span class="text-xs font-bold text-zinc-900 uppercase tracking-widest group-hover:translate-x-2 transition-transform duration-300">View Project</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Large Product Spotlight -->
+    <section class="py-32 bg-[#EBE9E4] overflow-hidden">
+        <div class="max-w-screen-2xl mx-auto px-6 text-center">
+            <span class="text-xs text-amber-700 font-bold uppercase tracking-widest mb-4 block animate-on-scroll">Masterpiece Focus</span>
+            <h2 class="text-4xl md:text-7xl font-extralight text-zinc-900 tracking-tighter mb-24 animate-on-scroll">The Kensington Modular</h2>
+            
+            <div class="relative max-w-6xl mx-auto">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/e96bb607-1b76-4df4-8963-fef197128f2e_1600w.jpg" alt="Luxury Sofa" class="w-full mix-blend-multiply grayscale contrast-125 animate-on-scroll object-cover">
+                
+                <!-- Annotations -->
+                <div class="absolute top-1/2 -right-4 md:-right-12 bg-white/90 backdrop-blur p-6 shadow-2xl shadow-amber-900/10 rounded-sm text-left hidden md:block border border-white/50 animate-on-scroll">
+                    <div class="text-[10px] text-zinc-400 uppercase tracking-widest mb-2">Acquisition Cost</div>
+                    <div class="text-3xl font-light text-zinc-900 tracking-tight">$18,500.00</div>
+                    <div class="text-[10px] text-amber-600 mt-1 italic">Made to Order (8-10 Weeks)</div>
+                    <button class="mt-5 w-full py-3 bg-zinc-900 text-white text-[10px] uppercase font-bold tracking-widest rounded-sm flex items-center justify-center gap-2 hover:bg-amber-600 transition duration-300">
+                        <iconify-icon icon="solar:bag-check-linear" width="16" stroke-width="1.5"></iconify-icon> Reserve
+                    </button>
+                </div>
+
+                <div class="absolute bottom-0 left-0 md:-left-12 max-w-xs text-left animate-on-scroll">
+                    <div class="w-12 h-[1px] bg-zinc-900 mb-4"></div>
+                    <p class="text-sm text-zinc-600 leading-relaxed font-light">
+                        Upholstered in Grade-A Tuscan leather with a kiln-dried hardwood frame. The Kensington represents the pinnacle of comfort engineering.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Voices (Testimonials) Section -->
+    <section class="py-24 bg-white border-t border-zinc-100 overflow-hidden">
+        <div class="max-w-screen-2xl mx-auto px-6">
+            <div class="flex justify-between items-start mb-12 animate-on-scroll">
+                <h2 class="text-4xl font-light text-zinc-900 tracking-tighter">Voices of the Avant-Garde</h2>
+                <div class="flex gap-2">
+                    <button id="prev-voice" class="w-12 h-12 border border-zinc-200 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:border-zinc-900 transition duration-300">
+                        <iconify-icon icon="solar:arrow-left-linear" width="24" stroke-width="1.5"></iconify-icon>
+                    </button>
+                    <button id="next-voice" class="w-12 h-12 border border-zinc-200 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:border-zinc-900 transition duration-300">
+                        <iconify-icon icon="solar:arrow-right-linear" width="24" stroke-width="1.5"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slider Container -->
+            <div class="relative w-full overflow-hidden">
+                <div id="testimonial-track" class="slider-track flex w-full">
+                    
+                    <!-- Slide 1 -->
+                    <div class="testimonial-slide min-w-full grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+                        <div class="md:col-span-4">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/a97a0c41-fd53-4e71-a67c-d1621d1c359f_1600w.jpg" alt="Client" class="w-full aspect-[4/5] object-cover rounded-sm grayscale">
+                        </div>
+                        <div class="md:col-span-8 bg-zinc-50 p-12 md:p-20 border border-zinc-100">
+                            <iconify-icon icon="solar:quote-up-linear" width="48" stroke-width="1" class="text-amber-500 mb-8"></iconify-icon>
+                            <p class="text-2xl md:text-4xl text-zinc-800 leading-tight font-light tracking-tight mb-12">
+                                "Maison Aurum doesn't just sell furniture; they curate an atmosphere. A masterclass in restraint, luxury, and absolute perfection."
+                            </p>
+                            <div class="flex items-center gap-4 border-t border-zinc-200 pt-8">
+                                <div class="text-base font-semibold text-zinc-900 uppercase tracking-wide">Alexander V.</div>
+                                <div class="text-xs text-zinc-500 uppercase tracking-widest">Principal Architect, Zurich</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 2 -->
+                    <div class="testimonial-slide min-w-full grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+                         <div class="md:col-span-4">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/a91c1566-41b6-46c6-9605-e4fbe4ed2f39_1600w.jpg" alt="Client" class="w-full aspect-[4/5] object-cover rounded-sm grayscale">
+                        </div>
+                        <div class="md:col-span-8 bg-zinc-50 p-12 md:p-20 border border-zinc-100">
+                            <iconify-icon icon="solar:quote-up-linear" width="48" stroke-width="1" class="text-amber-500 mb-8"></iconify-icon>
+                            <p class="text-2xl md:text-4xl text-zinc-800 leading-tight font-light tracking-tight mb-12">
+                                "The seamless integration of their bespoke pieces transformed our penthouse into a gallery of livable art. Truly exceptional service."
+                            </p>
+                            <div class="flex items-center gap-4 border-t border-zinc-200 pt-8">
+                                <div class="text-base font-semibold text-zinc-900 uppercase tracking-wide">Elena R.</div>
+                                <div class="text-xs text-zinc-500 uppercase tracking-widest">Art Director, Paris</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 3 -->
+                    <div class="testimonial-slide min-w-full grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+                         <div class="md:col-span-4">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/6cc7a805-00d7-469b-b679-e61afe916531_1600w.jpg" alt="Client" class="w-full aspect-[4/5] object-cover rounded-sm grayscale">
+                        </div>
+                        <div class="md:col-span-8 bg-zinc-50 p-12 md:p-20 border border-zinc-100">
+                            <iconify-icon icon="solar:quote-up-linear" width="48" stroke-width="1" class="text-amber-500 mb-8"></iconify-icon>
+                            <p class="text-2xl md:text-4xl text-zinc-800 leading-tight font-light tracking-tight mb-12">
+                                "I have never encountered such attention to materiality. The textures speak a language of their own. It is silence in physical form."
+                            </p>
+                            <div class="flex items-center gap-4 border-t border-zinc-200 pt-8">
+                                <div class="text-base font-semibold text-zinc-900 uppercase tracking-wide">Marcus T.</div>
+                                <div class="text-xs text-zinc-500 uppercase tracking-widest">Hotelier, Copenhagen</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Grid -->
+    <section class="py-24 bg-white">
+        <div class="max-w-screen-2xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8 animate-on-scroll">
+                <div class="max-w-xl">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Private Collection</span>
+                    </div>
+                    <h2 class="text-4xl font-light text-zinc-900 tracking-tighter">Artifacts for Modern Living.</h2>
+                </div>
+                
+                <div class="flex items-center gap-1 bg-zinc-50 p-1.5 rounded-md border border-zinc-100">
+                    <button class="px-5 py-2 bg-white shadow-sm rounded-sm text-[10px] uppercase font-bold tracking-widest text-zinc-900 border border-zinc-100">All</button>
+                    <button class="px-5 py-2 text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-zinc-900 transition">Seating</button>
+                    <button class="px-5 py-2 text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-zinc-900 transition">Surfaces</button>
+                    <button class="px-5 py-2 text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-zinc-900 transition">Lighting</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
+                <!-- Product 1 -->
+                <div class="group cursor-pointer animate-on-scroll">
+                    <div class="relative bg-[#F5F5F0] aspect-[4/3] rounded-sm flex items-center justify-center mb-8 overflow-hidden">
+                        <div class="absolute top-4 right-4 z-10">
+                            <span class="text-[9px] font-bold text-amber-800 bg-amber-100/50 backdrop-blur px-3 py-1.5 rounded-sm uppercase tracking-widest border border-amber-200/50">Limited: 04/50</span>
+                        </div>
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/1c6b6980-54e4-4d8c-9ff6-e09b844d7b01_800w.webp" class="w-3/4 mix-blend-multiply transition duration-700 group-hover:scale-105 group-hover:-translate-y-2 object-cover" alt="Table">
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-medium text-zinc-900">Travertine Low Table</h3>
+                            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wide">Italian Stone / Honed Finish</p>
+                        </div>
+                        <span class="text-base font-medium text-zinc-900">$4,200</span>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="group cursor-pointer animate-on-scroll">
+                    <div class="relative bg-[#F5F5F0] aspect-[4/3] rounded-sm flex items-center justify-center mb-8 overflow-hidden">
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/42c2221e-d39c-4d8a-962e-002d6c18346d_800w.webp" class="w-3/4 mix-blend-multiply transition duration-700 group-hover:scale-105 group-hover:-translate-y-2 object-cover" alt="Cabinet">
+                    </div>
+                     <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-medium text-zinc-900">Nordic Credenza</h3>
+                            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wide">White Oak / Brass Inlay</p>
+                        </div>
+                        <span class="text-base font-medium text-zinc-900">$6,800</span>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="group cursor-pointer animate-on-scroll">
+                    <div class="relative bg-[#F5F5F0] aspect-[4/3] rounded-sm flex items-center justify-center mb-8 overflow-hidden">
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3fc46c7e-c12d-48eb-8165-a6ba346afaa6_800w.webp" class="w-3/4 mix-blend-multiply transition duration-700 group-hover:scale-105 group-hover:-translate-y-2 object-cover" alt="Console">
+                    </div>
+                     <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-medium text-zinc-900">Media Console No. 5</h3>
+                            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wide">Walnut / Matte Black</p>
+                        </div>
+                        <span class="text-base font-medium text-zinc-900">$5,400</span>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                 <div class="group cursor-pointer animate-on-scroll">
+                    <div class="relative bg-[#F5F5F0] aspect-[4/3] rounded-sm flex items-center justify-center mb-8 overflow-hidden">
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/d966e755-453e-4712-b522-79ee4fc68793_800w.webp" class="w-3/4 mix-blend-multiply transition duration-700 group-hover:scale-105 group-hover:-translate-y-2 object-cover" alt="Cabinet">
+                    </div>
+                     <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-medium text-zinc-900">Architect's Cabinet</h3>
+                            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wide">Steel / Perforated Mesh</p>
+                        </div>
+                        <span class="text-base font-medium text-zinc-900">$3,900</span>
+                    </div>
+                </div>
+
+                <!-- Product 5 -->
+                <div class="group cursor-pointer animate-on-scroll">
+                    <div class="relative bg-[#F5F5F0] aspect-[4/3] rounded-sm flex items-center justify-center mb-8 overflow-hidden">
+                        <div class="absolute top-4 right-4 z-10">
+                             <span class="text-[9px] font-bold text-amber-800 bg-amber-100/50 backdrop-blur px-3 py-1.5 rounded-sm uppercase tracking-widest border border-amber-200/50">New Season</span>
+                        </div>
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/7880ef07-dc02-494a-9ed6-22dba2fe705f_800w.webp" class="w-3/4 mix-blend-multiply transition duration-700 group-hover:scale-105 group-hover:-translate-y-2 object-cover" alt="Sofa">
+                    </div>
+                     <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-medium text-zinc-900">The Daybed</h3>
+                            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wide">Graphite Wool / Ash</p>
+                        </div>
+                        <span class="text-base font-medium text-zinc-900">$8,200</span>
+                    </div>
+                </div>
+
+                <!-- Product 6 -->
+                <div class="group cursor-pointer animate-on-scroll">
+                    <div class="relative bg-[#F5F5F0] aspect-[4/3] rounded-sm flex items-center justify-center mb-8 overflow-hidden">
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/33e29005-886e-4eb3-a3c4-342657448f56_800w.webp" class="w-2/3 mix-blend-multiply transition duration-700 group-hover:scale-105 group-hover:-translate-y-2 object-cover" alt="Dresser">
+                    </div>
+                     <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-medium text-zinc-900">Vertical Dresser</h3>
+                            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-wide">High Gloss / Minimal</p>
+                        </div>
+                        <span class="text-base font-medium text-zinc-900">$4,800</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Amber CTA Banner -->
+    <section class="py-24 bg-amber-50 mx-6 rounded-sm mb-24 flex items-center justify-center text-center border border-amber-100 animate-on-scroll">
+        <div class="max-w-2xl">
+            <h2 class="text-3xl md:text-5xl font-light text-zinc-900 tracking-tighter mb-6">
+                Join the Private  <span class="font-serif italic text-amber-700">Client Atelier</span>
+            </h2>
+            <p class="text-zinc-600 mb-10 max-w-md mx-auto font-light">
+                Gain access to our off-market collection, bespoke customization services, and priority global shipping.
+            </p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <button class="flex items-center gap-3 bg-zinc-900 text-white px-8 py-4 rounded-sm hover:bg-zinc-800 transition shadow-xl shadow-amber-900/5">
+                    <div class="text-left">
+                        <div class="text-[10px] uppercase tracking-widest leading-none text-zinc-400 mb-1">Request Access</div>
+                        <div class="text-sm font-bold leading-none">Concierge Portal</div>
+                    </div>
+                    <iconify-icon icon="solar:arrow-right-linear" width="18" stroke-width="1.5"></iconify-icon>
+                </button>
+                 <button class="flex items-center gap-3 bg-white text-zinc-900 border border-zinc-200 px-8 py-4 rounded-sm hover:bg-zinc-50 transition">
+                    <div class="text-left">
+                        <div class="text-[10px] uppercase tracking-widest leading-none text-zinc-400 mb-1">Download</div>
+                        <div class="text-sm font-bold leading-none">2025 Lookbook</div>
+                    </div>
+                    <iconify-icon icon="solar:download-linear" width="18" stroke-width="1.5"></iconify-icon>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-zinc-950 text-white pt-32 pb-12 border-t border-amber-900/20">
+        <div class="max-w-screen-2xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between mb-24">
+                <div class="max-w-md mb-12 md:mb-0">
+                    <iconify-icon icon="solar:armchair-2-linear" width="32" stroke-width="1" class="text-amber-500 mb-6"></iconify-icon>
+                    <h3 class="text-2xl font-light leading-snug text-zinc-300">
+                        Elevating the standard of living through <br> <span class="text-white">exceptional design.</span>
+                    </h3>
+                </div>
+                <div>
+                     <button class="bg-amber-500 text-black px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-amber-400 transition transform hover:-translate-y-1">Book Consultation</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-xs text-zinc-500 mb-20 border-t border-white/5 pt-16 uppercase tracking-widest font-medium">
+                <div class="flex flex-col gap-6">
+                    <span class="text-white mb-2">Collections</span>
+                    <a href="#" class="hover:text-amber-400 transition">Living</a>
+                    <a href="#" class="hover:text-amber-400 transition">Dining</a>
+                    <a href="#" class="hover:text-amber-400 transition">Workspace</a>
+                    <a href="#" class="hover:text-amber-400 transition">Outdoor</a>
+                </div>
+                 <div class="flex flex-col gap-6">
+                    <span class="text-white mb-2">The Maison</span>
+                    <a href="#" class="hover:text-amber-400 transition">Our Heritage</a>
+                    <a href="#" class="hover:text-amber-400 transition">Craftsmanship</a>
+                    <a href="#" class="hover:text-amber-400 transition">Sustainability</a>
+                    <a href="#" class="hover:text-amber-400 transition">Showrooms</a>
+                </div>
+                 <div class="flex flex-col gap-6">
+                    <span class="text-white mb-2">Services</span>
+                    <a href="#" class="hover:text-amber-400 transition">Trade Program</a>
+                    <a href="#" class="hover:text-amber-400 transition">Interior Design</a>
+                    <a href="#" class="hover:text-amber-400 transition">Custom Orders</a>
+                    <a href="#" class="hover:text-amber-400 transition">Care Guide</a>
+                </div>
+                 <div class="flex flex-col gap-6">
+                    <span class="text-white mb-2">Connect</span>
+                    <a href="#" class="hover:text-amber-400 transition">Instagram</a>
+                    <a href="#" class="hover:text-amber-400 transition">Pinterest</a>
+                    <a href="#" class="hover:text-amber-400 transition">LinkedIn</a>
+                    <a href="#" class="hover:text-amber-400 transition">Newsletter</a>
+                </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center text-[10px] text-zinc-600 uppercase tracking-widest">
+                <div>© 2025 Maison Aurum S.r.l. Milan. All Rights Reserved.</div>
+                <div class="flex gap-8 mt-4 md:mt-0">
+                    <span class="hover:text-white cursor-pointer transition">Privacy Policy</span>
+                    <span class="hover:text-white cursor-pointer transition">Terms of Service</span>
+                    <span class="hover:text-white cursor-pointer transition">Sitemap</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body></html>

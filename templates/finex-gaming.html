@@ -1,0 +1,1132 @@
+<html lang="en" class="bg-[#020202] text-white antialiased"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finex - Internet Performance Optimizer</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style id="aura-editor-visibility-style">
+.invisible { visibility: hidden !important; }
+</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+.bg-stripes {
+background-image: repeating-linear-gradient(
+-45deg,
+transparent,
+transparent 40px,
+rgba(255, 255, 255, 0.015) 40px,
+rgba(255, 255, 255, 0.015) 41px
+);
+}
+.globe-glow {
+background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
+}
+</style>
+<style>
+body { font-family: 'Plus Jakarta Sans', sans-serif; }
+</style>
+<style>
+@keyframes aura-reveal {
+0% { opacity: 0; transform: translateY(24px); filter: blur(8px); }
+100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.aura-reveal {
+animation: aura-reveal 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+animation-play-state: paused;
+}
+.aura-reveal.is-visible {
+animation-play-state: running;
+}
+.flashlight-card {
+position: relative;
+--mouse-x: -999px;
+--mouse-y: -999px;
+}
+.flashlight-card::after {
+content: "";
+position: absolute;
+inset: 0;
+background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 40%);
+opacity: 0;
+transition: opacity 0.5s;
+pointer-events: none;
+z-index: 10;
+mix-blend-mode: screen;
+}
+.flashlight-card:hover::after {
+opacity: 1;
+}
+</style>
+<link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">
+.font-geist { font-family: 'Geist', sans-serif !important; }
+</style><link id="all-fonts-link-font-roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-roboto">
+.font-roboto { font-family: 'Roboto', sans-serif !important; }
+</style><link id="all-fonts-link-font-montserrat" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-montserrat">
+.font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+</style><link id="all-fonts-link-font-poppins" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-poppins">
+.font-poppins { font-family: 'Poppins', sans-serif !important; }
+</style><link id="all-fonts-link-font-playfair" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap"><style id="all-fonts-style-font-playfair">
+.font-playfair { font-family: 'Playfair Display', serif !important; }
+</style><link id="all-fonts-link-font-instrument-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-instrument-serif">
+.font-instrument-serif { font-family: 'Instrument Serif', serif !important; }
+</style><link id="all-fonts-link-font-merriweather" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap"><style id="all-fonts-style-font-merriweather">
+.font-merriweather { font-family: 'Merriweather', serif !important; }
+</style><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">
+.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }
+</style><link id="all-fonts-link-font-jakarta" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-jakarta">
+.font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-manrope" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-manrope">
+.font-manrope { font-family: 'Manrope', sans-serif !important; }
+</style><link id="all-fonts-link-font-space-grotesk" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-space-grotesk">
+.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }
+</style><link id="all-fonts-link-font-work-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-work-sans">
+.font-work-sans { font-family: 'Work Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-pt-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-pt-serif">
+.font-pt-serif { font-family: 'PT Serif', serif !important; }
+</style><link id="all-fonts-link-font-geist-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist-mono">
+.font-geist-mono { font-family: 'Geist Mono', monospace !important; }
+</style><link id="all-fonts-link-font-space-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-space-mono">
+.font-space-mono { font-family: 'Space Mono', monospace !important; }
+</style><link id="all-fonts-link-font-quicksand" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-quicksand">
+.font-quicksand { font-family: 'Quicksand', sans-serif !important; }
+</style><link id="all-fonts-link-font-nunito" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-nunito">
+.font-nunito { font-family: 'Nunito', sans-serif !important; }
+</style><link id="all-fonts-link-font-newsreader" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&amp;display=swap"><style id="all-fonts-style-font-newsreader">
+.font-newsreader { font-family: 'Newsreader', serif !important; }
+</style><link id="all-fonts-link-font-google-sans-flex" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-google-sans-flex">
+.font-google-sans-flex { font-family: 'Google Sans Flex', sans-serif !important; }
+</style><link id="all-fonts-link-font-oswald" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-oswald">
+.font-oswald { font-family: 'Oswald', sans-serif !important; }
+</style><link id="all-fonts-link-font-dm-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-dm-sans">
+.font-dm-sans { font-family: 'DM Sans', sans-serif !important; }
+</style></head>
+  <body class="min-h-screen selection:bg-purple-500/30 relative overflow-x-hidden">
+    
+    
+
+
+
+
+
+
+
+<!-- Background (component) added by Aura -->
+<div class="aura-background-component fixed top-0 w-full -z-10 h-[800px]" data-alpha-mask="80" style="; mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)"><div class="aura-background-component top-0 w-full -z-10 absolute h-full">
+  <div data-us-project="bKN5upvoulAmWvInmHza" class="absolute w-full h-full left-0 top-0 -z-10"></div>
+  <script type="text/javascript">
+    !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();
+  </script>
+</div></div>
+    <!-- Diagonal Background Pattern -->
+    <div class="fixed inset-0 bg-stripes pointer-events-none z-0"></div>
+
+    <!-- Radial Spotlight Effect -->
+
+    <!-- Floating Navigation -->
+    <nav class="fixed flex z-50 px-4 top-6 right-0 left-0 justify-center">
+      <div class="flex shadow-black/50 bg-[#000000] w-full max-w-4xl border-white/10 border rounded-full pt-2 pr-2 pb-2 pl-6 shadow-2xl backdrop-blur-xl items-center justify-between">
+        <a href="#" class="inline-flex items-center justify-center bg-center w-[100px] h-[40px] bg-[url(https://cdn.midjourney.com/a3840b63-36c4-4a6b-80dd-5c41d0f4a259/0_0.png?w=800&amp;q=80)] bg-cover rounded"></a>
+
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
+          <a href="#" class="hover:text-white transition-colors">Benefits</a>
+          <a href="#" class="hover:text-white transition-colors">Features</a>
+          <a href="#" class="hover:text-white transition-colors">Plans</a>
+          <a href="#" class="hover:text-white transition-colors">FAQ</a>
+        </div>
+
+        <a href="#" class="bg-white text-black px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-zinc-200 transition-colors">
+          Get Started
+        </a>
+      </div>
+    </nav>
+
+    <main class="relative z-10">
+      <!-- Hero Header -->
+      <div class="container border-x flex flex-col text-center max-w-7xl border-white/10 mr-auto ml-auto pt-32 pr-6 pb-24 pl-6 items-center">
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs font-medium text-zinc-300 mb-8 uppercase tracking-wider aura-reveal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          Version 2.0 Now Live
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-zinc-500 mb-6 max-w-5xl mx-auto leading-[1.1] aura-reveal" style="animation-delay: 100ms;">
+          Unleash Maximum
+          <br>
+          Internet Speed
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-normal aura-reveal" style="animation-delay: 200ms;">
+          Optimize your connection with advanced routing, reduced latency, and
+          packet loss prevention for gaming and streaming.
+        </p>
+
+        <!-- Platform Icons -->
+        <a href="#" class="group isolate inline-flex cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_8px_rgba(34,197,94,0.35)] rounded-full relative shadow-[0_8px_40px_rgba(34,197,94,0.25)] aura-reveal" style="--spread: 90deg; --shimmer-color: rgba(255,255,255,0.6); --radius: 9999px; --speed: 4s; --cut: 1px; --bg: rgba(255, 255, 255, 0.05); animation-delay: 300ms;">
+          <div class="absolute inset-0">
+            <div class="absolute inset-[-200%] w-[400%] h-[400%] [animation:rotate-gradient_var(--speed)_linear_infinite]">
+              <div class="absolute inset-0 [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]"></div>
+            </div>
+          </div>
+          <div class="absolute rounded-full [background:var(--bg)] [inset:var(--cut)] backdrop-blur"></div>
+          <div class="z-10 flex gap-3 sm:w-auto overflow-hidden text-base font-medium text-white w-full pt-3 pr-4 pb-3 pl-4 relative items-center" style="border-radius: 9999px">
+            <div style="position: absolute; content: ' '; display: block; width: 200%; height: 200%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2), transparent); animation: borderBeamRotation 4s infinite linear; top: 50%; left: 50%; transform: translate(-50%, -50%);" class=""></div>
+            <div style="position: absolute; inset: 1px; background: rgba(10, 11, 20, 0.8); border-radius: 9999px; backdrop-filter: blur(8px)" class=""></div>
+
+            <span class="whitespace-nowrap relative z-10 font-sans">
+              Boost Connection
+            </span>
+            <span class="inline-flex items-center justify-center z-10 bg-white/10 w-7 h-7 rounded-full ml-1 relative group-hover:bg-white/20 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </span>
+            <style>
+              @keyframes borderBeamRotation {
+                0% {
+                  transform: translate(-50%, -50%) rotate(0deg);
+                }
+
+                100% {
+                  transform: translate(-50%, -50%) rotate(360deg);
+                }
+              }
+            </style>
+          </div>
+        </a>
+      </div>
+      <div class="container border-x border-b max-w-7xl border-white/10 mr-auto ml-auto pt-24 pr-6 pb-24 pl-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 border border-white/10 bg-black/40 backdrop-blur-sm rounded-none overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-white/10">
+          <div class="lg:col-span-7 flex flex-col flashlight-card aura-reveal">
+            <div class="p-8 md:p-12 border-b border-white/10 bg-gradient-to-br from-white/[0.02] to-transparent relative group">
+              <div class="flex flex-col md:flex-row items-center gap-12 h-full">
+                <div class="relative w-full max-w-xs shrink-0">
+                  <div class="bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl relative z-20 group-hover:-translate-y-2 transition-transform duration-500 ease-out">
+                    <div class="flex items-center justify-center w-12 h-12 bg-white rounded-xl mb-4 shadow-lg shadow-white/10">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check w-6 h-6 text-black">
+                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                        <path d="m9 12 2 2 4-4"></path>
+                      </svg>
+                    </div>
+                    <div class="text-sm font-medium text-white mb-0.5">
+                      Optimized
+                    </div>
+                    <div class="text-xs text-zinc-500 mb-6 font-mono">
+                      Ping: 14ms
+                    </div>
+
+                    <div class="flex items-center gap-3 pt-4 border-t border-white/5">
+                      <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-600 via-white to-red-600 shadow-inner"></div>
+                      <div class="text-xs text-zinc-400">Frankfurt, DE</div>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-3 h-3 text-zinc-600 ml-auto">
+                        <path d="m9 18 6-6-6-6"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="absolute -inset-4 bg-white/5 blur-2xl rounded-full z-10 opacity-50"></div>
+                </div>
+
+                <div class="text-left">
+                  <h3 class="text-2xl font-semibold tracking-tight text-white mb-3">
+                    Low Latency
+                  </h3>
+                  <p class="text-base text-zinc-400 leading-relaxed mb-6">
+                    Experience gaming and streaming without interruptions. Our
+                    smart routing finds the shortest path to game servers.
+                  </p>
+                  <a href="#" class="inline-flex items-center text-sm font-medium text-white hover:text-zinc-300 transition-colors group">
+                    See our plans
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform">
+                      <path d="M5 12h14"></path>
+                      <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/10 flex-grow">
+              <div class="p-8 md:p-10 bg-gradient-to-br from-transparent to-white/[0.02] relative overflow-hidden group">
+                <h3 class="text-xl font-semibold tracking-tight text-white mb-2 relative z-10">
+                  Packet Loss Fix
+                </h3>
+                <p class="text-sm text-zinc-400 relative z-10">
+                  Stabilize your connection instantly.
+                </p>
+              </div>
+              <div class="p-8 md:p-10 flex flex-col justify-center bg-black">
+                <div class="text-4xl md:text-5xl font-semibold tracking-tighter text-white mb-1">
+                  -40%
+                </div>
+                <div class="text-sm text-zinc-400">Average Ping Reduction</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 p-8 md:p-12 flex flex-col justify-between bg-zinc-900/20 flashlight-card aura-reveal" style="animation-delay: 100ms;">
+            <div class="">
+              <h3 class="text-3xl font-semibold tracking-tight text-white mb-4">
+                Competitive Edge In Every Game
+              </h3>
+              <p class="text-base text-zinc-400 leading-relaxed mb-10">
+                Don't let your ISP's bad routing cost you the match. Finex
+                ensures your packets take the most direct route.
+              </p>
+              <ul class="space-y-4 mb-10">
+                <li class="flex items-start gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap w-5 h-5 text-white shrink-0 mt-0.5">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                  <span class="text-sm text-zinc-300">
+                    Reduce Latency &amp; Jitter
+                  </span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-5 h-5 text-white shrink-0 mt-0.5">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                  <span class="text-sm text-zinc-300">
+                    DDoS Protection Included
+                  </span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-route w-5 h-5 text-white shrink-0 mt-0.5">
+                    <circle cx="6" cy="19" r="3"></circle>
+                    <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path>
+                    <circle cx="18" cy="5" r="3"></circle>
+                  </svg>
+                  <span class="text-sm text-zinc-300">
+                    Smart Traffic Routing
+                  </span>
+                </li>
+              </ul>
+            </div>
+            <button class="bg-white text-black px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-zinc-200 transition-colors w-fit">
+              Get Started
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGE-BASED FEATURE SECTION (NO ROUNDED CORNERS) -->
+      <section class="container max-w-7xl mx-auto px-6 border-x border-b border-white/10 py-24">
+        <!-- Section Header -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-12">
+          <div class="flex-1 aura-reveal">
+            <div class="inline-flex items-center justify-center px-3 py-1 mb-6 border border-purple-500/30 bg-purple-500/10 text-purple-200 text-xs font-medium tracking-wide uppercase">
+              Intelligent Protection
+            </div>
+            <h2 class="text-6xl md:text-7xl lg:text-8xl font-oswald uppercase tracking-tight leading-[0.9] text-white">
+              Speed Without
+              <br>
+              Compromise
+            </h2>
+          </div>
+
+          <div class="flex flex-col justify-end items-start lg:items-end lg:text-right max-w-md gap-12 aura-reveal" style="animation-delay: 100ms;">
+            <p class="text-zinc-400 text-lg leading-relaxed text-left lg:text-left">
+              Your connection, supercharged by our global node network.
+            </p>
+            <div class="w-full flex justify-end">
+              <span class="text-sm text-zinc-500 font-mono">001 — 003</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Feature Visual Area -->
+        <div class="relative w-full aspect-[16/10] md:aspect-[21/9] bg-[#0A0A0A] border border-white/10 mb-10 overflow-hidden group shadow-2xl shadow-purple-900/20 aura-reveal">
+          <!-- Background ambient glow -->
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-purple-800/20 blur-[120px] rounded-full pointer-events-none"></div>
+
+          <!-- Dark overlay gradient -->
+          <div class="absolute inset-0 bg-gradient-to-t from-[#020202] via-transparent to-transparent z-10"></div>
+
+          <!-- Abstract UI Interface (Sharp Edges) -->
+          <div class="absolute inset-10 md:inset-16 flex border border-white/5 bg-[#050505] shadow-2xl z-20">
+            <!-- Sidebar -->
+            <div class="w-16 border-r border-white/5 flex flex-col items-center py-6 gap-6 bg-black/20 backdrop-blur-md">
+              <div class="w-8 h-8 bg-zinc-800 flex items-center justify-center">
+                <svg class="w-4 h-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+              </div>
+              <div class="w-8 h-8 bg-purple-600/20 flex items-center justify-center border-l-2 border-purple-500">
+                <svg class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                  <path d="M2 12h20"></path>
+                </svg>
+              </div>
+              <div class="w-8 h-8 flex items-center justify-center opacity-50">
+                <svg class="w-4 h-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 p-8 relative overflow-hidden">
+              <!-- Header UI -->
+              <div class="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-2 h-2 bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                  <span class="text-sm font-mono text-zinc-300 tracking-wider">
+                    OPTIMIZATION_ACTIVE
+                  </span>
+                </div>
+                <div class="flex gap-3">
+                  <div class="px-3 py-1 border border-white/10 text-[10px] text-zinc-400 uppercase tracking-widest hover:bg-white/5 transition-colors cursor-pointer">
+                    Protocol: Wireguard
+                  </div>
+                  <div class="px-3 py-1 border border-white/10 text-[10px] text-zinc-400 uppercase tracking-widest hover:bg-white/5 transition-colors cursor-pointer">
+                    IP: 192.168.X.X
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Stats Grid -->
+              <div class="grid grid-cols-2 gap-4 aura-reveal">
+                <!-- Card 1 -->
+                <div class="border border-white/10 bg-white/[0.02] p-4 group/card hover:bg-white/[0.04] transition-colors">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="p-2 bg-purple-500/10 border border-purple-500/20">
+                      <svg class="w-5 h-5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+                      </svg>
+                    </div>
+                    <span class="text-xs text-zinc-500 font-mono">
+                      Reduced from 45ms
+                    </span>
+                  </div>
+                  <div class="text-lg text-white font-medium">12ms</div>
+                  <div class="text-xs text-zinc-500 mt-1">
+                    Military grade standard
+                  </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="border border-white/10 bg-white/[0.02] p-4 group/card hover:bg-white/[0.04] transition-colors">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="p-2 bg-blue-500/10 border border-blue-500/20">
+                      <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path>
+                        <path d="M8.5 8.5v.01"></path>
+                        <path d="M16 15.5v.01"></path>
+                        <path d="M12 12v.01"></path>
+                        <path d="M11 17v.01"></path>
+                        <path d="M7 14v.01"></path>
+                      </svg>
+                    </div>
+                    <span class="text-xs text-zinc-500 font-mono">
+                      No Packet Loss
+                    </span>
+                  </div>
+                  <div class="text-lg text-white font-medium">100%</div>
+                  <div class="text-xs text-zinc-500 mt-1">Latency: 14ms</div>
+                </div>
+
+                <!-- List Item -->
+                <div class="col-span-2 mt-4">
+                  <div class="text-xs text-zinc-500 font-mono mb-3 uppercase tracking-wider">
+                    Recent Activity
+                  </div>
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between p-3 border border-white/5 bg-white/[0.01] hover:bg-white/[0.03]">
+                      <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-1.5 bg-green-500"></div>
+                        <span class="text-sm text-zinc-300">
+                          Route Re-optimized
+                        </span>
+                      </div>
+                      <span class="text-xs text-zinc-600 font-mono">
+                        00:00:05
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 border border-white/5 bg-white/[0.01] hover:bg-white/[0.03]">
+                      <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-1.5 bg-blue-500"></div>
+                        <span class="text-sm text-zinc-400">
+                          Jitter Spike Mitigated
+                        </span>
+                      </div>
+                      <span class="text-xs text-zinc-600 font-mono">
+                        00:01:12
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Abstract Decorative Elements inside the main window -->
+          <div class="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-transparent to-transparent z-30 pointer-events-none"></div>
+          <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-transparent to-transparent z-30 pointer-events-none"></div>
+
+          <!-- Decorative floating squares (like reference image) -->
+
+          <div class="absolute right-[5%] top-[20%] w-24 h-24 border border-white/5 bg-white/[0.02] backdrop-blur-sm z-10 rotate-45 opacity-20"></div>
+        </div>
+
+        <!-- Feature Navigation Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 border-t border-white/10">
+          <div class="group pt-6 pr-4 cursor-pointer">
+            <h3 class="text-sm font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">
+              Smart Pathing
+            </h3>
+            <p class="text-xs text-zinc-500 leading-relaxed group-hover:text-zinc-400 transition-colors">
+              We find the fastest physical path to the game server.
+            </p>
+          </div>
+          <div class="relative pt-6 pr-4 px-0 md:px-4 cursor-pointer">
+            <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_15px_rgba(255,255,255,0.7)]"></div>
+            <h3 class="text-sm font-semibold text-white mb-2">FPS Boost</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed">
+              Free up system resources and optimize network drivers.
+            </p>
+          </div>
+          <div class="group pt-6 pr-4 px-0 md:px-4 cursor-pointer">
+            <h3 class="text-sm font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">
+              Packet Loss Fix
+            </h3>
+            <p class="text-xs text-zinc-500 leading-relaxed group-hover:text-zinc-400 transition-colors">
+              Redundant data transmission ensures 0% packet loss.
+            </p>
+          </div>
+          <div class="group pt-6 px-0 md:px-4 cursor-pointer">
+            <h3 class="text-sm font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">
+              Game Support
+            </h3>
+            <p class="text-xs text-zinc-500 leading-relaxed group-hover:text-zinc-400 transition-colors">
+              Custom profiles for over 1000+ competitive titles.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TESTIMONIALS SECTION -->
+      <section class="container border-x max-w-7xl border-white/10 border-b mr-auto ml-auto pt-24 pr-6 pb-24 pl-6">
+        <style>
+          .testimonial-item {
+            transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0.15;
+            filter: blur(4px);
+            transform: scale(0.96) translateX(-10px);
+          }
+          .testimonial-item.active {
+            opacity: 1;
+            filter: blur(0);
+            transform: scale(1) translateX(0);
+          }
+          .avatar-indicator {
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0.3;
+            filter: grayscale(100%);
+            transform: scale(1);
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: none;
+          }
+          .avatar-indicator.active {
+            opacity: 1;
+            filter: grayscale(0%);
+            transform: scale(1.4);
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 40px -5px rgba(168, 85, 247, 0.4);
+            z-index: 20;
+          }
+          .avatar-indicator::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+          }
+        </style>
+
+        <!-- Header -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-24 gap-12 relative z-10">
+          <div class="flex-1">
+            <h2 class="text-6xl md:text-7xl lg:text-8xl font-oswald uppercase tracking-tight leading-[0.9] text-white">
+              What They Said
+            </h2>
+          </div>
+
+          <div class="flex flex-col justify-end items-start lg:items-end lg:text-right max-w-md gap-12">
+            <p class="text-zinc-400 text-lg leading-relaxed text-left lg:text-left">
+              Voices of our satisfied clients from around the globe.
+            </p>
+            <div class="w-full flex justify-end">
+              <span class="text-sm text-zinc-500 font-mono">
+                SCROLL TO READ
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 relative min-h-[800px]">
+          <!-- Left Column: Testimonial Quotes (Scrollable) -->
+          <div class="lg:col-span-9 flex flex-col gap-40 lg:pb-40 py-12">
+            <!-- Quote 1 -->
+            <div class="testimonial-item group relative aura-reveal" data-index="0">
+              <div class="md:pl-12 relative">
+                <!-- Big Quote Icon -->
+                <div class="absolute -left-2 -top-6 md:-left-12 md:-top-8 opacity-20">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" class="text-white transform rotate-180">
+                    <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z"></path>
+                  </svg>
+                </div>
+
+                <blockquote class="text-3xl md:text-5xl text-white font-light leading-[1.1] tracking-tight mb-8">
+                  My ping dropped from 80ms to 35ms instantly. I can finally
+                  compete at a high level without lag spikes.
+                </blockquote>
+
+                <div class="flex items-center gap-4">
+                  <!-- Mobile Inline Avatar -->
+                  <div class="lg:hidden w-10 h-10 rounded-full overflow-hidden border border-white/20">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&amp;h=100&amp;fit=crop&amp;crop=faces" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm text-white font-medium">
+                      Alex Chen
+                    </span>
+                    <span class="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                      Semi-Pro Valorant Player
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quote 2 -->
+            <div class="testimonial-item group relative" data-index="1">
+              <div class="md:pl-12 relative">
+                <div class="absolute -left-2 -top-6 md:-left-12 md:-top-8 opacity-20">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" class="text-white transform rotate-180">
+                    <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z"></path>
+                  </svg>
+                </div>
+                <blockquote class="text-3xl md:text-5xl text-white font-light leading-[1.1] tracking-tight mb-8">
+                  Incredible reliability and encryption standards. Highly
+                  recommended for enterprise usage!
+                </blockquote>
+                <div class="flex items-center gap-4">
+                  <div class="lg:hidden w-10 h-10 rounded-full overflow-hidden border border-white/20">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&amp;h=150&amp;fit=crop&amp;crop=faces" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm text-white font-medium">
+                      Sarah Jenkins
+                    </span>
+                    <span class="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                      Director at Style Vision
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quote 3 -->
+            <div class="testimonial-item group relative" data-index="2">
+              <div class="md:pl-12 relative">
+                <div class="absolute -left-2 -top-6 md:-left-12 md:-top-8 opacity-20">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" class="text-white transform rotate-180">
+                    <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11C14.017 11.5523 13.5693 12 13.017 12H12.017V5H22.017V15C22.017 18.3137 19.3307 21 16.017 21H14.017ZM5.0166 21L5.0166 18C5.0166 16.8954 5.91203 16 7.0166 16H10.0166C10.5689 16 11.0166 15.5523 11.0166 15V9C11.0166 8.44772 10.5689 8 10.0166 8H6.0166C5.46432 8 5.0166 8.44772 5.0166 9V11C5.0166 11.5523 4.56889 12 4.0166 12H3.0166V5H13.0166V15C13.0166 18.3137 10.3303 21 7.0166 21H5.0166Z"></path>
+                  </svg>
+                </div>
+                <blockquote class="text-3xl md:text-5xl text-white font-light leading-[1.1] tracking-tight mb-8">
+                  Transformed our connectivity across borders into a seamless
+                  experience. Superb!
+                </blockquote>
+                <div class="flex items-center gap-4">
+                  <div class="lg:hidden w-10 h-10 rounded-full overflow-hidden border border-white/20">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&amp;h=100&amp;fit=crop&amp;crop=faces" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm text-white font-medium">
+                      Marcus Thorne
+                    </span>
+                    <span class="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                      Freelance Journalist
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Sticky Avatars (Desktop) -->
+          <div class="hidden lg:flex lg:col-span-3 sticky top-[40vh] flex-col items-end gap-8 pr-4 h-fit">
+            <div class="relative w-16 h-16 rounded-full border border-white/10 overflow-hidden cursor-pointer avatar-indicator" data-target="0">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&amp;h=100&amp;fit=crop&amp;crop=faces" class="w-full h-full object-cover transition-all">
+            </div>
+            <div class="relative w-16 h-16 rounded-full border border-white/10 overflow-hidden cursor-pointer avatar-indicator" data-target="1">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&amp;h=150&amp;fit=crop&amp;crop=faces" class="w-full h-full object-cover transition-all">
+            </div>
+            <div class="relative w-16 h-16 rounded-full border border-white/10 overflow-hidden cursor-pointer avatar-indicator" data-target="2">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&amp;h=100&amp;fit=crop&amp;crop=faces" class="w-full h-full object-cover transition-all">
+            </div>
+          </div>
+        </div>
+
+        <script>
+          (function() {
+            // Intersection Observer with a tight margin to detect middle of viewport
+            const options = {
+              root: null,
+              rootMargin: '-45% 0px -45% 0px',
+              threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  const index = entry.target.getAttribute('data-index');
+                  updateActiveState(index);
+                }
+              });
+            }, options);
+
+            // Observe all testimonial items
+            const items = document.querySelectorAll('.testimonial-item');
+            items.forEach(item => observer.observe(item));
+
+            // Click to scroll functionality for avatars
+            const avatars = document.querySelectorAll('.avatar-indicator');
+            avatars.forEach(avatar => {
+              avatar.addEventListener('click', () => {
+                const targetIndex = avatar.getAttribute('data-target');
+                const targetItem = document.querySelector(`.testimonial-item[data-index="${targetIndex}"]`);
+                if (targetItem) {
+                  targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  updateActiveState(targetIndex);
+                }
+              });
+            });
+
+            function updateActiveState(index) {
+              // Toggle active class on text items
+              items.forEach(item => {
+                if (item.getAttribute('data-index') === index) {
+                  item.classList.add('active');
+                } else {
+                  item.classList.remove('active');
+                }
+              });
+
+              // Toggle active class on avatars
+              avatars.forEach(avatar => {
+                if (avatar.getAttribute('data-target') === index) {
+                  avatar.classList.add('active');
+                } else {
+                  avatar.classList.remove('active');
+                }
+              });
+            }
+
+            // Initialize first item as active
+            setTimeout(() => updateActiveState('0'), 100);
+          })();
+        </script>
+      </section>
+
+      <!-- PRICING SECTION -->
+      <section class="w-full bg-black text-white relative border-b border-white/10">
+        <!-- Top Header Section -->
+        <div class="container border-x max-w-7xl border-white/10 mr-auto ml-auto pr-6 pl-6">
+          <div class="flex flex-col lg:flex-row lg:items-end justify-between py-24 gap-12">
+            <!-- Main Title -->
+            <div class="flex-1 aura-reveal">
+              <h1 class="text-6xl md:text-7xl lg:text-8xl font-oswald uppercase tracking-tight leading-[0.9]">
+                Simple Pricing Plans
+              </h1>
+            </div>
+
+            <!-- Right Description & Counter -->
+            <div class="flex flex-col justify-end items-start lg:items-end lg:text-right max-w-md gap-12 aura-reveal" style="animation-delay: 100ms;">
+              <p class="text-zinc-400 text-lg leading-relaxed text-left lg:text-left">
+                No hourly rates. No surprise charges. No scope creep penalties.
+                Just transparent pricing for transformational work.
+              </p>
+              <div class="w-full flex justify-end">
+                <span class="text-sm text-zinc-500 font-mono">003 — 003</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing Grid -->
+        <div class="container max-w-7xl mx-auto border-x border-t border-white/10">
+          <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-white/10">
+            <!-- Plan 1: Website Design & Development -->
+            <div class="flex flex-col p-8 md:p-12 h-full flashlight-card aura-reveal">
+              <div class="mb-16">
+                <h2 class="text-3xl font-normal mb-6">Monthly Pass</h2>
+                <p class="text-zinc-400 leading-relaxed max-w-lg">
+                  Full access to our global node network for a month. Perfect
+                  for testing the waters.
+                </p>
+              </div>
+
+              <div class="border-t border-white/10 pt-12 mt-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <!-- Left Column: Includes -->
+                  <div class="">
+                    <span class="block text-zinc-500 text-sm mb-6">
+                      Include
+                    </span>
+                    <ul class="space-y-4 text-sm text-zinc-300">
+                      <li class="flex items-start gap-3">
+                        <span class="text-zinc-600">—</span>
+                        Website strategy and UX design
+                      </li>
+                      <li class="flex items-start gap-3">
+                        <span class="text-zinc-600">—</span>
+                        Custom web design
+                      </li>
+                      <li class="flex items-start gap-3">
+                        <span class="text-zinc-600">—</span>
+                        Responsive development
+                      </li>
+                    </ul>
+
+                    <div class="mt-24">
+                      <div class="text-4xl lg:text-5xl font-normal tracking-tight">
+                        $9.99
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Right Column: Timeline & Team -->
+                  <div class="flex flex-col h-full">
+                    <div class="mb-10">
+                      <span class="block text-zinc-500 text-sm mb-2">
+                        Timeline
+                      </span>
+                      <div class="text-white">12-18 weeks</div>
+                    </div>
+
+                    <div class="mb-12">
+                      <span class="block text-zinc-500 text-sm mb-2">Team</span>
+                      <div class="text-white leading-relaxed text-sm">
+                        Strategist, 2 Designers, 2 Developers, Project Manager
+                      </div>
+                    </div>
+
+                    <div class="mt-auto pt-6">
+                      <button class="w-full py-4 px-6 bg-zinc-900 border border-white/10 text-white text-sm hover:bg-zinc-800 transition-colors">
+                        Start Your Project
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Plan 2: Product Design & Development -->
+            <div class="flex flex-col p-8 md:p-12 h-full">
+              <div class="mb-16">
+                <h2 class="text-3xl font-normal mb-6">Annual Pro</h2>
+                <p class="text-zinc-400 leading-relaxed max-w-lg">
+                  Maximum savings for the dedicated gamer. Includes priority
+                  routing and beta features.
+                </p>
+              </div>
+
+              <div class="border-t border-white/10 pt-12 mt-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <!-- Left Column: Includes -->
+                  <div class="">
+                    <span class="block text-zinc-500 text-sm mb-6">
+                      Include
+                    </span>
+                    <ul class="space-y-4 text-sm text-zinc-300">
+                      <li class="flex items-start gap-3">
+                        <span class="text-zinc-600">—</span>
+                        Priority Node Access
+                      </li>
+                      <li class="flex items-start gap-3">
+                        <span class="text-zinc-600">—</span>
+                        Early Access Features
+                      </li>
+                      <li class="flex items-start gap-3">
+                        <span class="text-zinc-600">—</span>
+                        Multi-Device Support
+                      </li>
+                    </ul>
+
+                    <div class="mt-24">
+                      <div class="text-4xl lg:text-5xl font-normal tracking-tight">
+                        $89.99
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Right Column: Timeline & Team -->
+                  <div class="flex flex-col h-full">
+                    <div class="mb-10">
+                      <span class="block text-zinc-500 text-sm mb-2">
+                        Timeline
+                      </span>
+                      <div class="text-white">16-24 weeks</div>
+                    </div>
+
+                    <div class="mb-12">
+                      <span class="block text-zinc-500 text-sm mb-2">Team</span>
+                      <div class="text-white leading-relaxed text-sm">
+                        Product Strategist, UX Researcher, 2 Designers, 2-3
+                        Developers
+                      </div>
+                    </div>
+
+                    <div class="mt-auto pt-6">
+                      <button class="w-full py-4 px-6 bg-zinc-900 border border-white/10 text-white text-sm hover:bg-zinc-800 transition-colors">
+                        Start Your Project
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-black text-white border-t border-white/10 font-sans relative overflow-hidden">
+      <!-- Top Glow Effect -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-32 bg-white/5 blur-[80px] rounded-full pointer-events-none"></div>
+
+      <div class="max-w-7xl mx-auto border-x border-white/10 relative z-10">
+        <!-- Social Media Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 border-b border-white/10">
+          <!-- YouTube -->
+          <a href="#" class="group flex items-center justify-between p-6 border-b md:border-b-0 md:border-r border-white/10 hover:bg-white/[0.03] transition-colors">
+            <div class="flex items-center gap-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-white">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+              </svg>
+              <span class="text-sm font-medium text-white">YouTube</span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+
+          <!-- Twitter -->
+          <a href="#" class="group flex items-center justify-between p-6 border-b md:border-b-0 md:border-r border-white/10 hover:bg-white/[0.03] transition-colors">
+            <div class="flex items-center gap-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-white">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+              </svg>
+              <span class="text-sm font-medium text-white">Twitter</span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+
+          <!-- Instagram -->
+          <a href="#" class="group flex items-center justify-between p-6 border-b md:border-b-0 md:border-r border-white/10 hover:bg-white/[0.03] transition-colors">
+            <div class="flex items-center gap-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+              </svg>
+              <span class="text-sm font-medium text-white">Instagram</span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+
+          <!-- Facebook -->
+          <a href="#" class="group flex items-center justify-between p-6 border-b md:border-b-0 hover:bg-white/[0.03] transition-colors">
+            <div class="flex items-center gap-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-white">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              </svg>
+              <span class="text-sm font-medium text-white">Facebook</span>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Links Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 min-h-[300px]">
+          <!-- Column 1 -->
+          <div class="p-8 md:p-12 border-r border-white/10 border-b md:border-b-0">
+            <h4 class="text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-8">
+              Product
+            </h4>
+            <ul class="space-y-4">
+              <li class="">
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Technology
+                </a>
+              </li>
+              <li class="">
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Integrations
+                </a>
+              </li>
+              <li class="">
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Releases
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Column 2 -->
+          <div class="p-8 md:p-12 border-r border-white/10 border-b md:border-b-0">
+            <h4 class="text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-8">
+              Resources
+            </h4>
+            <ul class="space-y-4">
+              <li>
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Docs
+                </a>
+              </li>
+              <li>
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  API Reference
+                </a>
+              </li>
+              <li>
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Tutorials
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Column 3 -->
+          <div class="p-8 md:p-12 border-r border-white/10 border-b md:border-b-0">
+            <h4 class="text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-8">
+              Company
+            </h4>
+            <ul class="space-y-4">
+              <li class="">
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Team
+                </a>
+              </li>
+              <li class="">
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Culture
+                </a>
+              </li>
+              <li class="">
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Jobs
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Column 4 -->
+          <div class="p-8 md:p-12">
+            <h4 class="text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-8">
+              Legal
+            </h4>
+            <ul class="space-y-4">
+              <li>
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Imprint
+                </a>
+              </li>
+              <li>
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Data Policy
+                </a>
+              </li>
+              <li>
+                <a href="#" class="text-sm text-zinc-300 hover:text-white transition-colors block">
+                  Cookie Policy
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="px-8 md:px-12 pb-24 pt-20 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-12">
+          <div class="max-w-md">
+            <div class="flex items-center gap-3 mb-6">
+              <!-- Geometric Logo -->
+
+              <span class="text-3xl font-semibold tracking-tighter text-white">
+                FINEX.
+              </span>
+            </div>
+            <p class="text-sm text-zinc-500 leading-relaxed max-w-xs font-medium">
+              Optimizing the internet for the next generation of competitive
+              gaming.
+            </p>
+          </div>
+
+          <div class="w-full lg:w-auto flex flex-col md:flex-row gap-0">
+            <div class="relative w-full md:w-80 group">
+              <input type="email" placeholder="GAMER@EMAIL.COM" class="bg-white text-black text-xs font-mono font-medium placeholder:text-black/50 px-5 py-4 w-full h-full outline-none uppercase transition-colors rounded-none">
+            </div>
+            <button class="bg-zinc-900 text-white text-[11px] tracking-wide font-semibold px-8 py-4 border border-zinc-800 hover:bg-zinc-800 transition-colors uppercase whitespace-nowrap">
+              Subscribe
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      lucide.createIcons();
+    </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+        document.querySelectorAll('.aura-reveal').forEach((el) => {
+          const parent = el.parentElement;
+          if (parent) {
+            const siblings = Array.from(parent.children).filter(c => c.classList.contains('aura-reveal'));
+            const index = siblings.indexOf(el);
+            if (index > 0) el.style.animationDelay = `${index * 100}ms`;
+          }
+          observer.observe(el);
+        });
+
+        document.querySelectorAll('.flashlight-card').forEach(card => {
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+            card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+          });
+        });
+      });
+    </script>
+  
+</body></html>

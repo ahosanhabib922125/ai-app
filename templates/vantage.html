@@ -1,0 +1,778 @@
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VANTAGE | The Velocity Protocol</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<!-- Styles Configuration -->
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+'obsidian': '#050505',
+'charcoal': '#0F1115',
+'acid': '#CCFF00',
+'silver': '#E1E1E1',
+'glass': 'rgba(255, 255, 255, 0.05)'
+},
+fontFamily: {
+'sans': ['Space Grotesk', 'sans-serif'],
+'display': ['Syncopate', 'sans-serif'],
+},
+backgroundImage: {
+'grid-pattern': "linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)",
+},
+dropShadow: {
+'neon': '0 0 5px rgba(204, 255, 0, 0.5)',
+'hard': '4px 4px 0px rgba(0, 0, 0, 1)',
+}
+}
+}
+}
+</script>
+<style>
+body {
+background-color: #050505;
+color: #E1E1E1;
+overflow-x: hidden;
+}
+/* Smooth Scroll Setup */
+html.lenis { width: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+/* Utilities */
+.glass-panel {
+background: rgba(15, 17, 21, 0.6);
+backdrop-filter: blur(12px);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.text-outline {
+-webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+color: transparent;
+}
+/* Acid Outline for Hero */
+.text-outline-acid {
+-webkit-text-stroke: 1px #CCFF00;
+color: transparent;
+}
+/* Noise Texture */
+.noise {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+z-index: 9000;
+opacity: 0.04;
+background: url('https://grainy-gradients.vercel.app/noise.svg');
+}
+/* Marquee for Top Bar Only */
+.marquee-container {
+mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+/* Stacking Cards */
+.stacking-card {
+position: sticky;
+top: 100px;
+box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+}
+/* Neon Glow Hover */
+.neon-hover:hover {
+box-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
+border-color: #CCFF00;
+}
+/* Card Image Hover */
+.card-image-container img {
+transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.neon-hover:hover .card-image-container img {
+transform: scale(1.1);
+}
+/* Roadmap Animations */
+.roadmap-img {
+transition: opacity 0.6s ease-in-out, transform 0.8s ease-out;
+opacity: 0;
+transform: scale(1.05);
+}
+.roadmap-img.active {
+opacity: 1;
+transform: scale(1);
+}
+/* Phase Dot & Text States */
+.phase-dot {
+background-color: #4b5563; /* Gray-600 */
+box-shadow: none;
+transition: all 0.4s ease;
+}
+.phase-label {
+color: #9ca3af; /* Gray-400 */
+transition: color 0.4s ease;
+}
+.phase-title {
+color: #6b7280; /* Gray-500 */
+transition: color 0.4s ease;
+}
+/* Active Phase State */
+.roadmap-phase.active-phase .phase-dot {
+background-color: #CCFF00;
+box-shadow: 0 0 15px #CCFF00;
+transform: scale(1.2);
+}
+.roadmap-phase.active-phase .phase-label {
+color: #CCFF00;
+}
+.roadmap-phase.active-phase .phase-title {
+color: white;
+}
+/* Mobile Menu */
+.mobile-menu {
+transform: translateX(100%);
+transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mobile-menu.open {
+transform: translateX(0);
+}
+/* Custom Gradient for Title */
+.title-gradient {
+background-image: linear-gradient(to bottom, #FFFFFF 0%, #9ca3af 50%, #111827 100%);
+}
+</style>
+<style>
+/* 3D Transform utilities */
+</style></head>
+<body class="antialiased selection:bg-acid selection:text-black">
+
+    <!-- Noise Overlay -->
+    <div class="noise"></div>
+
+    <!-- Navigation (Fixed) -->
+    <nav class="fixed top-0 w-full z-50 px-6 py-4 backdrop-blur-md bg-obsidian/60 border-b border-white/5 transition-all duration-300">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <a href="#" class="text-2xl font-display font-bold tracking-widest text-white group relative z-50">
+                VANTAGE<span class="text-acid group-hover:animate-pulse">.</span>
+            </a>
+            
+            <!-- Desktop Links -->
+            <div class="hidden md:flex gap-12 font-sans text-sm uppercase tracking-widest relative z-50">
+                <a href="#features" class="text-gray-400 hover:text-acid transition-colors link-hover" data-value="Protocol">Protocol</a>
+                <a href="#ecosystem" class="text-gray-400 hover:text-acid transition-colors link-hover" data-value="Ecosystem">Ecosystem</a>
+                <a href="#roadmap" class="text-gray-400 hover:text-acid transition-colors link-hover" data-value="Roadmap">Roadmap</a>
+            </div>
+            
+            <div class="flex items-center gap-4 relative z-50">
+                <button class="hidden md:block px-6 py-2 border border-white/20 text-white text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded-full group overflow-hidden relative">
+                    <span class="relative z-10 group-hover:text-black transition-colors">Launch App</span>
+                    <div class="absolute inset-0 bg-acid translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                </button>
+
+                <!-- Mobile Hamburger -->
+                <button id="menu-btn" class="md:hidden text-white focus:outline-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="mobile-menu fixed inset-0 z-40 bg-obsidian flex flex-col justify-center items-center text-center md:hidden">
+        <div class="flex flex-col gap-8 font-display text-2xl font-bold uppercase">
+            <a href="#features" class="text-white hover:text-acid transition-colors menu-link">Protocol</a>
+            <a href="#ecosystem" class="text-white hover:text-acid transition-colors menu-link">Ecosystem</a>
+            <a href="#roadmap" class="text-white hover:text-acid transition-colors menu-link">Roadmap</a>
+        </div>
+        <button id="close-menu" class="absolute top-6 right-6 text-white p-2">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section class="relative min-h-screen flex flex-col justify-center items-center overflow-hidden pt-20">
+        
+        <!-- Unicorn Studio Background -->
+        <div class="absolute inset-0 z-0">
+            <div data-us-project="G2OBjVkMrg8juHghbIqJ" style="width: 100%; height: 100%;"></div>
+        </div>
+        <script type="text/javascript">
+            !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.3/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();
+        </script>
+        
+        <!-- Ambient Glow (Reduced opacity) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-acid rounded-full blur-[150px] opacity-5 pointer-events-none z-1"></div>
+
+        <div class="container w-full mx-auto px-6 relative z-10 text-center pointer-events-none overflow-hidden">
+            <div class="overflow-hidden mb-8">
+                <!-- Tagline: High visibility Acid on Dark Glass -->
+                <p class="hero-reveal text-acid font-mono text-xs md:text-sm tracking-[0.3em] uppercase inline-block border px-3 py-2 rounded border-acid/20 bg-black/80 backdrop-blur-md pointer-events-auto shadow-lg">
+                    The Velocity Protocol
+                </p>
+            </div>
+            
+            <div class="relative pointer-events-auto max-w-6xl mx-auto">
+                <!-- New Professional Title Structure -->
+                <!-- Font Sans (Space Grotesk) for solidity, Tighter tracking for block effect -->
+                <h1 class="hero-title text-6xl md:text-8xl lg:text-9xl font-sans font-bold uppercase leading-[0.9] tracking-tighter mb-8 drop-shadow-2xl">
+                    <span class="block title-gradient text-transparent bg-clip-text">Institutional</span>
+                    <span class="block title-gradient text-transparent bg-clip-text">Liquidity Layer</span>
+                </h1>
+            </div>
+
+            <div class="flex flex-col justify-center items-center gap-8 mt-8 max-w-2xl mx-auto pointer-events-auto">
+                <!-- Description Box -->
+                <div class="p-6 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 text-center shadow-2xl">
+                    <p class="hero-desc text-gray-300 font-sans text-lg md:text-xl leading-relaxed">
+                        VANTAGE bridges the gap between traditional finance and DeFi.
+                        
+                        <span class="text-white">Zero slippage. Micro-second finality. Infinite scale.</span>
+                    </p>
+                </div>
+                
+                <div class="hero-cta relative group mt-4">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-acid to-white rounded-sm blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                    <!-- CTA -->
+                    <button class="relative bg-obsidian border border-white/20 text-white px-10 py-5 font-display font-bold uppercase tracking-wide hover:bg-acid hover:text-black transition-all duration-300 rounded-sm shadow-lg text-sm md:text-base">
+                        Start Trading
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE TICKER STRIP -->
+    <div class="w-full bg-acid py-3 overflow-hidden whitespace-nowrap border-y border-black z-20 relative transform -rotate-1 scale-105 origin-left shadow-lg">
+        <div class="marquee-content inline-block text-obsidian font-bold font-mono text-lg tracking-tight">
+            BTC/USD $94,231 ▲ • ETH/USD $4,821 ▲ • VTG/USD $12.45 ▲▲ • SOL/USD $188 ▲ • LIQUIDITY $4.2B • 24H VOL $890M • VTG/USD $12.45 ▲▲ • BTC/USD $94,231 ▲ •
+        </div>
+    </div>
+
+    <!-- PARTNERS GRID -->
+    <section class="py-16 bg-charcoal border-b border-white/5">
+        <div class="container mx-auto px-6">
+            <p class="text-xs font-mono text-gray-500 uppercase tracking-widest text-center mb-10">Trusted by Validators</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 justify-items-center items-center">
+                <h3 class="text-xl md:text-2xl font-display font-bold text-gray-600 hover:text-white transition-colors duration-300 cursor-default">SEQUOIA</h3>
+                <h3 class="text-xl md:text-2xl font-display font-bold text-gray-600 hover:text-white transition-colors duration-300 cursor-default">PANTERA</h3>
+                <h3 class="text-xl md:text-2xl font-display font-bold text-gray-600 hover:text-white transition-colors duration-300 cursor-default">BINANCE</h3>
+                <h3 class="text-xl md:text-2xl font-display font-bold text-gray-600 hover:text-white transition-colors duration-300 cursor-default">COINBASE</h3>
+                <h3 class="text-xl md:text-2xl font-display font-bold text-gray-600 hover:text-white transition-colors duration-300 cursor-default">A16Z</h3>
+                <h3 class="text-xl md:text-2xl font-display font-bold text-gray-600 hover:text-white transition-colors duration-300 cursor-default">POLYCHAIN</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- METRICS SECTION -->
+    <section class="py-32 bg-obsidian relative">
+        <div class="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-acid/5 to-transparent"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-white/10 pt-10">
+                
+                <!-- TVL Card -->
+                <div class="stat-card group cursor-default">
+                    <h3 class="text-gray-500 font-mono text-sm mb-2">Total Value Locked</h3>
+                    <div class="text-5xl md:text-7xl font-display font-bold text-white group-hover:text-acid transition-colors duration-300 counter" data-target="4.2">0</div>
+                    <span class="text-xl text-acid font-bold">B+</span>
+                    <div class="h-[1px] w-full bg-white/20 mt-4 overflow-hidden">
+                        <div class="h-full w-0 group-hover:w-full bg-acid transition-all duration-1000 ease-out"></div>
+                    </div>
+                </div>
+
+                <!-- Tx Card -->
+                <div class="stat-card group cursor-default">
+                    <h3 class="text-gray-500 font-mono text-sm mb-2">Transactions / Sec</h3>
+                    <div class="text-5xl md:text-7xl font-display font-bold text-white group-hover:text-acid transition-colors duration-300 counter" data-target="120">0</div>
+                    <span class="text-xl text-acid font-bold">K</span>
+                    <div class="h-[1px] w-full bg-white/20 mt-4 overflow-hidden">
+                        <div class="h-full w-0 group-hover:w-full bg-acid transition-all duration-1000 ease-out"></div>
+                    </div>
+                </div>
+
+                <!-- AVG COST LAYOUT UPDATED -->
+                <div class="stat-card group cursor-default">
+                    <h3 class="text-gray-500 font-mono text-sm mb-2">Avg. Cost</h3>
+                    <!-- Number -->
+                    <div class="text-5xl md:text-7xl font-display font-bold text-white group-hover:text-acid transition-colors duration-300 counter" data-target="0.03">0</div>
+                    <!-- Dollar Sign Below, in Green -->
+                    <span class="text-xl text-acid font-bold">$</span>
+                    <div class="h-[1px] w-full bg-white/20 mt-4 overflow-hidden">
+                        <div class="h-full w-0 group-hover:w-full bg-acid transition-all duration-1000 ease-out"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- STACKING CARDS FEATURES -->
+    <section id="features" class="py-20 bg-charcoal relative">
+        <div class="container mx-auto px-6 mb-20">
+            <h2 class="text-4xl md:text-6xl font-display uppercase font-bold">Protocol <span class="text-acid">Architecture</span></h2>
+        </div>
+
+        <div class="container mx-auto px-6 pb-40">
+            <!-- Card 1 -->
+            <div class="stacking-card bg-obsidian border border-white/10 p-10 md:p-16 rounded-3xl mb-12 transform origin-top transition-transform duration-500 neon-hover">
+                <div class="flex flex-col md:flex-row justify-between gap-10">
+                    <div class="md:w-1/2">
+                        <span class="text-acid font-mono text-xl mb-4 block">01</span>
+                        <h3 class="text-4xl md:text-5xl font-display font-bold mb-6">Atomic Settlement</h3>
+                        <p class="text-gray-400 text-lg leading-relaxed">
+                            Peer-to-peer exchange across different blockchains without intermediaries. Utilizing Hashed TimeLock Contracts (HTLC) for absolute security.
+                        </p>
+                        <button class="mt-8 text-white border-b border-acid pb-1 hover:text-acid transition-colors">Read Whitepaper</button>
+                    </div>
+                    <div class="md:w-1/2 h-64 md:h-80 rounded-xl relative overflow-hidden card-image-container">
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/17ccd163-d602-4899-bb48-384b86aacf6d_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Blockchain">
+                        <div class="absolute inset-0 bg-gradient-to-t from-obsidian to-transparent opacity-80"></div>
+                        <div class="absolute bottom-4 left-4 p-2 bg-black/50 backdrop-blur rounded text-xs font-mono border border-white/20">HTLC ENCRYPTED</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="stacking-card bg-[#0A0C10] border border-white/10 p-10 md:p-16 rounded-3xl mb-12 transform origin-top transition-transform duration-500 neon-hover">
+                <div class="flex flex-col md:flex-row justify-between gap-10">
+                    <div class="md:w-1/2">
+                        <span class="text-acid font-mono text-xl mb-4 block">02</span>
+                        <h3 class="text-4xl md:text-5xl font-display font-bold mb-6">Dark Pool Liquidity</h3>
+                        <p class="text-gray-400 text-lg leading-relaxed">
+                            Institutional grade privacy for large volume trades. Orders are matched within a zero-knowledge environment, preventing front-running.
+                        </p>
+                    </div>
+                    <div class="md:w-1/2 h-64 md:h-80 rounded-xl relative overflow-hidden card-image-container">
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/a1a86b7c-a011-43f0-966c-544a0e5f53e9_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Dark Pool">
+                        <div class="absolute inset-0 bg-black/40"></div>
+                        <div class="absolute bottom-4 left-4 p-2 bg-black/50 backdrop-blur rounded text-xs font-mono border border-white/20">ZK-SNARKS PROOF</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="stacking-card bg-[#111318] border border-white/10 p-10 md:p-16 rounded-3xl transform origin-top transition-transform duration-500 neon-hover">
+                <div class="flex flex-col md:flex-row justify-between gap-10">
+                    <div class="md:w-1/2">
+                        <span class="text-acid font-mono text-xl mb-4 block">03</span>
+                        <h3 class="text-4xl md:text-5xl font-display font-bold mb-6">Yield Aggregation</h3>
+                        <p class="text-gray-400 text-lg leading-relaxed">
+                            AI-driven routing logic scans 14 chains simultaneously to find the highest yield for idle assets, automatically rebalancing every block.
+                        </p>
+                    </div>
+                    <div class="md:w-1/2 h-64 md:h-80 rounded-xl relative overflow-hidden card-image-container">
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4a711e45-c2d2-4f0e-9414-408c91c4f7da_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt="Data Analytics">
+                        <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent"></div>
+                         <div class="absolute bottom-4 left-4 p-2 bg-black/50 backdrop-blur rounded text-xs font-mono border border-white/20">AI ROUTING ACTIVE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TECH DEEP DIVE (Accordion) -->
+    <section class="py-20 bg-obsidian">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <h2 class="text-3xl font-display mb-12 text-center">Technical Specifications</h2>
+            
+            <div class="space-y-4">
+                <!-- Tech Item 1 -->
+                <div class="group border border-white/10 p-6 rounded-lg hover:bg-white/5 transition-all cursor-pointer overflow-hidden">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xl font-bold font-mono text-acid">Consensus Mechanism</h4>
+                        <span class="text-2xl transform group-hover:rotate-45 transition-transform duration-300">+</span>
+                    </div>
+                    <div class="h-0 group-hover:h-24 transition-all duration-500 ease-in-out overflow-hidden">
+                        <p class="pt-4 text-gray-400">Proof-of-History combined with Tower BFT to achieve sub-400ms finality times while maintaining decentralization across 5,000+ nodes.</p>
+                    </div>
+                </div>
+
+                <!-- Tech Item 2 -->
+                <div class="group border border-white/10 p-6 rounded-lg hover:bg-white/5 transition-all cursor-pointer overflow-hidden">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xl font-bold font-mono text-acid">Virtual Machine (VVM)</h4>
+                        <span class="text-2xl transform group-hover:rotate-45 transition-transform duration-300">+</span>
+                    </div>
+                    <div class="h-0 group-hover:h-24 transition-all duration-500 ease-in-out overflow-hidden">
+                        <p class="pt-4 text-gray-400">Fully compatible with EVM but optimized for parallel processing. Execute thousands of smart contracts simultaneously.</p>
+                    </div>
+                </div>
+
+                <!-- Tech Item 3 -->
+                <div class="group border border-white/10 p-6 rounded-lg hover:bg-white/5 transition-all cursor-pointer overflow-hidden">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xl font-bold font-mono text-acid">Token Standard</h4>
+                        <span class="text-2xl transform group-hover:rotate-45 transition-transform duration-300">+</span>
+                    </div>
+                    <div class="h-0 group-hover:h-24 transition-all duration-500 ease-in-out overflow-hidden">
+                        <p class="pt-4 text-gray-400">VRC-20 standards include native metadata compression and gas-less transfer capabilities for authorized wallets.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PARALLAX VISUAL -->
+    <section class="py-40 relative overflow-hidden flex items-center justify-center bg-charcoal">
+        <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        
+        <!-- Floating Text Behind -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+            <h2 class="text-[18vw] font-display font-bold text-transparent select-none leading-none tracking-tighter whitespace-nowrap" style="-webkit-text-stroke: 2px rgba(255, 255, 255, 0.1);" id="big-text">
+               TOKENOMICS
+           </h2>
+        </div>
+
+        <!-- Center Image -->
+        <div class="relative w-[300px] h-[400px] md:w-[400px] md:h-[600px] z-20 parallax-card perspective-1000 group">
+            <div class="absolute inset-0 bg-acid blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+            <img src="https://images.unsplash.com/photo-1642104704074-907c0698cbd9?q=80&amp;w=2832&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover rounded-lg shadow-2xl brightness-75 contrast-125 grayscale group-hover:grayscale-0 transition-all duration-700" alt="Token">
+            <div class="absolute inset-0 border border-acid/20 rounded-lg"></div>
+            
+            <!-- Floating Data Points -->
+            <div class="absolute -right-10 top-20 bg-black/80 backdrop-blur border border-white/10 p-4 rounded text-xs font-mono">
+                <div class="text-gray-400">Current APY</div>
+                <div class="text-acid text-xl">14.2%</div>
+            </div>
+             <div class="absolute -left-10 bottom-20 bg-black/80 backdrop-blur border border-white/10 p-4 rounded text-xs font-mono">
+                <div class="text-gray-400">Burn Rate</div>
+                <div class="text-white text-xl">2.1% / Yr</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ECOSYSTEM LIST -->
+    <section id="ecosystem" class="py-20 bg-obsidian">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col gap-0">
+                <!-- Item 1 -->
+                <div class="ecosystem-item border-t border-white/10 py-12 flex flex-col md:flex-row justify-between items-start md:items-center group hover:bg-white/5 transition-colors duration-300 px-4 cursor-pointer">
+                    <span class="text-acid font-mono mb-2 md:mb-0">01</span>
+                    <h3 class="text-4xl font-display font-bold text-gray-500 group-hover:text-white transition-colors scramble-text" data-value="Staking V2">Staking V2</h3>
+                    <p class="hidden md:block text-gray-500 w-1/3 text-right group-hover:text-acid">Up to 45% APY locked</p>
+                    <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-acid group-hover:border-acid transition-all transform group-hover:-rotate-45">
+                        <svg class="w-4 h-4 text-white group-hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="ecosystem-item border-t border-white/10 py-12 flex flex-col md:flex-row justify-between items-start md:items-center group hover:bg-white/5 transition-colors duration-300 px-4 cursor-pointer">
+                    <span class="text-acid font-mono mb-2 md:mb-0">02</span>
+                    <h3 class="text-4xl font-display font-bold text-gray-500 group-hover:text-white transition-colors scramble-text" data-value="Governance">Governance</h3>
+                    <p class="hidden md:block text-gray-500 w-1/3 text-right group-hover:text-acid">DAO Voting Power</p>
+                    <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-acid group-hover:border-acid transition-all transform group-hover:-rotate-45">
+                        <svg class="w-4 h-4 text-white group-hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                </div>
+                 <!-- Item 3 -->
+                 <div class="ecosystem-item border-t border-b border-white/10 py-12 flex flex-col md:flex-row justify-between items-start md:items-center group hover:bg-white/5 transition-colors duration-300 px-4 cursor-pointer">
+                    <span class="text-acid font-mono mb-2 md:mb-0">03</span>
+                    <h3 class="text-4xl font-display font-bold text-gray-500 group-hover:text-white transition-colors scramble-text" data-value="The Bridge">The Bridge</h3>
+                    <p class="hidden md:block text-gray-500 w-1/3 text-right group-hover:text-acid">Cross-chain Interop</p>
+                    <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-acid group-hover:border-acid transition-all transform group-hover:-rotate-45">
+                        <svg class="w-4 h-4 text-white group-hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UPDATED ROADMAP: SPLIT STICKY SCROLL -->
+    <section id="roadmap" class="py-32 relative bg-charcoal">
+        <div class="container mx-auto px-6">
+            <h2 class="text-5xl font-display font-bold mb-24 text-center">Trajectory</h2>
+            
+            <!-- Sticky Container Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-20 relative">
+                
+                <!-- Left: Content (Phases) -->
+                <div class="relative border-l border-white/10 ml-4 md:ml-10">
+                    
+                    <!-- Q1 -->
+                    <div class="mb-40 pl-10 relative roadmap-phase" data-index="0">
+                        <div class="phase-dot absolute -left-[5px] top-2 w-[9px] h-[9px] rounded-full"></div>
+                        <span class="phase-label font-mono text-sm block">PHASE 01</span>
+                        <h4 class="phase-title text-4xl font-bold mt-2">Mainnet Launch</h4>
+                        <p class="text-gray-400 mt-4 text-lg leading-relaxed">
+                            Deployment of the Genesis block. Initial validator onboarding ensuring a decentralized distribution of power from day one. TGE happens concurrently.
+                        </p>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="mb-40 pl-10 relative roadmap-phase" data-index="1">
+                        <div class="phase-dot absolute -left-[5px] top-2 w-[9px] h-[9px] rounded-full"></div>
+                        <span class="phase-label font-mono text-sm block">PHASE 02</span>
+                        <h4 class="phase-title text-4xl font-bold mt-2">Vantage SDK</h4>
+                        <p class="text-gray-400 mt-4 text-lg leading-relaxed">
+                            Complete developer suite for building dApps. Includes Rust and Solidity compiler support, API endpoints, and a comprehensive documentation library.
+                        </p>
+                    </div>
+
+                     <!-- Q3 -->
+                     <div class="mb-40 pl-10 relative roadmap-phase" data-index="2">
+                        <div class="phase-dot absolute -left-[5px] top-2 w-[9px] h-[9px] rounded-full"></div>
+                        <span class="phase-label font-mono text-sm block">PHASE 03</span>
+                        <h4 class="phase-title text-4xl font-bold mt-2">Global Settlement</h4>
+                        <p class="text-gray-400 mt-4 text-lg leading-relaxed">
+                            Integration with traditional financial institutions (TradFi). Bridges to SWIFT and SEPA enabling instant fiat on/off ramps directly on-chain.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Right: Sticky Images -->
+                <div class="hidden md:block">
+                    <div class="sticky top-32 h-[500px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                        <!-- Image 1 -->
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/622eee03-933e-4849-bec1-9c79c8a93107_1600w.webp" class="roadmap-img active absolute inset-0 w-full h-full object-cover" id="img-0" alt="Mainnet">
+                        <div class="absolute inset-0 bg-black/30 pointer-events-none"></div>
+                        
+                        <!-- Image 2 -->
+                        <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/9f2ed82e-900a-4e17-843f-6340215c86a0_1600w.jpg" class="roadmap-img absolute inset-0 w-full h-full object-cover" id="img-1" alt="SDK">
+                        
+                        <!-- Image 3 -->
+                        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&amp;w=2000&amp;auto=format&amp;fit=crop" class="roadmap-img absolute inset-0 w-full h-full object-cover" id="img-2" alt="Global">
+                        
+                        <!-- Overlay Text -->
+                        <div class="absolute bottom-5 right-5 bg-black/60 backdrop-blur px-4 py-2 border border-white/10 rounded">
+                            <span class="text-acid font-mono text-xs">VISUALIZATION // LIVE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BIG COMMUNITY CTA -->
+    <section class="py-40 bg-acid relative overflow-hidden flex flex-col items-center justify-center text-center">
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+        <div class="relative z-10">
+            <h2 class="text-black font-display text-[8vw] leading-none font-bold tracking-tighter hover:skew-x-2 transition-transform duration-300 cursor-pointer">
+                JOIN THEVANGUARD
+            </h2>
+            <div class="mt-10 flex gap-4 justify-center">
+                <button class="bg-black text-white px-10 py-4 font-bold text-xl hover:scale-110 transition-transform">DISCORD</button>
+                <button class="border-2 border-black text-black px-10 py-4 font-bold text-xl hover:bg-black hover:text-white transition-colors">TWITTER</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-obsidian pt-20 pb-10 border-t border-white/10">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+                <div class="col-span-1 md:col-span-2">
+                    <h2 class="text-4xl font-display font-bold mb-6 text-white">VANTAGE.</h2>
+                    <p class="max-w-md text-gray-400">Pioneering the future of decentralized finance with speed, security, and institutional-grade architecture.</p>
+                    <div class="mt-8 flex gap-4">
+                        <input type="email" placeholder="Enter your email" class="bg-white/5 border border-white/10 px-4 py-3 w-64 focus:border-acid outline-none text-white transition-colors">
+                        <button class="bg-white text-black px-6 font-bold hover:bg-acid transition-colors">JOIN</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 uppercase text-sm tracking-widest text-white">Platform</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li class="hover:text-acid cursor-pointer transition-colors">Markets</li>
+                        <li class="hover:text-acid cursor-pointer transition-colors">Exchange</li>
+                        <li class="hover:text-acid cursor-pointer transition-colors">Earn</li>
+                        <li class="hover:text-acid cursor-pointer transition-colors">Wallet</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 uppercase text-sm tracking-widest text-white">Social</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li class="hover:text-acid cursor-pointer transition-colors">Twitter / X</li>
+                        <li class="hover:text-acid cursor-pointer transition-colors">Discord</li>
+                        <li class="hover:text-acid cursor-pointer transition-colors">Telegram</li>
+                        <li class="hover:text-acid cursor-pointer transition-colors">Medium</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex justify-between items-center border-t border-white/5 pt-8 text-xs text-gray-600">
+                <p>© 2024 VANTAGE PROTOCOL.</p>
+                <div class="flex gap-4">
+                    <span class="hover:text-white cursor-pointer transition-colors">Privacy Policy</span>
+                    <span class="hover:text-white cursor-pointer transition-colors">Terms of Service</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- GSAP & Lenis Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        // 1. Initialize Smooth Scroll (Lenis)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+        })
+
+        function raf(time) {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf)
+
+        // 2. Immediate Entry Animation (No Loader)
+        const tlEntry = gsap.timeline();
+        tlEntry.from(".hero-title", {
+            y: 100,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            ease: "power3.out",
+            delay: 0.2
+        })
+        .from(".hero-desc", {
+            opacity: 0,
+            y: 20,
+            duration: 1
+        }, "-=0.6")
+        .from(".hero-cta", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.5
+        }, "-=0.6");
+
+        // 3. Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Metrics Count Up
+        gsap.utils.toArray('.counter').forEach(counter => {
+            const target = parseFloat(counter.getAttribute('data-target'));
+            const isDecimal = target < 1; 
+            
+            gsap.to(counter, {
+                innerText: target,
+                duration: 2,
+                snap: { innerText: isDecimal ? 0.001 : 1 }, 
+                scrollTrigger: {
+                    trigger: counter,
+                    start: "top 85%",
+                }
+            });
+        });
+
+        // Tokenomics Big Text Animation
+        gsap.fromTo("#big-text", 
+            { xPercent: 25 }, 
+            {
+                xPercent: -25,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#big-text",
+                    start: "top bottom", 
+                    end: "bottom top",   
+                    scrub: 1
+                }
+            }
+        );
+
+        // Ecosystem Items Stagger
+        gsap.utils.toArray('.ecosystem-item').forEach((item, i) => {
+            gsap.from(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: "top 90%",
+                },
+                opacity: 0,
+                x: -50,
+                duration: 0.8,
+                delay: i * 0.1
+            });
+        });
+
+        // Marquee Animation
+        gsap.to(".marquee-content", {
+            xPercent: -50,
+            repeat: -1,
+            duration: 20,
+            ease: "linear"
+        });
+
+        // 4. ROADMAP LOGIC (SYNCED IMAGES + ACTIVE TEXT)
+        const phases = document.querySelectorAll('.roadmap-phase');
+        const images = document.querySelectorAll('.roadmap-img');
+
+        phases.forEach((phase, index) => {
+            ScrollTrigger.create({
+                trigger: phase,
+                start: "top center",
+                end: "bottom center",
+                onEnter: () => updateRoadmap(index),
+                onEnterBack: () => updateRoadmap(index)
+            });
+        });
+
+        function updateRoadmap(index) {
+            // Update Images
+            images.forEach(img => img.classList.remove('active'));
+            if(images[index]) {
+                images[index].classList.add('active');
+            }
+
+            // Update Phase Styles (Text & Dot)
+            phases.forEach(p => p.classList.remove('active-phase'));
+            if(phases[index]) {
+                phases[index].classList.add('active-phase');
+            }
+        }
+        
+        // Initialize first state
+        updateRoadmap(0);
+
+        // 5. Hacker Text Effect
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        document.querySelectorAll(".link-hover, .scramble-text").forEach(element => {
+            element.addEventListener("mouseover", event => {
+                let iteration = 0;
+                const originalText = event.target.innerText;
+                const datasetValue = event.target.dataset.value || originalText; 
+
+                let interval = setInterval(() => {
+                    event.target.innerText = datasetValue
+                        .split("")
+                        .map((letter, index) => {
+                            if(index < iteration) {
+                                return datasetValue[index];
+                            }
+                            return letters[Math.floor(Math.random() * 26)]
+                        })
+                        .join("");
+                    
+                    if(iteration >= datasetValue.length){ 
+                        clearInterval(interval);
+                    }
+                    
+                    iteration += 1 / 3;
+                }, 30);
+            });
+        });
+
+        // 6. Mobile Menu Logic
+        const menuBtn = document.getElementById('menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuLinks = document.querySelectorAll('.menu-link');
+
+        function toggleMenu() {
+            mobileMenu.classList.toggle('open');
+            document.body.classList.toggle('overflow-hidden'); // Prevent scrolling when menu is open
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        closeMenuBtn.addEventListener('click', toggleMenu);
+        
+        menuLinks.forEach(link => {
+            link.addEventListener('click', toggleMenu);
+        });
+
+    </script>
+
+</body></html>

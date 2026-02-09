@@ -1,0 +1,704 @@
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBELISK | The Infrastructure of Tomorrow</title>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<style>
+:root {
+--bg: #030303;
+--surface: #0a0a0a;
+--surface-hover: #141414;
+--text: #e0e0e0;
+--text-dim: #888;
+--accent: #ff003c;
+--accent-glow: rgba(255, 0, 60, 0.6);
+--border: #222;
+--font-head: 'Teko', sans-serif;
+--font-body: 'Rajdhani', sans-serif;
+--header-height: 90px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+background-color: var(--bg);
+color: var(--text);
+font-family: var(--font-body);
+overflow-x: hidden;
+font-size: 18px;
+scrollbar-width: thin;
+scrollbar-color: var(--accent) var(--bg);
+scroll-behavior: smooth;
+}
+/* GLOBAL NOISE TEXTURE */
+.noise-overlay {
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+pointer-events: none; z-index: 9999; mix-blend-mode: overlay;
+}
+h1, h2, h3, h4 { font-family: var(--font-head); text-transform: uppercase; line-height: 0.9; font-weight: 500; }
+p { font-weight: 400; line-height: 1.6; color: var(--text-dim); }
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+ul { list-style: none; }
+.container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+.highlight { color: var(--accent); }
+/* --- BUTTONS --- */
+.btn-wrapper { display: inline-block; padding: 10px; }
+.btn {
+display: inline-flex; align-items: center; justify-content: center; padding: 1rem 2.5rem;
+font-family: var(--font-head); font-size: 1.4rem; letter-spacing: 0.05em; text-transform: uppercase;
+background: rgba(0,0,0,0.8); color: var(--text); border: 1px solid var(--border);
+position: relative; overflow: hidden; transition: all 0.2s ease-out; cursor: pointer; z-index: 20; backdrop-filter: blur(5px);
+}
+.btn::before {
+content: ''; position: absolute; top: 0; left: 0; width: 0%; height: 100%;
+background: var(--accent); z-index: -1; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+transform: skewX(-15deg) translateX(-10px);
+}
+.btn:hover::before { width: 150%; }
+.btn:hover { border-color: var(--accent); color: #fff; box-shadow: 0 0 30px var(--accent-glow); }
+/* --- NAV --- */
+nav {
+position: fixed; top: 0; width: 100%; height: var(--header-height); z-index: 100;
+background: rgba(3, 3, 3, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05);
+display: flex; align-items: center;
+}
+.nav-wrap { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.logo { font-family: var(--font-head); font-size: 2.5rem; font-weight: 700; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 20px; height: 20px; background: var(--accent); transform: rotate(45deg); }
+.menu-items { display: flex; gap: 2.5rem; }
+.menu-items a { font-size: 1.1rem; font-weight: 600; position: relative; text-transform: uppercase; letter-spacing: 0.1em; }
+.menu-items a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 1px; background: var(--accent); transition: width 0.3s; }
+.menu-items a:hover::after { width: 100%; }
+/* --- HERO SECTION --- */
+.hero {
+position: relative; height: 100vh; width: 100%; display: flex; flex-direction: column;
+align-items: center; justify-content: center; overflow: hidden; perspective: 1200px;
+padding-top: var(--header-height); padding-bottom: 80px; z-index: 2; background: var(--bg);
+}
+#particleCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.6; }
+.monolith-wrapper { position: absolute; z-index: 5; top: 50%; left: 50%; transform: translate(-50%, -50%) rotateX(10deg) rotateY(20deg); transform-style: preserve-3d; pointer-events: none; }
+.monolith { width: 160px; height: 420px; position: relative; transform-style: preserve-3d; animation: monoSpin 20s linear infinite; }
+.face {
+position: absolute; width: 160px; height: 420px; background: rgba(5, 5, 5, 0.95);
+border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(255,0,60,0.1) inset;
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+font-family: var(--font-body); color: var(--accent); backdrop-filter: blur(4px); backface-visibility: visible; overflow: hidden;
+}
+.front  { transform: translateZ(80px); }
+.back   { transform: rotateY(180deg) translateZ(80px); }
+.right  { transform: rotateY(90deg) translateZ(80px); }
+.left   { transform: rotateY(-90deg) translateZ(80px); }
+.top    { width: 160px; height: 160px; transform: rotateX(90deg) translateZ(80px); background: var(--accent); box-shadow: 0 0 60px var(--accent); display:flex; align-items:center; justify-content:center; color:#000; font-weight:700;}
+.bottom { width: 160px; height: 160px; transform: rotateX(-90deg) translateZ(340px); background: transparent; border:none; box-shadow:none;}
+.monitor-wrap { text-align: center; width: 100%; padding: 0 20px; }
+.monitor-label { font-size: 0.8rem; letter-spacing: 2px; color: #fff; margin-bottom: 10px; display: block; }
+.monitor-val { font-size: 2.5rem; font-family: var(--font-head); font-weight: 700; line-height: 1; display:block; }
+.status-light { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; margin: 20px auto; box-shadow: 0 0 10px var(--accent); animation: pulse 1s infinite alternate; }
+.bars-wrap { display: flex; gap: 4px; height: 100px; align-items: flex-end; }
+.bar { width: 8px; background: var(--accent); opacity: 0.5; animation: equalizer 0.5s infinite ease-in-out alternate; }
+.bar:nth-child(1) { height: 40%; animation-delay: 0.1s; } .bar:nth-child(2) { height: 80%; animation-delay: 0.2s; } .bar:nth-child(3) { height: 60%; animation-delay: 0.3s; } .bar:nth-child(4) { height: 90%; animation-delay: 0.1s; } .bar:nth-child(5) { height: 50%; animation-delay: 0.4s; }
+.rack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 80%; }
+.rack-light { width: 100%; aspect-ratio: 1; background: #333; border: 1px solid #444; }
+.rack-light.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); animation: blinkRack 2s infinite; }
+.lock-icon { font-size: 3rem; margin-bottom: 10px; border: 2px solid var(--accent); padding: 10px; border-radius: 50%; }
+.face::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #fff; box-shadow: 0 0 15px #fff, 0 0 30px var(--accent); animation: scan 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+@keyframes scan { 0% { top: 0%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+@keyframes monoSpin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
+@keyframes pulse { from { opacity: 0.5; } to { opacity: 1; box-shadow: 0 0 20px var(--accent); } }
+@keyframes equalizer { 0% { height: 20%; } 100% { height: 100%; } }
+@keyframes blinkRack { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+.hero-content { z-index: 10; text-align: center; position: relative; width: 100%; max-width: 1200px; display: flex; flex-direction: column; justify-content: center; height: 100%; margin-top: -50px; }
+.hero-title { font-size: clamp(4rem, 10vw, 11rem); color: transparent; -webkit-text-stroke: 2px var(--text); line-height: 0.85; margin-bottom: 2rem; letter-spacing: -0.02em; }
+.hero-title span { display: block; }
+.hero-title .filled { color: var(--text); -webkit-text-stroke: 0; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+.hero-subtitle { font-size: 1.2rem; max-width: 550px; margin: 0 auto; color: var(--text-dim); background: rgba(5,5,5,0.85); border: 1px solid rgba(255,255,255,0.1); padding: 1rem 1.5rem; backdrop-filter: blur(10px); }
+.hero-actions-container { z-index: 20; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 100%; display: flex; justify-content: center; gap: 1rem; }
+/* --- MARQUEE --- */
+.stream-bar {
+background: var(--accent); color: #000; padding: 1rem 0; font-family: var(--font-head); font-size: 1.4rem; font-weight: 600;
+overflow: hidden; white-space: nowrap; position: relative; z-index: 2; border-top: 1px solid #fff; border-bottom: 1px solid #fff;
+}
+.stream-track { display: inline-block; animation: marquee 10s linear infinite; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+/* --- FEATURES GRID --- */
+.section-grid {
+padding: 8rem 0; position: relative; background: #030303; z-index: 2;
+}
+.section-title { font-size: 5rem; margin-bottom: 5rem; border-left: 8px solid var(--accent); padding-left: 2rem; line-height: 1; }
+.card-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.tech-card {
+background: rgba(20,20,20,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 3rem 2rem;
+position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;
+border-radius: 4px;
+--mouse-x: -9999px; --mouse-y: -9999px;
+}
+.tech-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 0, 60, 0.25), transparent 40%); z-index: 0; opacity: 0; transition: opacity 0.5s; }
+.tech-card::after {
+content: ""; position: absolute; inset: 0;
+background-image: radial-gradient(rgba(255, 0, 60, 0.8) 3px, transparent 4px); background-size: 30px 30px;
+mask-image: radial-gradient(700px circle at var(--mouse-x) var(--mouse-y), black, transparent 40%);
+-webkit-mask-image: radial-gradient(700px circle at var(--mouse-x) var(--mouse-y), black, transparent 40%);
+z-index: 0; opacity: 0; transition: opacity 0.3s; mix-blend-mode: screen;
+}
+.card-container:hover .tech-card::before { opacity: 1; } .card-container:hover .tech-card::after { opacity: 1; }
+.tech-card h3 { font-size: 3rem; margin-bottom: 1rem; z-index: 2; position: relative; }
+.tech-card p { z-index: 2; position: relative; font-size: 1.1rem; }
+.icon-box { width: 60px; height: 60px; background: #111; margin-bottom: 2rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.1); z-index: 2; position: relative; }
+/* --- PIPELINE --- */
+.pipeline-section { overflow: hidden; z-index: 2; position: relative; }
+.pin-wrap-container { width: 100%; height: 100vh; display: flex; background: #000; position: relative; overflow: hidden; }
+.pin-wrap { height: 100%; display: flex; align-items: center; padding: 0 5vw; }
+.horiz-card {
+width: 60vw; height: 70vh; margin-right: 5vw; background: #080808; border: 1px solid var(--border);
+flex-shrink: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 4rem;
+position: relative; overflow: hidden; transform: translate3d(0,0,0);
+}
+.horiz-img {
+position: absolute; top: 0; left: 0;
+width: 100%; height: 100%; object-fit: cover;
+transform: scale(1.5); transform-origin: center center;
+opacity: 0.4; filter: grayscale(100%) contrast(1.2);
+transition: 0.5s; z-index: 0;
+will-change: transform;
+}
+.horiz-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, #000 0%, rgba(0,0,0,0.8) 40%, rgba(255,0,60,0.1) 100%); z-index: 1; }
+.horiz-card:hover .horiz-img { filter: grayscale(0%) contrast(1.1); opacity: 0.6; }
+.horiz-content { position: relative; z-index: 2; }
+.horiz-num { font-family: var(--font-head); font-size: 8rem; line-height: 0.8; color: var(--accent); margin-bottom: 1rem; display:block; }
+.horiz-title { font-size: 4rem; margin-bottom: 1rem; color: #fff; line-height: 0.9; }
+.horiz-desc { font-size: 1.4rem; max-width: 600px; margin-bottom: 1.5rem; }
+.horiz-detail { font-size: 1.1rem; color: #888; max-width: 550px; line-height: 1.6; border-left: 2px solid var(--accent); padding-left: 1rem; }
+/* --- NEURAL GRID --- */
+.neural-section { position: relative; padding: 10rem 0; background: #050505; z-index: 2; overflow: hidden; }
+.neural-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 0; z-index: 0; }
+.neural-dot { width: 2px; height: 2px; background: #333; border-radius: 50%; margin: 14px; transition: transform 0.1s ease-out, background 0.2s; will-change: transform; }
+.neural-dot.pushed { background: #555; }
+.neural-content { position: relative; z-index: 2; text-align: center; background: radial-gradient(circle, rgba(5,5,5,0.8) 0%, rgba(5,5,5,0) 70%); padding: 4rem 2rem; }
+.neural-header { font-size: clamp(3rem, 8vw, 7rem); margin-bottom: 2rem; color: #fff; text-shadow: 0 0 20px #000; }
+.neural-sub { font-size: 1.5rem; max-width: 700px; margin: 0 auto 4rem; color: #ccc; }
+.mesh-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 3rem; max-width: 900px; margin: 0 auto; }
+.m-stat h4 { font-size: 3rem; color: var(--accent); margin-bottom: 0.5rem; }
+.m-stat p { font-size: 0.9rem; letter-spacing: 2px; color: #888; text-transform: uppercase; }
+/* --- SYSTEM PULSE --- */
+.pulse-section { padding: 10rem 0; background: #080808; z-index: 2; position: relative; }
+.pulse-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+.pulse-text h2 { font-size: 4rem; margin-bottom: 1.5rem; }
+.pulse-text p { font-size: 1.2rem; margin-bottom: 2rem; }
+.stat-row { display: flex; gap: 3rem; margin-top: 2rem; border-top: 1px solid #333; padding-top: 2rem; }
+.stat-item h4 { font-size: 2.5rem; color: var(--accent); margin-bottom: 0.5rem; }
+.stat-item span { font-size: 0.9rem; color: var(--text-dim); letter-spacing: 1px; }
+.pulse-visual { position: relative; height: 500px; perspective: 1000px; }
+.db-card { background: rgba(15,15,15,0.9); border: 1px solid #333; border-radius: 8px; position: absolute; backdrop-filter: blur(10px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); transition: transform 0.5s ease-out; }
+.db-main { width: 100%; height: 350px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; padding: 1.5rem; display: flex; flex-direction: column; }
+.db-header { display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px;}
+.db-title { font-family: var(--font-head); font-size: 1.2rem; color: #fff; }
+.db-status { color: var(--accent); font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
+.db-status::before { content:''; width:6px; height:6px; background:var(--accent); border-radius:50%; box-shadow:0 0 5px var(--accent); animation: blinkRack 1s infinite; }
+.chart-area { flex: 1; display: flex; align-items: flex-end; gap: 5px; position: relative; overflow: hidden; }
+.chart-bar { flex: 1; background: linear-gradient(0deg, var(--accent) 0%, transparent 100%); opacity: 0.3; border-top: 1px solid var(--accent); animation: chartMove 3s infinite ease-in-out; }
+.db-float-1 { width: 200px; padding: 1rem; top: 10%; right: -5%; z-index: 3; animation: float 6s ease-in-out infinite; background: #000; border-color: var(--accent); }
+.code-snippet { font-family: 'Courier New', monospace; font-size: 0.7rem; color: #888; line-height: 1.4; }
+.db-float-2 { width: 180px; padding: 1rem; bottom: 0%; left: -5%; z-index: 3; animation: float 5s ease-in-out infinite reverse; }
+.metric-big { font-size: 2rem; font-family: var(--font-head); color: #fff; }
+@keyframes chartMove { 0%,100% { height: 20%; } 50% { height: 80%; } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+/* --- VELOCITY ENGINE --- */
+.dev-section { padding: 10rem 0; background: #030303; z-index: 2; position: relative; }
+.dev-header { text-align: center; margin-bottom: 5rem; }
+.dev-header h2 { font-size: 5rem; margin-bottom: 1rem; }
+.dev-header p { font-size: 1.5rem; color: var(--text-dim); max-width: 700px; margin: 0 auto; }
+.dev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: stretch; }
+.dev-code-wrap { position: relative; display: flex; flex-direction: column; }
+.dev-tabs { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.dev-tab { padding: 5px 15px; border: 1px solid #333; border-radius: 20px; font-size: 0.9rem; color: #888; cursor: pointer; transition: 0.3s; }
+.dev-tab.active { background: #222; color: #fff; border-color: #555; }
+.code-card { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5); font-family: 'Courier New', monospace; font-size: 1rem; line-height: 1.6; color: #ccc; transform: translateX(-50px); opacity: 0; height: 100%; display: flex; flex-direction: column; }
+.window-controls { margin-bottom: 1.5rem; display: flex; gap: 8px; }
+.w-dot { width: 12px; height: 12px; border-radius: 50%; }
+.w-dot.r { background: #ff5f56; } .w-dot.y { background: #ffbd2e; } .w-dot.g { background: #27c93f; }
+.c-purple { color: #cc99cd; } .c-yellow { color: #f8c555; } .c-green { color: #7ec699; } .c-blue { color: #67cdfe; } .c-orange { color: #f08d49; } .c-comment { color: #666; font-style: italic; }
+.code-output { margin-top: auto; padding-top: 1.5rem; border-top: 1px dashed #333; font-size: 0.9rem; }
+.dev-features { display: flex; flex-direction: column; gap: 4rem; justify-content: space-between; }
+.feature-block { border-left: 2px solid #222; padding-left: 2rem; transition: 0.3s; transform: translateX(50px); opacity: 0; }
+.feature-block:hover { border-color: var(--accent); }
+.feature-block h3 { font-size: 2rem; margin-bottom: 1rem; color: #fff; }
+.feature-block p { font-size: 1.1rem; color: var(--text-dim); margin-bottom: 1.5rem; line-height: 1.6; }
+.feature-tags { display: flex; gap: 10px; }
+.f-tag { font-size: 0.8rem; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; color: #888; }
+/* --- TERMINAL --- */
+.terminal-section { padding: 8rem 0; display: flex; justify-content: center; background: #030303; z-index: 2; position: relative; margin-bottom: 80vh; }
+.terminal-window { width: 100%; max-width: 1000px; background: rgba(10,10,10,0.95); border: 1px solid var(--border); box-shadow: 0 0 100px rgba(0,0,0,0.8); overflow: hidden; position: relative; margin: 0 auto; }
+.terminal-bg { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(255, 0, 60, 0.03) 3px); pointer-events: none; z-index: 0; }
+.terminal-header { background: #111; padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid var(--border); position: relative; z-index: 2; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: #333; }
+.terminal-content { padding: 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; position: relative; z-index: 2; }
+.cmd-col { font-family: 'Courier New', monospace; color: var(--text); font-size: 1.1rem; }
+.cmd-line { margin-bottom: 0.8rem; display: flex; min-height: 1.5em; }
+.cmd-accent { color: var(--accent); margin-right: 10px; }
+.pricing-col { border-left: 1px dashed #333; padding-left: 3rem; }
+.pricing-col h3 { font-size: 3.5rem; margin-bottom: 1rem; }
+.pricing-col ul li { margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 1.2rem; }
+.check { color: var(--accent); }
+/* --- FOOTER --- */
+footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 80vh; background: #000; display: flex; flex-direction: column; justify-content: center; z-index: 1; padding: 4rem 2rem; border-top: 1px solid #222; }
+.footer-content { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+.footer-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.footer-big { font-family: var(--font-head); font-size: 25vw; line-height: 0.8; color: transparent; -webkit-text-stroke: 2px #111; text-align: center; margin-top: auto; position: relative; overflow: hidden; }
+.footer-big::before { content: 'OBELISK'; position: absolute; top:0; left:0; width: 100%; height: 100%; color: #111; clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%); transition: clip-path 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-active .footer-big::before { clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
+/* --- RESPONSIVE MEDIA QUERIES --- */
+@media (max-width: 1024px) {
+.card-container { grid-template-columns: repeat(2, 1fr); }
+.hero-title { font-size: 12vw; }
+.neural-text { font-size: 15vw; }
+}
+@media (max-width: 768px) {
+/* General */
+.section-title { font-size: 3rem; }
+.container { padding: 0 1.5rem; }
+/* Nav */
+.menu-items { gap: 1rem; }
+.btn { padding: 0.6rem 1.2rem; font-size: 1rem; }
+.nav-wrap .btn { display: none; } /* Hide CTA on small screens */
+/* Hero */
+.monolith-wrapper { transform: translate(-50%, -50%) scale(0.6) !important; } /* Force scale down */
+.hero-title { font-size: 15vw; margin-bottom: 1rem; }
+.hero-subtitle { font-size: 1rem; padding: 0.8rem; }
+.hero-actions-container { flex-direction: column; bottom: 80px; }
+/* Capabilities */
+.card-container { grid-template-columns: 1fr; }
+/* Pipeline */
+.horiz-card { width: 85vw; padding: 2rem; height: 60vh; }
+.horiz-num { font-size: 5rem; }
+.horiz-title { font-size: 2.5rem; }
+.horiz-desc { font-size: 1.1rem; }
+/* Neural */
+.mesh-stats { grid-template-columns: 1fr; gap: 1.5rem; }
+/* Pulse & Velocity & Terminal */
+.pulse-grid, .dev-grid, .terminal-content { grid-template-columns: 1fr; gap: 3rem; }
+/* Pulse Visual */
+.pulse-visual { height: 400px; transform: scale(0.85); transform-origin: center top; margin-bottom: 0; }
+/* Footer */
+.footer-top { flex-direction: column; gap: 2rem; }
+.footer-big { font-size: 23vw; }
+footer { height: 60vh; }
+.terminal-section { margin-bottom: 60vh; }
+}
+</style>
+<script src="https://cdn.tailwindcss.com"></script></head>
+<body class="">
+
+    <div class="noise-overlay"></div>
+
+    <nav>
+        <div class="container nav-wrap">
+            <div class="logo"><div class="logo-icon"></div>OBELISK</div>
+            <div class="menu-items">
+                <a href="#arch">System</a>
+                <a href="#pipeline">Pipeline</a>
+                <a href="#mesh">Network</a>
+                <a href="#engine">Engine</a>
+                <a href="#terminal">Access</a>
+            </div>
+            <a href="#" class="btn" style="font-size: 1rem; padding: 0.8rem 1.5rem; border:none; background: var(--accent); color: #000;">Initialize</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+        <canvas id="particleCanvas"></canvas>
+        <div class="monolith-wrapper" id="monolith">
+            <div class="monolith">
+                <div class="face front">
+                    <div class="monitor-wrap">
+                        <span class="monitor-label">CORE TEMP</span><span class="monitor-val">42°C</span>
+                        <div class="status-light"></div><span class="monitor-label">STATUS: ONLINE</span>
+                    </div>
+                </div>
+                <div class="face back">
+                    <div class="monitor-wrap"><div class="lock-icon">🔒</div><span class="monitor-val" style="font-size: 1.5rem;">LOCKED</span><span class="monitor-label" style="margin-top:10px;">AES-256</span></div>
+                </div>
+                <div class="face right">
+                    <div style="transform: rotate(90deg);"><span class="monitor-label" style="text-align:center;">NETWORK I/O</span><div class="bars-wrap"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div></div>
+                </div>
+                <div class="face left">
+                    <span class="monitor-label" style="margin-bottom:15px;">STORAGE</span>
+                    <div class="rack-grid">
+                        <div class="rack-light active"></div><div class="rack-light"></div><div class="rack-light active"></div><div class="rack-light"></div>
+                        <div class="rack-light"></div><div class="rack-light active"></div><div class="rack-light"></div><div class="rack-light active"></div>
+                    </div>
+                </div>
+                <div class="face top">SYS</div><div class="face bottom"></div>
+            </div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title"><span>SYSTEM</span><span class="filled">CORE</span><span>ONLINE</span></h1>
+            <p class="hero-subtitle">The absolute standard for decentralized computation. Zero latency. Infinite scale. Pure power.</p>
+        </div>
+        <div class="hero-actions-container">
+            <div class="btn-wrapper"><button class="btn">Deploy Instance</button></div>
+            <div class="btn-wrapper"><button class="btn" style="border-color: #444; color: #888;">Documentation</button></div>
+        </div>
+    </header>
+
+    <div class="stream-bar">
+        <div class="stream-track">
+             // SYSTEM STATUS: OPTIMAL // UPTIME: 99.9999% // NODES ACTIVE: 4,021,202 // LATENCY: 12MS // THREAT LEVEL: 0 // ENCRYPTION: MIL-STD-810 // SYSTEM STATUS: OPTIMAL // UPTIME: 99.9999% //
+        </div>
+    </div>
+
+    <!-- FEATURES -->
+    <section class="section-grid" id="arch">
+        <div class="container">
+            <h2 class="section-title">CAPABILITIES</h2>
+            <div class="card-container" id="cards">
+                <div class="tech-card">
+                    <div class="icon-box">01</div>
+                    <h3>ATOMIC SYNC</h3>
+                    <p>Data replicated across the mesh network in nanoseconds. Physics is the only limitation.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="icon-box">02</div>
+                    <h3>QUANTUM SHIELD</h3>
+                    <p>Post-quantum cryptography protects your payloads from future computation threats.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="icon-box">03</div>
+                    <h3>EDGE COMPUTE</h3>
+                    <p>Logic executes at the edge. Your users never hit the origin server, reducing load by 99%.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="icon-box">04</div>
+                    <h3>SELF HEALING</h3>
+                    <p>Nodes automatically reroute traffic if a region goes dark. 100% continuity.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="icon-box">05</div>
+                    <h3>AI OPTIMIZED</h3>
+                    <p>Traffic patterns are analyzed by our neural core to pre-scale resources.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="icon-box">06</div>
+                    <h3>DARK FIBER</h3>
+                    <p>We own the pipes. Private backbone connectivity between all major metros.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PIPELINE -->
+    <section class="pipeline-section" id="pipeline">
+        <div class="pin-wrap-container">
+            <div class="pin-wrap">
+                <div class="horiz-card">
+                    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4097263b-8c62-417e-b933-385d88a6ecd4_1600w.webp" class="horiz-img" alt="Data Center">
+                    <div class="horiz-content">
+                        <span class="horiz-num">01</span><h3 class="horiz-title">DATA INGESTION</h3><p class="horiz-desc">Stream petabytes of data through our firehose API. We handle deduplication and normalization.</p>
+                        <p class="horiz-detail">Encryption is applied at the source using AES-256. We guarantee 0% packet loss during transmission, ensuring data integrity from the very first byte.</p>
+                    </div>
+                </div>
+                <div class="horiz-card">
+                    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/6d68bc50-b233-4d73-a3be-97c5058a2e69_1600w.jpg" class="horiz-img" alt="Neural Network">
+                    <div class="horiz-content">
+                        <span class="horiz-num">02</span><h3 class="horiz-title">NEURAL PROCESSING</h3><p class="horiz-desc">Our proprietary AI mesh analyzes patterns instantly to predict scaling needs.</p>
+                        <p class="horiz-detail">Automatic load balancing kicks in milliseconds before saturation occurs. The system learns your traffic spikes and pre-warms containers proactively.</p>
+                    </div>
+                </div>
+                <div class="horiz-card">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&amp;w=2072&amp;auto=format&amp;fit=crop" class="horiz-img" alt="Global Network">
+                    <div class="horiz-content">
+                        <span class="horiz-num">03</span><h3 class="horiz-title">GLOBAL DISTRIBUTION</h3><p class="horiz-desc">Content is cached in 450+ PoPs worldwide. Your users connect to the nearest node.</p>
+                        <p class="horiz-detail">Assets are replicated to the edge closest to your user, cutting Time-To-First-Byte (TTFB) to under 20ms regardless of geography.</p>
+                    </div>
+                </div>
+                <div class="horiz-card" style="border-color: var(--accent);">
+                    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/41920389-9270-4fe4-8576-94539497c33f_1600w.jpg" class="horiz-img" alt="Execution">
+                    <div class="horiz-content">
+                        <span class="horiz-num">04</span><h3 class="horiz-title" style="color: var(--accent)">EXECUTION</h3><p class="horiz-desc">The result? A system that never sleeps, never fails, and always outperforms.</p>
+                        <p class="horiz-detail">Serverless functions run in isolation with zero cold starts, guaranteed. Your infrastructure is now a competitive advantage.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEURAL GRID -->
+    <section class="neural-section" id="mesh">
+        <div class="neural-grid" id="neuralGrid"></div>
+        <div class="container neural-content">
+            <h2 class="neural-header">GLOBAL MESH</h2>
+            <p class="neural-sub">
+                Our infrastructure spans 450+ Points of Presence across 120 countries. 
+                Experience edge computing with zero compromises. We connect the world 
+                faster than the speed of thought.
+            </p>
+            <div class="mesh-stats">
+                <div class="m-stat"><h4>450+</h4><p>Edge Nodes</p></div>
+                <div class="m-stat"><h4>120TB</h4><p>Backbone Capacity</p></div>
+                <div class="m-stat"><h4>&lt;10ms</h4><p>Global Latency</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SYSTEM PULSE -->
+    <section class="pulse-section">
+        <div class="container">
+            <div class="pulse-grid">
+                <div class="pulse-text">
+                    <h2>LIVE INFRASTRUCTURE</h2>
+                    <p>Monitor your entire stack in real-time. Our dashboard provides granular control over every aspect of your deployment, from metal to application layer.</p>
+                    <ul style="color:var(--text-dim); line-height:2;">
+                        <li>&gt; Real-time latency tracking per region</li>
+                        <li>&gt; Automated DDoS mitigation logs</li>
+                        <li>&gt; Predictive resource allocation</li>
+                    </ul>
+                    <div class="stat-row">
+                        <div class="stat-item"><h4>99.999%</h4><span>UPTIME SLA</span></div>
+                        <div class="stat-item"><h4>&lt;5ms</h4><span>GLOBAL LATENCY</span></div>
+                    </div>
+                </div>
+                
+                <div class="pulse-visual">
+                    <div class="db-card db-main">
+                        <div class="db-header">
+                            <span class="db-title">TRAFFIC_OUT</span><span class="db-status">LIVE</span>
+                        </div>
+                        <div class="chart-area" id="liveChart"></div>
+                    </div>
+                    <div class="db-card db-float-1">
+                        <div class="db-header"><span class="db-title" style="font-size:0.9rem">CONFIG.YAML</span></div>
+                        <div class="code-snippet">replicas: 50region: "us-east"scaling: automax_cost: inf</div>
+                    </div>
+                    <div class="db-card db-float-2">
+                        <span class="db-status">HEALTH</span>
+                        <div class="metric-big">100%</div>
+                        <div style="height:4px; width:100%; background:#333; margin-top:10px;"><div style="height:100%; width:100%; background:var(--accent);"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VELOCITY ENGINE -->
+    <section class="dev-section" id="engine">
+        <div class="container">
+            <div class="dev-header">
+                <h2>VELOCITY ENGINE</h2>
+                <p>The developer experience you've always wanted. Integrate in minutes, scale for decades.</p>
+            </div>
+            
+            <div class="dev-grid">
+                <div class="dev-code-wrap">
+                    <div class="dev-tabs"><div class="dev-tab active">Node.js</div><div class="dev-tab">Python</div><div class="dev-tab">Go</div><div class="dev-tab">Rust</div></div>
+                    <div class="code-card">
+                        <div class="window-controls"><span class="w-dot r"></span><span class="w-dot y"></span><span class="w-dot g"></span></div>
+                        <div class="code-content">
+                            <span class="c-purple">const</span> client = <span class="c-yellow">new</span> Obelisk({<br>
+                            &nbsp;&nbsp;key: <span class="c-green">"obs_live_9928_x1a"</span><br>
+                            });<br><br>
+                            <span class="c-comment">// Deploy edge function</span><br>
+                            <span class="c-purple">await</span> client.edge.<span class="c-blue">deploy</span>({<br>
+                            &nbsp;&nbsp;region: <span class="c-green">"global"</span>,<br>
+                            &nbsp;&nbsp;memory: <span class="c-orange">1024</span>,<br>
+                            &nbsp;&nbsp;runtime: <span class="c-green">"node_20"</span><br>
+                            });<br><br>
+                            console.<span class="c-blue">log</span>(<span class="c-green">"🚀 Deployment Active"</span>);
+                        </div>
+                        <div class="code-output">
+                            <span class="c-comment">// Live Output Stream</span><br>
+                            <span style="color:#555">10:42:01</span> <span class="c-green">✓ Validating configuration...</span><br>
+                            <span style="color:#555">10:42:02</span> <span class="c-green">✓ Building container [142ms]</span><br>
+                            <span style="color:#555">10:42:03</span> <span class="c-green">✓ Propagating to 450 regions</span><br>
+                            <span style="color:#555">10:42:03</span> <span class="c-blue">→ Deployment: obs_882a_z9</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dev-features">
+                    <div class="feature-block">
+                        <h3>Type-Safe SDKs</h3>
+                        <p>Full TypeScript support out of the box. Auto-complete your infrastructure configuration and catch errors before deployment.</p>
+                        <div class="feature-tags"><span class="f-tag">TypeScript</span><span class="f-tag">Intellisense</span></div>
+                    </div>
+                    <div class="feature-block">
+                        <h3>Edge Native</h3>
+                        <p>Your code runs on V8 isolates at the edge. Cold starts are eliminated, and latency is reduced to the theoretical minimum.</p>
+                        <div class="feature-tags"><span class="f-tag">0ms Cold Start</span><span class="f-tag">V8 Isolate</span></div>
+                    </div>
+                    <div class="feature-block">
+                        <h3>Instant Rollback</h3>
+                        <p>Made a mistake? Revert to any previous deployment version instantly with a single CLI command or API call.</p>
+                        <div class="feature-tags"><span class="f-tag">Atomic Deploys</span><span class="f-tag">Version Control</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TERMINAL -->
+    <section class="terminal-section" id="terminal">
+        <div class="container">
+            <div class="terminal-window">
+                <div class="terminal-bg"></div>
+                <div class="terminal-header"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+                <div class="terminal-content">
+                    <div class="cmd-col" id="terminalOutput"></div>
+                    <div class="pricing-col">
+                        <h3 class="highlight">ENTERPRISE</h3>
+                        <p style="margin-bottom: 2rem;">Full access to the metal. No restrictions.</p>
+                        <ul><li><span class="check">/</span> Unlimited Bandwidth</li><li><span class="check">/</span> Dedicated VPC</li><li><span class="check">/</span> 24/7 Priority Signal</li></ul>
+                        <div class="btn-wrapper"><a href="#" class="btn" style="margin-top: 2rem; font-size: 1rem;">Contact Sales</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-top">
+                <div><div class="logo">OBELISK.</div><p>© 2025 Obelisk Systems Inc.</p></div>
+                <div style="display:flex; gap: 2rem; font-size: 1.2rem;"><a href="#">Legal</a><a href="#">Twitter</a><a href="#">GitHub</a><a href="#">Status</a></div>
+            </div>
+            <div class="footer-big">OBELISK</div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- 1. HERO ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height; let particles = [];
+        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Particle {
+            constructor() { this.x = (Math.random() - 0.5) * width; this.y = (Math.random() - 0.5) * height; this.z = Math.random() * 2000; }
+            update() { this.z -= 4; if (this.z <= 0) { this.z = 2000; this.x = (Math.random() - 0.5) * width; this.y = (Math.random() - 0.5) * height; } }
+            draw() { const p = 300 / (this.z + 0.1); const sx = width / 2 + this.x * p; const sy = height / 2 + this.y * p; const a = Math.min(1, (2000 - this.z) / 1000); ctx.fillStyle = `rgba(255, 0, 60, ${a})`; ctx.fillRect(sx, sy, 2 * p, 2 * p); }
+        }
+        for (let i = 0; i < 1500; i++) particles.push(new Particle());
+        function animateCanvas() { ctx.fillStyle = '#030303'; ctx.fillRect(0, 0, width, height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateCanvas); }
+        animateCanvas();
+
+        document.addEventListener('mousemove', (e) => { const x = (e.clientX/window.innerWidth - 0.5); const y = (e.clientY/window.innerHeight - 0.5); gsap.to('.monolith-wrapper', { rotationY: x*15, rotationX: 10 + (y*-10), duration: 1, ease: "power2.out" }); });
+        
+        const heroTl = gsap.timeline({ scrollTrigger: { trigger: ".hero", start: "top top", end: "+=1500", pin: true, scrub: 0.5 } });
+        heroTl.to(".monolith-wrapper", { z: 600, rotationY: "+=120", rotationX: "+=20", duration: 1, ease: "power1.inOut" }, 0)
+              .to(".hero-title span:nth-child(1)", { x: -400, opacity: 0, blur: 20 }, 0).to(".hero-title span:nth-child(2)", { scale: 2, opacity: 0, blur: 20 }, 0).to(".hero-title span:nth-child(3)", { x: 400, opacity: 0, blur: 20 }, 0).to(".hero-subtitle", { y: 50, opacity: 0 }, 0);
+
+        // --- 2. SPOTLIGHT ---
+        const cardsContainer = document.getElementById("cards");
+        cardsContainer.addEventListener("mousemove", (e) => {
+            for (const card of document.getElementsByClassName("tech-card")) {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
+                card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+            }
+        });
+
+        // --- 3. PIPELINE ---
+        const races = document.querySelector(".pin-wrap");
+        const getScrollAmount = () => -(races.scrollWidth - window.innerWidth);
+        const tween = gsap.to(races, { x: getScrollAmount, ease: "none" });
+        ScrollTrigger.create({ trigger: ".pipeline-section", start: "top top", end: () => `+=${races.scrollWidth - window.innerWidth}`, pin: true, animation: tween, scrub: 1, invalidateOnRefresh: true });
+        
+        // Revised Parallax to utilize scale buffer
+        gsap.utils.toArray('.horiz-img').forEach(img => { 
+            gsap.fromTo(img, 
+                { xPercent: -15 }, 
+                { 
+                    xPercent: 15, 
+                    ease: "none", 
+                    scrollTrigger: { 
+                        trigger: ".pipeline-section", 
+                        start: "top top", 
+                        end: () => `+=${races.scrollWidth - window.innerWidth}`, 
+                        scrub: true 
+                    } 
+                }
+            ); 
+        });
+
+        // --- 4. NEURAL GRID ---
+        const grid = document.getElementById('neuralGrid');
+        const cols = Math.ceil(window.innerWidth / 30);
+        const rows = Math.ceil((window.innerHeight * 1.5) / 30);
+        const totalDots = cols * rows;
+
+        for(let i=0; i<totalDots; i++) { 
+            const dot = document.createElement('div'); 
+            dot.classList.add('neural-dot'); 
+            grid.appendChild(dot); 
+        }
+
+        const neuralSection = document.querySelector('.neural-section');
+        neuralSection.addEventListener('mousemove', (e) => {
+            const dots = document.querySelectorAll('.neural-dot'); 
+            const rect = grid.getBoundingClientRect(); 
+            const mx = e.clientX - rect.left; 
+            const my = e.clientY - rect.top;
+            
+            const radius = 350;
+
+            dots.forEach(dot => {
+                const dotRect = dot.getBoundingClientRect();
+                const dx = (dotRect.left - rect.left) - mx; 
+                const dy = (dotRect.top - rect.top) - my;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if(dist < radius) {
+                    const force = (radius - dist) / radius; 
+                    const angle = Math.atan2(dy, dx);
+                    const moveX = Math.cos(angle) * force * 50;
+                    const moveY = Math.sin(angle) * force * 50;
+                    dot.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                    dot.style.background = '#555';
+                } else {
+                    dot.style.transform = `translate(0,0)`;
+                    dot.style.background = '#333';
+                }
+            });
+        });
+
+        // --- 5. SYSTEM PULSE ---
+        const chartArea = document.getElementById('liveChart');
+        for(let i=0; i<30; i++) {
+            const bar = document.createElement('div');
+            bar.classList.add('chart-bar');
+            bar.style.animationDelay = `${Math.random() * 2}s`;
+            chartArea.appendChild(bar);
+        }
+
+        // --- 6. VELOCITY ENGINE ---
+        gsap.to(".code-card", {
+            scrollTrigger: { trigger: ".dev-section", start: "top 70%" },
+            x: 0, opacity: 1, duration: 0.8, ease: "power2.out"
+        });
+        
+        gsap.utils.toArray('.feature-block').forEach((block, i) => {
+            gsap.to(block, {
+                scrollTrigger: { trigger: block, start: "top 85%" },
+                x: 0, opacity: 1, duration: 0.6, delay: i * 0.1, ease: "power2.out"
+            });
+        });
+
+        // --- 7. TERMINAL ---
+        const terminalOutput = document.getElementById('terminalOutput');
+        const commands = [{ text: "root@obelisk:~# ./init_sequence.sh", type: "cmd" }, { text: "Loading core modules...", type: "log" }, { text: "> [OK] Quantum Mesh", type: "success" }, { text: "> [OK] Database Sharding", type: "success" }, { text: "> [OK] Global CDN Nodes", type: "success" }, { text: "System ready. Listening on port 443...", type: "log" }, { text: "root@obelisk:~# _", type: "cmd_blink" }];
+        let cmdIndex = 0; let charIndex = 0; let isTyping = false;
+        function typeLine() { if (cmdIndex >= commands.length) return; const lineData = commands[cmdIndex]; let lineEl = document.querySelector(`#line-${cmdIndex}`); if(!lineEl) { lineEl = document.createElement('div'); lineEl.id = `line-${cmdIndex}`; lineEl.classList.add('cmd-line'); lineEl.style.color = lineData.type === 'cmd' || lineData.type === 'cmd_blink' ? "#fff" : lineData.type === 'success' ? "var(--accent)" : "#888"; terminalOutput.appendChild(lineEl); } if(charIndex < lineData.text.length) { lineEl.textContent += lineData.text.charAt(charIndex); charIndex++; setTimeout(typeLine, Math.random() * 30 + 10); } else { cmdIndex++; charIndex = 0; setTimeout(typeLine, 200); } }
+        ScrollTrigger.create({ trigger: ".terminal-section", start: "top 60%", once: true, onEnter: () => { if(!isTyping) { isTyping = true; typeLine(); } } });
+
+        // --- 8. FOOTER ---
+        ScrollTrigger.create({ trigger: document.body, start: "bottom bottom", onEnter: () => document.body.classList.add('reveal-active'), onLeaveBack: () => document.body.classList.remove('reveal-active') });
+
+    </script>
+
+</body></html>

@@ -1,0 +1,1416 @@
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledgerly - AI Social Growth</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<!-- Animation Keyframe Styles -->
+<style>
+@keyframes animationIn {
+0% { opacity: 0; transform: translateY(30px); filter: blur(8px); }
+100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
+}
+</style>
+<!-- Animation on Scroll Script -->
+<script>
+(function () {
+const style = document.createElement("style");
+style.textContent = `
+.animate-on-scroll { animation-play-state: paused !important; }
+.animate-on-scroll.animate { animation-play-state: running !important; }
+`;
+document.head.appendChild(style);
+const once = true;
+if (!window.__inViewIO) {
+window.__inViewIO = new IntersectionObserver((entries) => {
+entries.forEach((entry) => {
+if (entry.isIntersecting) {
+entry.target.classList.add("animate");
+if (once) window.__inViewIO.unobserve(entry.target);
+}
+});
+}, { threshold: 0.2, rootMargin: "0px 0px -10% 0px" });
+}
+window.initInViewAnimations = function (selector = ".animate-on-scroll") {
+document.querySelectorAll(selector).forEach((el) => window.__inViewIO.observe(el));
+};
+document.addEventListener("DOMContentLoaded", () => initInViewAnimations());
+})();
+</script>
+<style>
+body { font-feature-settings: "cv11", "ss01"; background-color: #FAF7F2; }
+/* Grid Background - Container Aligned */
+.grid-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 0; display: flex; justify-content: center; }
+.grid-inner { width: 100%; height: 100%; max-width: 80rem; display: flex; justify-content: space-between; padding: 0 1rem; }
+.grid-line-v { width: 1px; height: 100%; background: rgba(230,222,211,0.65); }
+/* Utilities */
+.text-gradient {
+background-clip: text;
+-webkit-background-clip: text;
+color: transparent;
+background-image: linear-gradient(to bottom, #141414, #6B6B6B);
+}
+.border-subtle { border-color: #E6DED3; }
+/* Border Beam Animation */
+.beam-border { position: absolute; inset: 0; border-radius: 9999px; pointer-events: none; overflow: hidden; }
+.beam-border::before {
+content: "";
+position: absolute;
+inset: -2px;
+background: conic-gradient(from 0deg, transparent 0 340deg, #0F766E 360deg);
+animation: spin 4s linear infinite;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+.group:hover .beam-border::before { opacity: 1; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* Text Reveal Scroller */
+.reveal-word { opacity: 0.12; transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-word.active { opacity: 1; }
+/* Marquee Animation */
+.marquee-container {
+mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+-webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+.marquee-content { animation: marquee 40s linear infinite; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+/* Sticky Workflow Step Active State */
+.step-indicator { transition: all 0.5s ease; width: 2px; height: 100%; background: #E6DED3; }
+.step-indicator.active { background: #0F766E; }
+.step-text { transition: all 0.5s ease; color: #6B6B6B; }
+.step-text.active { color: #141414; }
+iconify-icon { display: inline-block; vertical-align: middle; }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+const observer = new IntersectionObserver((entries) => {
+entries.forEach((entry) => {
+if (entry.isIntersecting) {
+if (entry.target.classList.contains('counter-trigger')) startCounters(entry.target);
+observer.unobserve(entry.target);
+}
+});
+}, { threshold: 0.1 });
+document.querySelectorAll(".counter-trigger").forEach((el) => observer.observe(el));
+function startCounters(container) {
+container.querySelectorAll('[data-target]').forEach(counter => {
+const target = parseFloat(counter.getAttribute('data-target'));
+const suffix = counter.getAttribute('data-suffix') || '';
+const prefix = counter.getAttribute('data-prefix') || '';
+const duration = 1500;
+const startTime = performance.now();
+function update(t) {
+const p = Math.min((t - startTime) / duration, 1);
+const ease = 1 - Math.pow(1 - p, 4);
+counter.innerText = prefix + (target * ease).toFixed(target % 1 === 0 ? 0 : 1) + suffix;
+if (p < 1) requestAnimationFrame(update);
+}
+requestAnimationFrame(update);
+});
+}
+const textSection = document.getElementById('scroll-reveal-section');
+const words = document.querySelectorAll('.reveal-word');
+if (textSection) {
+window.addEventListener('scroll', () => {
+const rect = textSection.getBoundingClientRect();
+const winH = window.innerHeight;
+const startReveal = winH * 0.9;
+const endReveal = winH * 0.4;
+let progress = (startReveal - rect.top) / (startReveal - endReveal);
+progress = Math.max(0, Math.min(1, progress));
+const activeCount = Math.floor(progress * words.length);
+words.forEach((w, i) => i < activeCount ? w.classList.add('active') : w.classList.remove('active'));
+});
+}
+const workflowSteps = document.querySelectorAll('.workflow-step-content');
+const stepIndicators = document.querySelectorAll('.step-trigger');
+const workflowImages = document.querySelectorAll('.workflow-img');
+const stepObserver = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+const index = entry.target.getAttribute('data-step');
+stepIndicators.forEach(ind => {
+const line = ind.querySelector('.step-indicator');
+const text = ind.querySelector('.step-text');
+if (ind.getAttribute('data-step') === index) {
+line.classList.add('active');
+text.classList.add('active');
+} else {
+line.classList.remove('active');
+text.classList.remove('active');
+}
+});
+workflowImages.forEach(img => {
+if (img.getAttribute('data-step') === index) {
+img.classList.remove('opacity-0', 'scale-95');
+img.classList.add('opacity-100', 'scale-100');
+} else {
+img.classList.add('opacity-0', 'scale-95');
+img.classList.remove('opacity-100', 'scale-100');
+}
+});
+}
+});
+}, { rootMargin: "-40% 0px -40% 0px" });
+workflowSteps.forEach(step => stepObserver.observe(step));
+});
+</script>
+<style>
+.font-geist-mono { font-family: 'Geist Mono', monospace !important; }
+.font-geist { font-family: 'Geist', sans-serif !important; }
+.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }
+</style>
+<link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">
+.font-geist { font-family: 'Geist', sans-serif !important; }
+</style><link id="all-fonts-link-font-geist-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist-mono">
+.font-geist-mono { font-family: 'Geist Mono', monospace !important; }
+</style><link id="all-fonts-link-font-space-grotesk" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-space-grotesk">
+.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }
+</style><link id="all-fonts-link-font-roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-roboto">
+.font-roboto { font-family: 'Roboto', sans-serif !important; }
+</style><link id="all-fonts-link-font-montserrat" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-montserrat">
+.font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+</style><link id="all-fonts-link-font-poppins" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-poppins">
+.font-poppins { font-family: 'Poppins', sans-serif !important; }
+</style><link id="all-fonts-link-font-playfair" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap"><style id="all-fonts-style-font-playfair">
+.font-playfair { font-family: 'Playfair Display', serif !important; }
+</style><link id="all-fonts-link-font-instrument-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-instrument-serif">
+.font-instrument-serif { font-family: 'Instrument Serif', serif !important; }
+</style><link id="all-fonts-link-font-merriweather" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap"><style id="all-fonts-style-font-merriweather">
+.font-merriweather { font-family: 'Merriweather', serif !important; }
+</style><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">
+.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }
+</style><link id="all-fonts-link-font-jakarta" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-jakarta">
+.font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-manrope" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-manrope">
+.font-manrope { font-family: 'Manrope', sans-serif !important; }
+</style><link id="all-fonts-link-font-work-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-work-sans">
+.font-work-sans { font-family: 'Work Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-pt-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-pt-serif">
+.font-pt-serif { font-family: 'PT Serif', serif !important; }
+</style><link id="all-fonts-link-font-space-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-space-mono">
+.font-space-mono { font-family: 'Space Mono', monospace !important; }
+</style><link id="all-fonts-link-font-quicksand" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-quicksand">
+.font-quicksand { font-family: 'Quicksand', sans-serif !important; }
+</style><link id="all-fonts-link-font-nunito" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-nunito">
+.font-nunito { font-family: 'Nunito', sans-serif !important; }
+</style><link id="all-fonts-link-font-newsreader" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&amp;display=swap"><style id="all-fonts-style-font-newsreader">
+.font-newsreader { font-family: 'Newsreader', serif !important; }
+</style><link id="all-fonts-link-font-google-sans-flex" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-google-sans-flex">
+.font-google-sans-flex { font-family: 'Google Sans Flex', sans-serif !important; }
+</style><link id="all-fonts-link-font-oswald" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-oswald">
+.font-oswald { font-family: 'Oswald', sans-serif !important; }
+</style><link id="all-fonts-link-font-dm-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-dm-sans">
+.font-dm-sans { font-family: 'DM Sans', sans-serif !important; }
+</style></head>
+
+  <body class="text-[#6B6B6B] antialiased selection:bg-[#CCFBF1] selection:text-[#141414] relative overflow-x-hidden font-geist-mono">
+    <!-- Container-Size Grid Background -->
+    <div class="grid-overlay">
+      <div class="grid-inner">
+        <div class="grid-line-v"></div>
+        <div class="grid-line-v hidden md:block"></div>
+        <div class="grid-line-v hidden lg:block"></div>
+        <div class="grid-line-v"></div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 [animation:animationIn_0.8s_ease-out_0.1s_both] animate-on-scroll animate">
+      <div class="border-subtle flex bg-white/90 w-full max-w-4xl border pt-2 pr-2 pb-2 pl-2 shadow-2xl backdrop-blur-xl gap-x-1 gap-y-1 items-center justify-center">
+        <div class="hidden md:flex items-center gap-1">
+          <a href="#strategy" class="hover:text-[#141414] px-4 py-2 text-xs tracking-widest uppercase transition-colors text-[#6B6B6B] font-geist">
+            Overview
+          </a>
+          <a href="#workflows" class="hover:text-[#141414] px-4 py-2 text-xs tracking-widest uppercase transition-colors text-[#6B6B6B] font-geist">
+            How It Works
+          </a>
+        </div>
+
+        <div class="px-6 text-2xl text-[#141414] uppercase flex items-center gap-2 tracking-tighter font-space-grotesk font-light">
+          <div class="w-1.5 h-1.5 bg-[#115E59] animate-pulse shadow-[0_0_8px_rgba(22,163,74,0.35)]"></div>
+          LEDGERLY
+        </div>
+
+        <div class="hidden md:flex items-center gap-1">
+          <a href="#results" class="hover:text-[#141414] px-4 py-2 text-xs tracking-widest uppercase transition-colors text-[#6B6B6B] font-geist">
+            Insights
+          </a>
+          <a href="#contact" class="hover:text-[#141414] px-4 py-2 text-xs tracking-widest uppercase transition-colors text-[#6B6B6B] font-geist" aria-label="Connect Accounts">
+            Get Started
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="md:pt-52 md:pb-32 overflow-hidden z-10 pt-40 pb-20 relative">
+      <div class="container mx-auto px-4 relative max-w-7xl">
+        <div class="flex flex-col text-center mb-24 relative space-y-0 items-center justify-center">
+          <div class="absolute -left-4 md:left-20 top-0 flex flex-col gap-2 opacity-60 hidden lg:flex [animation:animationIn_0.8s_ease-out_0.5s_both] animate-on-scroll animate"></div>
+
+          <div class="flex flex-col w-full z-10 items-center justify-center">
+            <h1 class="uppercase leading-[0.85] flex flex-wrap justify-center gap-x-4 md:text-9xl mdgap-x-8 text-6xl font-semibold text-[#141414] tracking-tighter mt-8 mb-0">
+              <span class="[animation:animationIn_0.8s_ease-out_0.2s_both] animate-on-scroll tracking-tighter font-space-grotesk font-light animate">
+                Financial
+              </span>
+              <span class="text-gradient [animation:animationIn_0.8s_ease-out_0.3s_both] animate-on-scroll font-light tracking-tighter font-space-grotesk animate">
+                Clarity
+              </span>
+            </h1>
+          </div>
+
+          <div class="flex flex-col md:flex-row md:mt-12 md:mb-12 z-10 w-full mt-10 mb-8 gap-x-6 gap-y-6 items-center justify-center">
+            <div class="[animation:animationIn_0.8s_ease-out_0.5s_both] animate-on-scroll group my-8 relative animate">
+              <div class="beam-border"></div>
+              <div class="border-subtle flex group-hover:bg-[#F3EEE6] transition-colors md:h-16 z-10 bg-white h-12 border rounded-full mt-[1px] mr-[1px] mb-[1px] ml-[1px] pr-6 pl-3 relative gap-x-4 gap-y-4 items-center">
+                <div class="md:w-10 md:h-10 overflow-hidden flex border-subtle text-[#141414] bg-[#F3EEE6] w-8 h-8 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3f6038cb-af1c-4483-97bc-dd58d89c36ef_320w.jpg)] bg-cover bg-center border rounded-full relative items-center justify-center">
+                  <iconify-icon icon="lucide:bot" class="text-lg text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <div class="flex flex-row items-center gap-x-2 text-left">
+                  <span class="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-geist">
+                    System Status →
+                  </span>
+                  <span class="text-xs md:text-sm leading-none text-[#141414] font-geist">
+                    Tracking
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <h2 class="[animation:animationIn_0.8s_ease-out_0.4s_both] animate-on-scroll text-lg text-[#6B6B6B] tracking-tight font-space-grotesk md:text-3xl animate">
+              Your personal finance control hub.
+            </h2>
+          </div>
+
+          <div class="leading-relaxed [animation:animationIn_0.8s_ease-out_0.6s_both] animate-on-scroll md:text-2xl text-xs text-[#6B6B6B] font-space-grotesk text-center max-w-lg pb-5 animate">
+            See where your money goes, plan where it should go, and stay in
+            control—without spreadsheets.
+          </div>
+          <div class="mt-10 [animation:animationIn_0.8s_ease-out_0.7s_both] animate-on-scroll animate">
+            <a href="#contact" class="group relative inline-block bg-[#0F766E] text-white px-10 py-4 text-sm font-semibold tracking-widest uppercase transition-transform overflow-hidden">
+              <span class="relative z-10 font-geist">Connect Accounts</span>
+              <div class="absolute inset-0 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left bg-[#115E59]"></div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 max-w-6xl mx-auto counter-trigger [animation:animationIn_0.8s_ease-out_0.2s_both] animate-on-scroll animate">
+          <div class="bg-white border border-subtle p-8 flex flex-col justify-between min-h-[220px] relative group hover:border-[#0F766E]/30 transition-colors">
+            <div class="absolute top-4 right-4 text-xs text-[#6B6B6B] font-geist">
+              01
+            </div>
+            <div class="flex justify-between items-start">
+              <iconify-icon icon="lucide:wallet" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+              <div class="px-2 py-0.5 border border-[#16A34A]/30 bg-[#CCFBF1] text-[#0F766E] text-[10px] uppercase tracking-wider font-geist">
+                Total
+              </div>
+            </div>
+            <div class="">
+              <div class="text-4xl text-[#141414] mb-1 tracking-tighter font-space-grotesk font-light">
+                <span data-target="124560" data-prefix="$" data-suffix="" class="">
+                  $124,560
+                </span>
+              </div>
+              <h3 class="text-xs uppercase tracking-widest text-[#6B6B6B] font-geist">
+                Money Tracked
+              </h3>
+            </div>
+          </div>
+
+          <div class="bg-white border border-subtle p-8 flex flex-col justify-between min-h-[220px] relative group hover:border-[#0F766E]/30 transition-colors">
+            <div class="absolute top-4 right-4 text-xs text-[#6B6B6B] font-geist">
+              02
+            </div>
+            <div class="flex justify-between items-start">
+              <iconify-icon icon="lucide:bar-chart-3" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+            </div>
+            <div>
+              <div class="text-4xl text-[#141414] mb-1 tracking-tighter font-space-grotesk font-light">
+                <span data-target="1240" data-suffix="" data-prefix="+$">
+                  +$1,240
+                </span>
+              </div>
+              <h3 class="text-xs uppercase tracking-widest text-[#6B6B6B] font-geist">
+                Monthly Savings Identified
+              </h3>
+            </div>
+          </div>
+
+          <div class="bg-white border border-subtle p-8 flex flex-col justify-between min-h-[220px] relative group hover:border-[#0F766E]/30 transition-colors">
+            <div class="absolute top-4 right-4 text-xs text-[#6B6B6B] font-geist">
+              03
+            </div>
+            <div class="flex justify-between items-start">
+              <iconify-icon icon="lucide:calendar" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+            </div>
+            <div class="">
+              <div class="text-4xl text-[#141414] mb-1 tracking-tighter font-space-grotesk font-light">
+                <span data-target="18" data-suffix=" Active" data-prefix="">
+                  18 Active
+                </span>
+              </div>
+              <h3 class="text-xs uppercase tracking-widest text-[#6B6B6B] font-geist">
+                Bills &amp; Subscriptions Monitored
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scroll Text Section -->
+    <section class="border-y border-subtle overflow-hidden bg-[#F3EEE6] pt-32 pb-32 relative" id="scroll-reveal-section">
+      <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-6xl mx-auto text-center leading-tight">
+          <h2 class="text-3xl md:text-5xl tracking-tight uppercase leading-[1.3] font-semibold text-[#141414]">
+            <span class="reveal-word font-space-grotesk font-light">Stop</span>
+            <span class="reveal-word font-space-grotesk font-light">
+              guessing.
+            </span>
+            <span class="reveal-word font-space-grotesk font-light">Start</span>
+            <span class="reveal-word inline-flex align-middle bg-[#CCFBF1] border border-subtle px-4 py-1 mx-1 text-[#141414] font-space-grotesk font-light">
+              <iconify-icon icon="lucide:wallet" class="text-2xl mr-2 text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+              understanding
+            </span>
+            <span class="reveal-word font-space-grotesk font-light">where</span>
+            <span class="reveal-word font-space-grotesk font-light">your</span>
+            <span class="reveal-word text-white bg-[#0F766E] px-4 py-1 mx-1 font-space-grotesk font-light">
+              Personal Ledger
+            </span>
+            <span class="reveal-word font-space-grotesk font-light">shows</span>
+            <span class="reveal-word font-space-grotesk font-light">your</span>
+            <span class="reveal-word inline-flex align-middle border border-subtle text-[#141414] bg-white px-4 py-1 mx-1">
+              <iconify-icon icon="lucide:bar-chart-3" class="text-2xl text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+            </span>
+            <span class="reveal-word font-space-grotesk font-light">
+              spending
+            </span>
+            <span class="reveal-word font-space-grotesk font-light">in</span>
+            <span class="reveal-word inline-flex align-middle border border-subtle text-[#141414] bg-white px-4 py-1 mx-1">
+              <iconify-icon icon="lucide:calendar" class="text-2xl text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+            </span>
+            <span class="reveal-word font-space-grotesk font-light">real</span>
+            <span class="reveal-word font-space-grotesk font-light">time.</span>
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workflows Section -->
+    <section id="workflows" class="z-10 border-subtle bg-[#FAF7F2] border-b relative">
+      <div class="container mx-auto px-4 max-w-7xl">
+        <div class="flex flex-col lg:flex-row">
+          <div class="lg:w-1/2 lg:h-screen sticky top-0 flex flex-col justify-center py-12 lg:py-0 pr-0 lg:pr-20 border-r border-subtle/0 lg:border-subtle">
+            <h2 class="text-5xl md:text-6xl uppercase mb-8 lg:mb-8 text-[#141414] tracking-tighter font-space-grotesk font-light">
+              Money
+              <br>
+              <span class="text-[#6B6B6B]">Protocol</span>
+            </h2>
+
+            <div class="space-y-6 relative mb-12 hidden lg:block">
+              <div class="step-trigger group cursor-pointer flex items-center gap-6" data-step="1">
+                <div class="h-12 w-[2px] bg-[#E6DED3] relative overflow-hidden">
+                  <div class="step-indicator absolute top-0 left-0 w-full h-full bg-[#0F766E]"></div>
+                </div>
+                <div class="">
+                  <h3 class="text-xl uppercase tracking-widest text-[#141414] font-space-grotesk">
+                    01 / Track
+                  </h3>
+                  <p class="step-text text-sm text-[#6B6B6B] font-geist">
+                    Connect accounts. Auto-categorize spending. Real-time
+                    balance view.
+                  </p>
+                </div>
+              </div>
+
+              <div class="step-trigger group cursor-pointer flex items-center gap-6" data-step="2">
+                <div class="h-12 w-[2px] bg-[#E6DED3] relative overflow-hidden">
+                  <div class="step-indicator absolute top-0 left-0 w-full h-full bg-[#E6DED3]"></div>
+                </div>
+                <div class="">
+                  <h3 class="text-xl uppercase tracking-widest text-[#141414] font-space-grotesk">
+                    02 / Understand
+                  </h3>
+                  <p class="step-text text-sm text-[#6B6B6B] font-geist">
+                    Monthly breakdowns. Spending patterns. Subscription
+                    detection.
+                  </p>
+                </div>
+              </div>
+
+              <div class="step-trigger group cursor-pointer flex items-center gap-6" data-step="3">
+                <div class="h-12 w-[2px] bg-[#E6DED3] relative overflow-hidden">
+                  <div class="step-indicator absolute top-0 left-0 w-full h-full bg-[#E6DED3]"></div>
+                </div>
+                <div class="">
+                  <h3 class="text-xl uppercase tracking-widest text-[#141414] font-space-grotesk">
+                    03 / Plan
+                  </h3>
+                  <p class="step-text text-sm text-[#6B6B6B] font-geist">
+                    Budget goals. Savings targets. Upcoming bills &amp;
+                    forecasts.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="w-full aspect-video bg-white border border-subtle relative overflow-hidden rounded-sm hidden lg:block">
+              <div class="workflow-img absolute inset-0 transition-all duration-700 ease-out flex items-center justify-center bg-white" data-step="1">
+                <div class="absolute inset-0 bg-cover bg-center opacity-25 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/016bce7b-6e9c-4f55-810b-e3c8333d60c8_1600w.webp)]" style=""></div>
+                <div class="relative z-10 text-center">
+                  <iconify-icon icon="lucide:wallet" class="text-4xl text-[#141414] mb-2" style="stroke-width:1.5"></iconify-icon>
+                  <div class="text-xs font-mono text-[#16A34A]">
+                    SYNCING ACCOUNTS...
+                  </div>
+                </div>
+              </div>
+              <div class="workflow-img absolute inset-0 transition-all duration-700 ease-out flex items-center justify-center bg-white" data-step="2">
+                <div class="absolute inset-0 bg-cover bg-center opacity-25 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/296c40d2-ced0-483a-b0f0-35272b789c47_1600w.webp)]" style=""></div>
+                <div class="relative z-10 text-center">
+                  <iconify-icon icon="lucide:bar-chart-3" class="text-4xl text-[#141414] mb-2" style="stroke-width:1.5"></iconify-icon>
+                  <div class="text-xs font-mono text-[#0F766E]">
+                    ANALYZING SPEND...
+                  </div>
+                </div>
+              </div>
+              <div class="workflow-img absolute inset-0 transition-all duration-700 ease-out flex items-center justify-center bg-white" data-step="3">
+                <div class="absolute inset-0 bg-cover bg-center opacity-25 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/7ac27de6-317a-490a-a9b2-f8ab2a1506ce_1600w.webp)]" style=""></div>
+                <div class="relative z-10 text-center">
+                  <iconify-icon icon="lucide:calendar" class="text-4xl text-[#141414] mb-2" style="stroke-width:1.5"></iconify-icon>
+                  <div class="text-xs font-mono text-[#0F766E]">
+                    FORECAST READY
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:w-1/2">
+            <div class="h-[20vh] hidden lg:block"></div>
+
+            <div class="workflow-step-content min-h-[50vh] lg:min-h-[80vh] flex flex-col justify-center px-0 lg:px-20 py-12 lg:py-20 border-b border-subtle" data-step="1">
+              <span class="text-6xl text-[#141414]/10 mb-6 font-space-grotesk font-semibold">
+                01
+              </span>
+              <h3 class="text-3xl text-[#141414] mb-6 font-space-grotesk tracking-tight">
+                Track Everything, Automatically
+              </h3>
+
+              <div class="w-full aspect-video bg-white border border-subtle relative overflow-hidden rounded-sm mb-8 block lg:hidden">
+                <div class="absolute inset-0 flex items-center justify-center bg-white">
+                  <div class="absolute inset-0 bg-cover bg-center opacity-25 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11443b2f-dfa8-4425-8445-0f952362cd0a_1600w.webp)]" style=""></div>
+                  <div class="relative z-10 text-center">
+                    <iconify-icon icon="lucide:wallet" class="text-4xl text-[#141414] mb-2" style="stroke-width:1.5"></iconify-icon>
+                    <div class="text-xs font-mono text-[#16A34A]">
+                      SYNCING ACCOUNTS...
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-[#6B6B6B] leading-relaxed mb-8 font-geist">
+                Connect your accounts and let Ledgerly keep everything in sync.
+                Transactions are categorized automatically so you always know
+                what’s happening—without manual entry or spreadsheets.
+              </p>
+              <ul class="space-y-4 font-geist text-sm text-[#141414]">
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#16A34A]" style="stroke-width:1.5"></iconify-icon>
+                  Connect accounts
+                </li>
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#16A34A]" style="stroke-width:1.5"></iconify-icon>
+                  Auto-categorize spending
+                </li>
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#16A34A]" style="stroke-width:1.5"></iconify-icon>
+                  Real-time balance view
+                </li>
+              </ul>
+            </div>
+
+            <div class="workflow-step-content min-h-[50vh] lg:min-h-[80vh] flex flex-col justify-center px-0 lg:px-20 py-12 lg:py-20 border-b border-subtle" data-step="2">
+              <span class="text-6xl text-[#141414]/10 mb-6 font-space-grotesk font-semibold">
+                02
+              </span>
+              <h3 class="text-3xl text-[#141414] mb-6 font-space-grotesk tracking-tight">
+                Understand Your Spending
+              </h3>
+
+              <div class="w-full aspect-video bg-white border border-subtle relative overflow-hidden rounded-sm mb-8 block lg:hidden">
+                <div class="absolute inset-0 flex items-center justify-center bg-white">
+                  <div class="absolute inset-0 bg-cover bg-center opacity-25 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/296c40d2-ced0-483a-b0f0-35272b789c47_1600w.webp)]" style=""></div>
+                  <div class="relative z-10 text-center">
+                    <iconify-icon icon="lucide:bar-chart-3" class="text-4xl text-[#141414] mb-2" style="stroke-width:1.5"></iconify-icon>
+                    <div class="text-xs font-mono text-[#0F766E]">
+                      ANALYZING SPEND...
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-[#6B6B6B] leading-relaxed mb-8 font-geist">
+                See clear monthly breakdowns and the patterns behind your spend.
+                Ledgerly highlights trends and detects subscriptions so you can
+                cut waste before it adds up.
+              </p>
+              <ul class="space-y-4 font-geist text-sm text-[#141414]">
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+                  Monthly breakdowns
+                </li>
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+                  Spending patterns
+                </li>
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+                  Subscription detection
+                </li>
+              </ul>
+            </div>
+
+            <div class="workflow-step-content min-h-[50vh] lg:min-h-[80vh] flex flex-col justify-center px-0 lg:px-20 py-12 lg:py-20" data-step="3">
+              <span class="text-6xl text-[#141414]/10 mb-6 font-space-grotesk font-semibold">
+                03
+              </span>
+              <h3 class="text-3xl text-[#141414] mb-6 font-space-grotesk tracking-tight">
+                Plan What’s Next
+              </h3>
+
+              <div class="w-full aspect-video bg-white border border-subtle relative overflow-hidden rounded-sm mb-8 block lg:hidden">
+                <div class="absolute inset-0 flex items-center justify-center bg-white">
+                  <div class="absolute inset-0 bg-cover bg-center opacity-25 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/7ac27de6-317a-490a-a9b2-f8ab2a1506ce_1600w.webp)]" style=""></div>
+                  <div class="relative z-10 text-center">
+                    <iconify-icon icon="lucide:calendar" class="text-4xl text-[#141414] mb-2" style="stroke-width:1.5"></iconify-icon>
+                    <div class="text-xs font-mono text-[#0F766E]">
+                      FORECAST READY
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-[#6B6B6B] leading-relaxed mb-8 font-geist">
+                Set budget goals and savings targets that match your reality.
+                Upcoming bills and forecasts help you plan ahead—so you’re in
+                control before decisions get made for you.
+              </p>
+              <ul class="space-y-4 font-geist text-sm text-[#141414]">
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#16A34A]" style="stroke-width:1.5"></iconify-icon>
+                  Budget goals
+                </li>
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#16A34A]" style="stroke-width:1.5"></iconify-icon>
+                  Savings targets
+                </li>
+                <li class="flex items-center gap-3">
+                  <iconify-icon icon="lucide:check-circle" class="text-[#16A34A]" style="stroke-width:1.5"></iconify-icon>
+                  Upcoming bills &amp; forecasts
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="bg-[#FAF7F2] border-t border-subtle pt-24 pb-24 relative z-10">
+      <div class="container mx-auto px-4 max-w-7xl">
+        <div class="flex flex-col text-center mb-16 items-center justify-center">
+          <h2 class="text-3xl md:text-5xl uppercase text-[#141414] tracking-tighter font-space-grotesk font-light mb-4">
+            Security &amp;
+            <span class="text-[#6B6B6B]">Trust</span>
+          </h2>
+          <p class="text-lg text-[#6B6B6B] font-space-grotesk max-w-2xl mx-auto">
+            Your data is protected by design — not promises.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div class="bg-white border border-subtle p-8 flex flex-col gap-4 hover:border-[#0F766E]/30 transition-colors">
+            <div class="w-10 h-10 bg-[#F3EEE6] rounded-full flex items-center justify-center text-[#0F766E]">
+              <iconify-icon icon="lucide:lock" class="text-xl" style="stroke-width:1.5"></iconify-icon>
+            </div>
+            <div>
+              <h3 class="text-lg font-space-grotesk text-[#141414] mb-2">
+                Read-Only Bank Connections
+              </h3>
+              <p class="text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                Ledgerly can never move your money. We connect in read-only
+                mode, so transactions can be viewed but never changed.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-subtle p-8 flex flex-col gap-4 hover:border-[#0F766E]/30 transition-colors">
+            <div class="w-10 h-10 bg-[#F3EEE6] rounded-full flex items-center justify-center text-[#0F766E]">
+              <iconify-icon icon="lucide:shield-check" class="text-xl" style="stroke-width:1.5"></iconify-icon>
+            </div>
+            <div>
+              <h3 class="text-lg font-space-grotesk text-[#141414] mb-2">
+                End-to-End Encryption
+              </h3>
+              <p class="text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                Your data stays encrypted at all times. Information is protected
+                in transit and at rest using modern encryption standards.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-subtle p-8 flex flex-col gap-4 hover:border-[#0F766E]/30 transition-colors">
+            <div class="w-10 h-10 bg-[#F3EEE6] rounded-full flex items-center justify-center text-[#0F766E]">
+              <iconify-icon icon="lucide:eye-off" class="text-xl" style="stroke-width:1.5"></iconify-icon>
+            </div>
+            <div>
+              <h3 class="text-lg font-space-grotesk text-[#141414] mb-2">
+                Privacy First
+              </h3>
+              <p class="text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                Your financial data is yours — period. We never sell, share, or
+                monetize your personal information.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-subtle p-8 flex flex-col gap-4 hover:border-[#0F766E]/30 transition-colors">
+            <div class="w-10 h-10 bg-[#F3EEE6] rounded-full flex items-center justify-center text-[#0F766E]">
+              <iconify-icon icon="lucide:landmark" class="text-xl" style="stroke-width:1.5"></iconify-icon>
+            </div>
+            <div class="">
+              <h3 class="text-lg font-space-grotesk text-[#141414] mb-2">
+                Industry-Standard Security
+              </h3>
+              <p class="text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                Built using trusted financial security practices. Ledgerly is
+                designed with the same principles used by modern fintech
+                platforms.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-subtle pt-12 text-center">
+          <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <span class="px-4 py-2 bg-white border border-subtle rounded-full text-xs uppercase tracking-widest text-[#141414] font-geist">
+              Read-Only Access
+            </span>
+            <span class="px-4 py-2 bg-white border border-subtle rounded-full text-xs uppercase tracking-widest text-[#141414] font-geist">
+              256-bit Encryption
+            </span>
+            <span class="px-4 py-2 bg-white border border-subtle rounded-full text-xs uppercase tracking-widest text-[#141414] font-geist">
+              GDPR-Ready Architecture
+            </span>
+            <span class="px-4 py-2 bg-white border border-subtle rounded-full text-xs uppercase tracking-widest text-[#141414] font-geist">
+              SOC-Aligned Practices
+            </span>
+          </div>
+
+          <p class="text-[10px] text-[#6B6B6B] uppercase tracking-widest font-geist mb-8 opacity-60">
+            Security practices described reflect design principles, not formal
+            certifications.
+          </p>
+
+          <p class="text-lg md:text-xl text-[#141414] font-space-grotesk max-w-2xl mx-auto">
+            Ledgerly is designed to help you understand your money — not control
+            it.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results / Outputs Section -->
+    <section id="results" class="bg-[#FAF7F2] text-[#141414] pt-24 pb-12 border-t border-subtle relative z-10">
+      <div class="container max-w-7xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-12 pb-8 border-b border-subtle">
+          <div class="">
+            <h2 class="text-5xl md:text-7xl uppercase mb-2 text-[#141414] tracking-tighter font-space-grotesk font-light">
+              What You See
+            </h2>
+            <p class="text-xs uppercase tracking-widest text-[#6B6B6B] font-geist">
+              / What you actually get / Tangible views
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 mb-20 items-stretch">
+          <div class="flex flex-col gap-1 h-full">
+            <div class="bg-white border border-subtle w-full aspect-[9/16] relative group overflow-hidden">
+              <div class="absolute top-4 right-4 z-20 text-[10px] text-[#6B6B6B] border border-subtle bg-white/80 px-2 py-0.5 font-geist">
+                MOBILE
+              </div>
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5692478f-1158-46d2-a363-0a846c4f7fcf_1600w.webp" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity duration-500" alt="Mobile App View">
+              <div class="absolute bottom-6 left-6 z-20">
+                <h3 class="text-xl uppercase tracking-tight font-space-grotesk text-[#141414]">
+                  Mobile App View
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1 h-full aspect-[9/16] md:aspect-auto">
+            <div class="relative flex-1 group overflow-hidden border border-subtle bg-white">
+              <div class="absolute top-4 right-4 z-20 text-[10px] text-[#6B6B6B] border border-subtle bg-white/80 px-2 py-0.5 font-geist">
+                WEB
+              </div>
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c1042d62-4402-4150-a295-c82f622f7b03_1600w.webp" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-85 transition-opacity duration-500" alt="Spending Dashboard" style="">
+              <div class="absolute bottom-6 left-6 z-20">
+                <h3 class="text-xl uppercase tracking-tight font-space-grotesk text-[#141414]">
+                  Spending Dashboard
+                </h3>
+              </div>
+            </div>
+
+            <div class="relative flex-1 group overflow-hidden border border-subtle bg-white">
+              <div class="absolute top-4 right-4 z-20 text-[10px] text-[#6B6B6B] border border-subtle bg-white/80 px-2 py-0.5 font-geist">
+                AI
+              </div>
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/20497d74-08db-4ff4-ac25-4356dfa5142e_1600w.webp" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-85 transition-opacity duration-500" alt="Monthly Report" style="">
+              <div class="absolute bottom-6 left-6 z-20">
+                <h3 class="text-xl uppercase tracking-tight font-space-grotesk text-[#141414]">
+                  Monthly Report
+                </h3>
+              </div>
+            </div>
+
+            <div class="relative flex-1 group overflow-hidden border border-subtle bg-white">
+              <div class="absolute top-4 right-4 z-20 text-[10px] text-[#6B6B6B] border border-subtle bg-white/80 px-2 py-0.5 font-geist">
+                DATA
+              </div>
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/ec5706fb-8976-4615-86fc-f10055753ac2_1600w.webp" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-85 transition-opacity duration-500" alt="Subscription List">
+              <div class="absolute bottom-6 left-6 z-20">
+                <h3 class="text-xl uppercase tracking-tight font-space-grotesk text-[#141414]">
+                  Subscription List
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1 h-full">
+            <div class="bg-white border border-subtle w-full aspect-[9/16] relative group overflow-hidden">
+              <div class="absolute top-4 right-4 z-20 text-[10px] text-[#6B6B6B] border border-subtle bg-white/80 px-2 py-0.5 font-geist">
+                APP
+              </div>
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/daabbcee-89b4-4e3b-94b4-eded9675c9fb_1600w.webp" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity duration-500" alt="Savings Forecast" style="">
+              <div class="absolute bottom-6 left-6 z-20">
+                <h3 class="text-xl uppercase tracking-tight font-space-grotesk text-[#141414]">
+                  Savings Forecast
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="use-cases" class="bg-[#FAF7F2] text-[#141414] pt-24 pb-24 border-t border-subtle relative z-10">
+      <div class="container max-w-7xl mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-5xl md:text-7xl uppercase mb-4 text-[#141414] tracking-tighter font-space-grotesk font-light">
+            Made for
+            <span class="text-[#6B6B6B]">real life</span>
+          </h2>
+          <p class="text-lg text-[#6B6B6B] font-space-grotesk">
+            Same system. Different ways to use it.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-4 mb-12">
+          <button onclick="switchUseCase('individual')" id="tab-individual" class="use-case-tab px-6 py-2 border border-[#141414] bg-[#141414] text-white text-xs uppercase tracking-widest font-geist transition-all">
+            Individuals
+          </button>
+          <button onclick="switchUseCase('couple')" class="use-case-tab border-subtle hover:text-[#141414] uppercase transition-all text-xs text-[#6B6B6B] tracking-widest font-geist bg-white border pt-2 pr-6 pb-2 pl-6" id="tab-couple">
+            Couples
+          </button>
+          <button onclick="switchUseCase('family')" id="tab-family" class="use-case-tab px-6 py-2 border border-subtle bg-white text-[#6B6B6B] hover:text-[#141414] text-xs uppercase tracking-widest font-geist transition-all">
+            Families
+          </button>
+        </div>
+
+        <div class="max-w-4xl mx-auto relative min-h-[400px]">
+          <!-- Individual -->
+          <div id="content-individual" class="use-case-content transition-opacity duration-500 opacity-100 relative z-10">
+            <div class="bg-white border border-subtle p-8 md:p-12 flex flex-col md:flex-row gap-12 items-center">
+              <div class="flex-1 space-y-6">
+                <div class="w-12 h-12 bg-[#F3EEE6] rounded-full flex items-center justify-center text-[#0F766E] mb-6">
+                  <iconify-icon icon="lucide:user" class="text-2xl" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <h3 class="text-3xl font-space-grotesk text-[#141414] tracking-tight">
+                  Clarity without effort.
+                </h3>
+                <p class="text-[#6B6B6B] font-geist leading-relaxed">
+                  Understand your spending, spot patterns, and build better
+                  habits—without tracking every dollar manually.
+                </p>
+                <ul class="space-y-3 text-sm font-geist text-[#141414] pt-2">
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Automatic spending categories
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Subscription and bill tracking
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Monthly summaries that make sense
+                  </li>
+                </ul>
+                <div class="pt-6 border-t border-subtle mt-6">
+                  <span class="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-geist flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-[#0F766E] rounded-full"></span>
+                    Personal monthly snapshot
+                  </span>
+                </div>
+              </div>
+              <div class="w-full md:w-1/3 aspect-square bg-[#FAF7F2] border border-subtle flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/ca2dff12-04ff-4713-9404-e3cb60f16c8a_3840w.jpg?w=800&amp;q=80)]" style=""></div>
+                <div class="relative z-10 bg-white border border-subtle px-4 py-2 text-xs uppercase tracking-widest font-geist shadow-lg">
+                  Personal View
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Couple -->
+          <div id="content-couple" class="use-case-content transition-opacity duration-500 opacity-0 absolute inset-0 pointer-events-none">
+            <div class="bg-white border border-subtle p-8 md:p-12 flex flex-col md:flex-row gap-12 items-center">
+              <div class="flex-1 space-y-6">
+                <div class="w-12 h-12 bg-[#F3EEE6] rounded-full flex items-center justify-center text-[#0F766E] mb-6">
+                  <iconify-icon icon="lucide:users" class="text-2xl" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <h3 class="text-3xl font-space-grotesk text-[#141414] tracking-tight">
+                  Shared money, no confusion.
+                </h3>
+                <p class="text-[#6B6B6B] font-geist leading-relaxed">
+                  Keep shared expenses transparent and aligned, while still
+                  respecting individual accounts.
+                </p>
+                <ul class="space-y-3 text-sm font-geist text-[#141414] pt-2">
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Shared bills and subscriptions
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Clear view of who paid what
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Planning without awkward conversations
+                  </li>
+                </ul>
+                <div class="pt-6 border-t border-subtle mt-6">
+                  <span class="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-geist flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-[#0F766E] rounded-full"></span>
+                    Shared expenses timeline
+                  </span>
+                </div>
+              </div>
+              <div class="w-full md:w-1/3 aspect-square bg-[#FAF7F2] border border-subtle flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/d668b8f4-f584-4c3e-b78c-2a0f6b6b2e5c_3840w.webp?w=800&amp;q=80)]" style=""></div>
+                <div class="relative z-10 bg-white border border-subtle px-4 py-2 text-xs uppercase tracking-widest font-geist shadow-lg">
+                  Couples View
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Family -->
+          <div id="content-family" class="use-case-content transition-opacity duration-500 opacity-0 absolute inset-0 pointer-events-none">
+            <div class="bg-white border border-subtle p-8 md:p-12 flex flex-col md:flex-row gap-12 items-center">
+              <div class="flex-1 space-y-6">
+                <div class="w-12 h-12 bg-[#F3EEE6] rounded-full flex items-center justify-center text-[#0F766E] mb-6">
+                  <iconify-icon icon="lucide:home" class="text-2xl" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <h3 class="text-3xl font-space-grotesk text-[#141414] tracking-tight">
+                  Household finances, organized.
+                </h3>
+                <p class="text-[#6B6B6B] font-geist leading-relaxed">
+                  Manage bills, budgets, and long-term planning for your entire
+                  household in one clear view.
+                </p>
+                <ul class="space-y-3 text-sm font-geist text-[#141414] pt-2">
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Household-wide spending overview
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Recurring bills and due dates
+                  </li>
+                  <li class="flex items-center gap-3">
+                    <iconify-icon icon="lucide:check" class="text-[#0F766E]"></iconify-icon>
+                    Planning ahead with confidence
+                  </li>
+                </ul>
+                <div class="pt-6 border-t border-subtle mt-6">
+                  <span class="text-[10px] uppercase tracking-widest text-[#6B6B6B] font-geist flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-[#0F766E] rounded-full"></span>
+                    Household financial overview
+                  </span>
+                </div>
+              </div>
+              <div class="w-full md:w-1/3 aspect-square bg-[#FAF7F2] border border-subtle flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/b83dd0f6-5b13-4f4c-a16d-8458619d6d32_3840w.jpg?w=800&amp;q=80)]" style=""></div>
+                <div class="relative z-10 bg-white border border-subtle px-4 py-2 text-xs uppercase tracking-widest font-geist shadow-lg">
+                  Family View
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-12">
+          <p class="text-xs uppercase tracking-widest text-[#6B6B6B] font-geist opacity-60">
+            Switch perspectives anytime. Your data stays the same — only the
+            lens changes.
+          </p>
+        </div>
+      </div>
+      <script>
+        function switchUseCase(type) {
+          document.querySelectorAll('.use-case-tab').forEach(el => {
+            el.classList.remove('bg-[#141414]', 'text-white', 'border-[#141414]');
+            el.classList.add('bg-white', 'text-[#6B6B6B]', 'border-subtle');
+            if(el.id === 'tab-' + type) {
+              el.classList.remove('bg-white', 'text-[#6B6B6B]', 'border-subtle');
+              el.classList.add('bg-[#141414]', 'text-white', 'border-[#141414]');
+            }
+          });
+          document.querySelectorAll('.use-case-content').forEach(el => {
+            el.classList.add('opacity-0', 'pointer-events-none', 'absolute', 'inset-0');
+            el.classList.remove('opacity-100', 'relative', 'z-10');
+            if(el.id === 'content-' + type) {
+               el.classList.remove('opacity-0', 'pointer-events-none', 'absolute', 'inset-0');
+               el.classList.add('opacity-100', 'relative', 'z-10');
+            }
+          });
+        }
+      </script>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="border-subtle overflow-hidden z-10 border-t pt-24 pb-24 relative bg-[#FAF7F2]">
+      <div class="container mx-auto px-4 max-w-7xl mb-12">
+        <h2 class="text-3xl md:text-5xl uppercase text-center text-[#141414] tracking-tighter font-space-grotesk font-light">
+          User
+          <span class="text-[#6B6B6B]">Stories</span>
+        </h2>
+      </div>
+
+      <div class="marquee-container w-full relative overflow-hidden py-10">
+        <div class="flex w-[200%] marquee-content hover:[animation-play-state:paused]">
+          <div class="flex w-1/2 justify-around gap-6 px-4">
+            <div class="w-[400px] border border-subtle p-8 bg-white shrink-0">
+              <p class="text-sm leading-relaxed mb-6 text-[#141414] font-geist">
+                "I finally know where my money goes every month. Ledgerly made
+                it obvious what to cut—and I’m saving without feeling
+                restricted."
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 flex items-center justify-center">
+                  <iconify-icon icon="lucide:briefcase" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <div>
+                  <div class="text-xs text-[#141414] uppercase font-semibold font-geist">
+                    Maya
+                  </div>
+                  <div class="text-[10px] text-[#6B6B6B] uppercase font-geist">
+                    Freelance Designer
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="w-[400px] border border-subtle p-8 bg-white shrink-0">
+              <p class="text-sm leading-relaxed mb-6 text-[#141414] font-geist">
+                "Shared expenses used to be a constant back-and-forth. Now we’re
+                aligned—bills, subscriptions, and spending are all in one
+                place."
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 flex items-center justify-center">
+                  <iconify-icon icon="lucide:users" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <div>
+                  <div class="text-xs text-[#141414] uppercase font-semibold font-geist">
+                    Jordan &amp; Sam
+                  </div>
+                  <div class="text-[10px] text-[#6B6B6B] uppercase font-geist">
+                    Couple managing shared expenses
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="w-[400px] border border-subtle p-8 bg-white shrink-0">
+              <p class="text-sm leading-relaxed mb-6 text-[#141414] font-geist">
+                "I thought I was doing fine—until I saw my spending patterns.
+                Ledgerly helped me set targets I can actually stick to."
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 flex items-center justify-center">
+                  <iconify-icon icon="lucide:badge-dollar-sign" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <div>
+                  <div class="text-xs text-[#141414] uppercase font-semibold font-geist">
+                    Alex
+                  </div>
+                  <div class="text-[10px] text-[#6B6B6B] uppercase font-geist">
+                    Young professional
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex w-1/2 justify-around gap-6 px-4">
+            <div class="w-[400px] border border-subtle p-8 bg-white shrink-0">
+              <p class="text-sm leading-relaxed mb-6 text-[#141414] font-geist">
+                "We finally have a clear picture of our household money. Bills
+                are tracked, subscriptions don’t slip through, and we feel in
+                control."
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 flex items-center justify-center">
+                  <iconify-icon icon="lucide:home" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <div>
+                  <div class="text-xs text-[#141414] uppercase font-semibold font-geist">
+                    The Patel Family
+                  </div>
+                  <div class="text-[10px] text-[#6B6B6B] uppercase font-geist">
+                    Family household
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="w-[400px] border border-subtle p-8 bg-white shrink-0">
+              <p class="text-sm leading-relaxed mb-6 text-[#141414] font-geist">
+                "I finally know where my money goes every month. The monthly
+                view is simple, and the categories just make sense."
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 flex items-center justify-center">
+                  <iconify-icon icon="lucide:wallet" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <div>
+                  <div class="text-xs text-[#141414] uppercase font-semibold font-geist">
+                    Riley
+                  </div>
+                  <div class="text-[10px] text-[#6B6B6B] uppercase font-geist">
+                    Freelancer
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="w-[400px] border border-subtle p-8 bg-white shrink-0">
+              <p class="text-sm leading-relaxed mb-6 text-[#141414] font-geist">
+                "We stopped arguing about who paid for what. Now it’s
+                transparent, and we can plan ahead without guessing."
+              </p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 flex items-center justify-center">
+                  <iconify-icon icon="lucide:hand-coins" class="text-2xl text-[#141414]" style="stroke-width:1.5"></iconify-icon>
+                </div>
+                <div>
+                  <div class="text-xs text-[#141414] uppercase font-semibold font-geist">
+                    Taylor &amp; Casey
+                  </div>
+                  <div class="text-[10px] text-[#6B6B6B] uppercase font-geist">
+                    Couple managing shared expenses
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center gap-3 mt-8">
+        <button class="w-2 h-2 bg-[#0F766E] rounded-full"></button>
+        <button class="w-2 h-2 bg-[#E6DED3] hover:bg-[#D7CABC] transition-colors rounded-full"></button>
+        <button class="w-2 h-2 bg-[#E6DED3] hover:bg-[#D7CABC] transition-colors rounded-full"></button>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="faq" class="bg-[#FAF7F2] border-t border-subtle pt-24 pb-24 relative z-10">
+      <div class="container mx-auto px-4 max-w-3xl">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-5xl uppercase mb-4 text-[#141414] tracking-tighter font-space-grotesk font-light">
+            Frequently asked
+            <span class="text-[#6B6B6B]">questions</span>
+          </h2>
+          <p class="text-lg text-[#6B6B6B] font-space-grotesk">
+            Clear answers, before you get started.
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <!-- FAQ 1 -->
+          <div class="faq-item bg-white border border-subtle">
+            <button type="button" class="w-full flex items-center justify-between p-6 text-left group focus:outline-none" onclick="toggleFaq(this)">
+              <span class="text-lg font-space-grotesk text-[#141414]">
+                Is my data safe?
+              </span>
+              <span class="text-[#6B6B6B] text-2xl font-light transition-transform duration-300 icon-plus">
+                +
+              </span>
+            </button>
+            <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out faq-content">
+              <div class="overflow-hidden">
+                <p class="px-6 pb-6 text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                  Yes. Your data is protected by design. Ledgerly uses read-only
+                  connections and modern encryption to keep your information
+                  secure. Your financial data is encrypted in transit and at
+                  rest, and access is strictly limited.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="faq-item bg-white border border-subtle">
+            <button type="button" class="w-full flex items-center justify-between p-6 text-left group focus:outline-none" onclick="toggleFaq(this)">
+              <span class="text-lg font-space-grotesk text-[#141414]">
+                Is Ledgerly a bank?
+              </span>
+              <span class="text-[#6B6B6B] text-2xl font-light transition-transform duration-300 icon-plus">
+                +
+              </span>
+            </button>
+            <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out faq-content">
+              <div class="overflow-hidden">
+                <p class="px-6 pb-6 text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                  No. Ledgerly is not a bank. We don’t hold your money, move
+                  funds, or execute transactions. Ledgerly helps you understand
+                  your finances by organizing and visualizing your data.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="faq-item bg-white border border-subtle">
+            <button type="button" class="w-full flex items-center justify-between p-6 text-left group focus:outline-none" onclick="toggleFaq(this)">
+              <span class="text-lg font-space-grotesk text-[#141414]">
+                Can Ledgerly move my money?
+              </span>
+              <span class="text-[#6B6B6B] text-2xl font-light transition-transform duration-300 icon-plus">
+                +
+              </span>
+            </button>
+            <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out faq-content">
+              <div class="overflow-hidden">
+                <p class="px-6 pb-6 text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                  No. Never. Ledgerly connects in read-only mode. We can see
+                  transactions and balances, but we can’t make changes,
+                  transfers, or payments.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="faq-item bg-white border border-subtle">
+            <button type="button" class="w-full flex items-center justify-between p-6 text-left group focus:outline-none" onclick="toggleFaq(this)">
+              <span class="text-lg font-space-grotesk text-[#141414]">
+                Can I cancel anytime?
+              </span>
+              <span class="text-[#6B6B6B] text-2xl font-light transition-transform duration-300 icon-plus">
+                +
+              </span>
+            </button>
+            <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out faq-content">
+              <div class="overflow-hidden">
+                <p class="px-6 pb-6 text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                  Yes. You’re always in control. You can disconnect accounts or
+                  cancel your plan at any time, with no long-term commitments.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 5 -->
+          <div class="faq-item bg-white border border-subtle">
+            <button type="button" class="w-full flex items-center justify-between p-6 text-left group focus:outline-none" onclick="toggleFaq(this)">
+              <span class="text-lg font-space-grotesk text-[#141414]">
+                Is Ledgerly free?
+              </span>
+              <span class="text-[#6B6B6B] text-2xl font-light transition-transform duration-300 icon-plus">
+                +
+              </span>
+            </button>
+            <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out faq-content">
+              <div class="overflow-hidden">
+                <p class="px-6 pb-6 text-sm text-[#6B6B6B] font-geist leading-relaxed">
+                  Yes. You can get started for free. Ledgerly offers a free plan
+                  to help you understand your finances. Advanced features may be
+                  available with optional paid plans.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-12">
+          <p class="text-xs uppercase tracking-widest text-[#6B6B6B] font-geist opacity-60">
+            Ledgerly is designed to give you clarity — not lock you in.
+          </p>
+        </div>
+      </div>
+      <script>
+        function toggleFaq(btn) {
+          const container = btn.closest('.space-y-1');
+          const content = btn.nextElementSibling;
+          const icon = btn.querySelector('.icon-plus');
+          const isOpen = content.classList.contains('grid-rows-[1fr]');
+
+          container.querySelectorAll('.faq-content').forEach(el => {
+            el.classList.remove('grid-rows-[1fr]');
+            el.classList.add('grid-rows-[0fr]');
+          });
+          container.querySelectorAll('.icon-plus').forEach(el => {
+            el.classList.remove('rotate-45');
+          });
+
+          if (!isOpen) {
+            content.classList.remove('grid-rows-[0fr]');
+            content.classList.add('grid-rows-[1fr]');
+            icon.classList.add('rotate-45');
+          }
+        }
+      </script>
+    </section>
+    <section class="border-subtle bg-center z-10 border-t pt-32 pb-32 relative bg-[#FAF7F2]">
+      <div class="container mx-auto px-4 text-center max-w-4xl">
+        <h2 class="md:text-8xl uppercase text-5xl font-light text-[#141414] tracking-tighter font-space-grotesk mix-blend-multiply mb-8">
+          Ready to
+          <span class="text-[#6B6B6B]">feel in control?</span>
+        </h2>
+        <p class="text-xl text-[#6B6B6B] font-geist mix-blend-multiply max-w-xl mr-auto mb-10 ml-auto">
+          Join thousands who replaced stress with clarity.
+        </p>
+        <div class="">
+          <a href="#contact" class="inline-block bg-[#0F766E] text-white px-10 py-4 text-sm tracking-widest uppercase transition-colors font-geist font-semibold hover:bg-[#115E59]">
+            Start Free
+          </a>
+          <div class="mt-4 text-xs uppercase tracking-widest text-[#6B6B6B] font-geist">
+            No credit card required
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section id="contact" class="py-24 relative z-10 border-t border-subtle bg-[#FAF7F2]">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div class="">
+            <h3 class="text-3xl uppercase text-[#141414] mb-6 tracking-tighter font-space-grotesk font-light">
+              Create Your Ledger
+            </h3>
+            <p class="text-sm text-[#6B6B6B] mb-8 leading-relaxed font-geist">
+              Start step 1 of your account creation. Tell us who you are and
+              what you want to achieve—then we’ll set up your personal ledger.
+            </p>
+            <div class="space-y-4 font-geist-mono text-sm">
+              <div class="flex items-center gap-4 text-[#141414]">
+                <iconify-icon icon="lucide:mail" class="text-lg text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+                <span class="font-geist">hello@roar.growth</span>
+              </div>
+              <div class="flex items-center gap-4 text-[#141414]">
+                <iconify-icon icon="lucide:map-pin" class="text-lg text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+                <span class="font-geist">San Francisco, CA // Node 04</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="">
+            <form class="space-y-8">
+              <div class="group relative">
+                <input type="text" required="" class="outline-none focus:border-[#0F766E] transition-colors peer placeholder-transparent text-[#141414] font-geist-mono bg-transparent w-full border-[#E6DED3] border-b pt-3 pb-3" id="name">
+                <label for="name" class="absolute left-0 -top-3 text-[10px] text-[#6B6B6B] uppercase tracking-widest transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-[#6B6B6B] peer-focus:-top-3 peer-focus:text-[10px] peer-focus:text-[#0F766E] font-geist">
+                  Name
+                </label>
+              </div>
+              <div class="group relative">
+                <input type="email" id="email" required="" class="w-full bg-transparent border-b border-[#E6DED3] py-3 text-[#141414] outline-none focus:border-[#0F766E] transition-colors font-geist-mono peer placeholder-transparent">
+                <label for="email" class="absolute left-0 -top-3 text-[10px] text-[#6B6B6B] uppercase tracking-widest transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-[#6B6B6B] peer-focus:-top-3 peer-focus:text-[10px] peer-focus:text-[#0F766E] font-geist">
+                  Email Address
+                </label>
+              </div>
+              <div class="group relative">
+                <input type="text" id="goal" class="w-full bg-transparent border-b border-[#E6DED3] py-3 text-[#141414] outline-none focus:border-[#0F766E] transition-colors font-geist-mono peer placeholder-transparent">
+                <label for="goal" class="absolute left-0 -top-3 text-[10px] text-[#6B6B6B] uppercase tracking-widest transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-[#6B6B6B] peer-focus:-top-3 peer-focus:text-[10px] peer-focus:text-[#0F766E] font-geist">
+                  Financial goal
+                  <span class="normal-case tracking-normal">(optional)</span>
+                </label>
+              </div>
+
+              <button type="submit" class="group flex items-center gap-4 text-[#141414] uppercase tracking-widest text-xs font-semibold hover:text-[#0F766E] transition-colors pt-4">
+                <span class="font-geist">Continue</span>
+                <iconify-icon icon="lucide:arrow-right" class="transform group-hover:translate-x-1 transition-transform text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-subtle bg-[#FAF7F2] pt-12 pb-8 relative z-10">
+      <div class="container mx-auto px-4 max-w-7xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+          <div class="text-2xl text-[#141414] uppercase flex items-center gap-2 tracking-tighter font-space-grotesk font-light">
+            <div class="w-1.5 h-1.5 bg-[#0F766E]"></div>
+            LEDGERLY
+          </div>
+          <div class="flex gap-8 text-xs font-geist-mono text-[#6B6B6B] uppercase tracking-widest">
+            <a href="#" class="hover:text-[#141414] transition-colors font-geist">
+              Security
+            </a>
+            <a href="#" class="hover:text-[#141414] transition-colors font-geist">
+              Data Privacy
+            </a>
+            <a href="#" class="hover:text-[#141414] transition-colors font-geist">
+              Bank-Level Encryption
+            </a>
+            <a href="#" class="hover:text-[#141414] transition-colors font-geist">
+              Privacy Protocol
+            </a>
+            <a href="#" class="hover:text-[#141414] transition-colors font-geist">
+              Terms of Service
+            </a>
+            <a href="#" class="hover:text-[#141414] transition-colors font-geist">
+              Service Status
+            </a>
+          </div>
+        </div>
+
+        <div class="border-t border-subtle pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-mono uppercase tracking-widest text-[#6B6B6B]">
+          <p class="font-geist">© 2025 Ledgerly. // All Rights Reserved</p>
+          <div class="flex gap-6 mt-4 md:mt-0">
+            <a href="#" class="hover:text-[#141414] transition-colors flex items-center gap-2 font-geist">
+              <iconify-icon icon="lucide:twitter" class="text-sm text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+              Twitter
+            </a>
+            <a href="#" class="hover:text-[#141414] transition-colors flex items-center gap-2 font-geist">
+              <iconify-icon icon="lucide:linkedin" class="text-sm text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+              LinkedIn
+            </a>
+            <a href="#" class="hover:text-[#141414] transition-colors flex items-center gap-2 font-geist">
+              <iconify-icon icon="lucide:instagram" class="text-sm text-[#0F766E]" style="stroke-width:1.5"></iconify-icon>
+              Instagram
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  
+</body></html>

@@ -1,0 +1,931 @@
+<html lang="en" class="scroll-smooth"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropVision AI - Intelligent Property Staging</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<!-- Fonts: Geist Sans for UI, Cormorant Garamond for Headings (to match the interior design vibe) -->
+<link href="https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/style.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<style>
+body { font-family: 'Geist Sans', sans-serif; }
+h1, h2, h3, .serif { font-family: 'Cormorant Garamond', serif; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* Smooth transitions */
+.slider-track { transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+/* Custom Gradients & Glows - Adapted to Natural Hues */
+.glass-panel {
+background: rgba(255, 255, 255, 0.6);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+border: 1px solid rgba(143, 144, 126, 0.15); /* Sage tint */
+}
+.tech-glow {
+background: radial-gradient(circle at center, rgba(143, 144, 126, 0.2) 0%, transparent 70%);
+}
+.earth-glow {
+background: radial-gradient(circle at center, rgba(184, 145, 120, 0.15) 0%, transparent 60%);
+}
+/* Animation Utilities */
+.animate-on-scroll {
+opacity: 0;
+transform: translateY(20px);
+filter: blur(5px);
+transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-on-scroll.animate {
+opacity: 1;
+transform: translateY(0);
+filter: blur(0);
+}
+/* Mobile Menu */
+#mobile-menu { transition: opacity 0.3s ease, transform 0.3s ease; }
+#mobile-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+#mobile-menu.closed { opacity: 0; pointer-events: none; transform: translateY(-10px); }
+/* Custom Selection - Sage Green */
+::selection { background: rgba(143, 144, 126, 0.25); color: #383B26; }
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+// Intersection Observer
+const observer = new IntersectionObserver((entries) => {
+entries.forEach((entry) => {
+if (entry.isIntersecting) {
+entry.target.classList.add("animate");
+observer.unobserve(entry.target);
+}
+});
+}, { threshold: 0.1, rootMargin: "0px 0px -5% 0px" });
+document.querySelectorAll(".animate-on-scroll").forEach((el) => observer.observe(el));
+// Mobile Menu Logic
+const menuBtn = document.getElementById('menu-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+const menuIcon = menuBtn.querySelector('iconify-icon');
+let isMenuOpen = false;
+menuBtn.addEventListener('click', () => {
+isMenuOpen = !isMenuOpen;
+if (isMenuOpen) {
+mobileMenu.classList.remove('closed');
+mobileMenu.classList.add('open');
+menuIcon.setAttribute('icon', 'lucide:x');
+document.body.style.overflow = 'hidden';
+} else {
+mobileMenu.classList.remove('open');
+mobileMenu.classList.add('closed');
+menuIcon.setAttribute('icon', 'lucide:menu');
+document.body.style.overflow = '';
+}
+});
+// Testimonial Slider
+const track = document.getElementById('testimonial-track');
+const prevBtn = document.getElementById('prev-voice');
+const nextBtn = document.getElementById('next-voice');
+const slides = document.querySelectorAll('.testimonial-slide');
+let currentIndex = 0;
+function updateSlider() {
+track.style.transform = `translateX(-${currentIndex * 100}%)`;
+slides.forEach((slide, index) => {
+slide.style.opacity = index === currentIndex ? '1' : '0.4';
+});
+}
+updateSlider();
+nextBtn.addEventListener('click', () => {
+if (currentIndex < slides.length - 1) {
+currentIndex++;
+} else {
+currentIndex = 0;
+}
+updateSlider();
+});
+prevBtn.addEventListener('click', () => {
+if (currentIndex > 0) {
+currentIndex--;
+} else {
+currentIndex = slides.length - 1;
+}
+updateSlider();
+});
+});
+</script>
+<link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">.font-geist { font-family: 'Geist', sans-serif !important; }</style><link id="all-fonts-link-font-roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-roboto">.font-roboto { font-family: 'Roboto', sans-serif !important; }</style><link id="all-fonts-link-font-montserrat" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-montserrat">.font-montserrat { font-family: 'Montserrat', sans-serif !important; }</style><link id="all-fonts-link-font-poppins" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-poppins">.font-poppins { font-family: 'Poppins', sans-serif !important; }</style><link id="all-fonts-link-font-playfair" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap"><style id="all-fonts-style-font-playfair">.font-playfair { font-family: 'Playfair Display', serif !important; }</style><link id="all-fonts-link-font-instrument-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-instrument-serif">.font-instrument-serif { font-family: 'Instrument Serif', serif !important; }</style><link id="all-fonts-link-font-merriweather" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap"><style id="all-fonts-style-font-merriweather">.font-merriweather { font-family: 'Merriweather', serif !important; }</style><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }</style><link id="all-fonts-link-font-jakarta" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-jakarta">.font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }</style><link id="all-fonts-link-font-manrope" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-manrope">.font-manrope { font-family: 'Manrope', sans-serif !important; }</style><link id="all-fonts-link-font-space-grotesk" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-space-grotesk">.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }</style><link id="all-fonts-link-font-work-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-work-sans">.font-work-sans { font-family: 'Work Sans', sans-serif !important; }</style><link id="all-fonts-link-font-pt-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-pt-serif">.font-pt-serif { font-family: 'PT Serif', serif !important; }</style><link id="all-fonts-link-font-geist-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist-mono">.font-geist-mono { font-family: 'Geist Mono', monospace !important; }</style><link id="all-fonts-link-font-space-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-space-mono">.font-space-mono { font-family: 'Space Mono', monospace !important; }</style><link id="all-fonts-link-font-quicksand" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-quicksand">.font-quicksand { font-family: 'Quicksand', sans-serif !important; }</style><link id="all-fonts-link-font-nunito" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-nunito">.font-nunito { font-family: 'Nunito', sans-serif !important; }</style><link id="all-fonts-link-font-newsreader" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&amp;display=swap"><style id="all-fonts-style-font-newsreader">.font-newsreader { font-family: 'Newsreader', serif !important; }</style><link id="all-fonts-link-font-google-sans-flex" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-google-sans-flex">.font-google-sans-flex { font-family: 'Google Sans Flex', sans-serif !important; }</style><link id="all-fonts-link-font-oswald" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-oswald">.font-oswald { font-family: 'Oswald', sans-serif !important; }</style><link id="all-fonts-link-font-dm-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-dm-sans">.font-dm-sans { font-family: 'DM Sans', sans-serif !important; }</style><link id="all-fonts-link-font-cormorant" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-cormorant">.font-cormorant { font-family: 'Cormorant Garamond', serif !important; }</style></head>
+  <!-- Background Color: Warm Almond/White mix -->
+  <body class="bg-[#FDFCFB] text-stone-600 antialiased overflow-x-hidden">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-[#FDFCFB]/90 backdrop-blur-xl border-b border-[#EBE5DA] transition-all duration-300">
+      <div class="max-w-screen-2xl mx-auto px-6 h-16 flex items-center justify-between relative z-50">
+        <!-- Logo -->
+        <div class="flex items-center gap-2">
+          <!-- Sage Green Icon -->
+          <div class="flex items-center justify-center text-[#8F907E]">
+            <iconify-icon icon="lucide:armchair" width="24" stroke-width="1.5"></iconify-icon>
+          </div>
+          <span class="text-lg font-medium tracking-tight text-[#383B26] serif">
+            PropVision
+            <span class="text-[#8F907E]">.ai</span>
+          </span>
+        </div>
+
+        <!-- Desktop Links - Natural Hues -->
+        <div class="hidden md:flex items-center gap-8 text-xs font-semibold text-stone-500 uppercase tracking-widest">
+          <a href="#" class="hover:text-[#8F907E] transition-colors">
+            Collections
+          </a>
+          <a href="#" class="hover:text-[#8F907E] transition-colors">Studio</a>
+          <a href="#" class="hover:text-[#8F907E] transition-colors">
+            Business
+          </a>
+          <a href="#" class="hover:text-[#8F907E] transition-colors">Pricing</a>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-4">
+          <a href="#" class="hidden md:block text-xs font-semibold text-stone-500 hover:text-[#383B26] transition-colors uppercase tracking-widest">
+            Sign in
+          </a>
+          <!-- Pine Green Button -->
+          <button class="bg-[#383B26] text-[#DADFDB] px-6 py-2.5 text-xs font-medium tracking-widest uppercase transition-all rounded-sm hover:bg-[#2C2E1E] shadow-lg shadow-[#383B26]/10">
+            Get Started
+          </button>
+          <!-- Hamburger -->
+          <button id="menu-btn" class="md:hidden text-stone-600 hover:text-[#383B26] transition-colors">
+            <iconify-icon icon="lucide:menu" width="20" stroke-width="1.5"></iconify-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="fixed inset-0 bg-[#FDFCFB] z-40 flex flex-col pt-24 px-6 closed md:hidden h-screen">
+        <div class="flex flex-col gap-8 text-2xl font-light tracking-tight text-[#383B26] serif">
+          <a href="#" class="border-b border-[#EBE5DA] pb-4">Collections</a>
+          <a href="#" class="border-b border-[#EBE5DA] pb-4">Studio</a>
+          <a href="#" class="border-b border-[#EBE5DA] pb-4">Pricing</a>
+          <a href="#" class="border-b border-[#EBE5DA] pb-4">Journal</a>
+        </div>
+        <div class="mt-auto mb-12">
+          <button class="w-full py-4 bg-[#383B26] text-[#DADFDB] text-xs font-semibold uppercase tracking-widest shadow-xl">
+            Create Account
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="overflow-hidden flex flex-col min-h-[clamp(700px,100vh,900px)] bg-[#FDFCFB] w-full pt-28 relative justify-center">
+    <!-- Background Effects: Warm Almond/Sage Glows -->
+    <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-[#EBE5DA]/40 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3">
+    </div>
+    <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#8F907E]/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4">
+    </div>
+
+    <div class="z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-screen-2xl mr-auto ml-auto pr-6 pl-6 relative gap-x-16 gap-y-16 items-center">
+      <!-- Left Content -->
+      <div class="animate-on-scroll max-w-xl">
+        <div class="inline-flex items-center gap-2 mb-8 px-3 py-1 bg-[#F2F0E9] border border-[#EBE5DA] rounded-full">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#8F907E]"></span>
+          <span class="text-[10px] uppercase font-semibold text-[#654C37] tracking-[0.2em]">PropVISION Model 2.4</span>
+        </div>
+
+        <h1 class="md:text-8xl leading-[0.95] text-6xl font-normal text-[#2C2825] tracking-tight mb-8">
+          Interiors,
+          <br>
+          <span class="italic text-[#8F907E]">reimagined.</span>
+        </h1>
+
+        <p class="md:text-2xl leading-relaxed text-xl font-light text-stone-500 max-w-lg mb-12">Transform cluttered,
+          vacant spaces into curated sanctuaries using our generative vision engine trained on architectural elegance.</p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <button class="bg-[#383B26] text-[#DADFDB] px-8 py-4 text-sm font-medium hover:bg-[#2C2E1E] transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#383B26]/10 uppercase tracking-widest">
+                Start Staging
+                <iconify-icon icon="lucide:arrow-right" width="16"></iconify-icon>
+              </button>
+          <button class="px-8 py-4 text-sm font-medium text-[#654C37] border border-[#EBE5DA] hover:bg-[#F2F0E9] hover:border-[#8F907E] transition-all flex items-center justify-center gap-3 uppercase tracking-widest bg-white/50">
+                <iconify-icon icon="lucide:play-circle" width="16"></iconify-icon>
+                View Gallery
+              </button>
+        </div>
+
+        <div class="mt-12 flex items-center gap-8 text-stone-500 text-xs font-medium">
+          <div class="flex items-center gap-2">
+            <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+            Photorealistic Textures
+          </div>
+          <div class="flex items-center gap-2">
+            <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+            Physically Based Lighting
+          </div>
+          <div class="flex items-center gap-2">
+            <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+            4K Export
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Visual (Comparison Card) -->
+      <div class="relative animate-on-scroll w-full mt-12 lg:mt-0">
+        <!-- Main Card -->
+        <div class="relative p-2 bg-white shadow-2xl shadow-[#383B26]/5 border border-[#EBE5DA]">
+          <div class="relative h-[400px] md:h-[500px] lg:h-[600px] w-full group overflow-hidden">
+            <!-- After Image (Base) - Interior Design Style -->
+            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/512104dc-396b-46a8-9736-1d19239a7002_1600w.webp" class="w-full h-full object-cover absolute top-0 right-0 bottom-0 left-0" alt="Staged">
+
+            <!-- Before Image (Overlay with Clip) -->
+            <div class="absolute inset-0 w-1/2 overflow-hidden border-r border-white/70 bg-stone-900/10 transition-all duration-500 ease-out group-hover:w-[15%]">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/b1bbe5c6-7c15-46ed-b472-9fd636769ca5_320w.png" class="filter brightness-[0.8] sepia-[0.2] w-[200%] h-full max-w-none object-cover absolute top-0 left-0" alt="Empty">
+              <div class="absolute bottom-6 left-6 bg-[#383B26]/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#DADFDB] border border-[#DADFDB]/20">
+                Raw Space
+              </div>
+            </div>
+
+            <!-- Controls Mockup - Palette Style -->
+            <div class="flex flex-col gap-4 bg-[#FDFCFB]/95 w-48 border-[#EBE5DA] border p-5 absolute right-6 bottom-6 shadow-lg backdrop-blur">
+              <div class="flex justify-between items-center text-[10px] text-stone-400 uppercase tracking-wider">
+                <span>Style</span>
+                <span class="text-[#383B26] font-semibold">Japandi</span>
+              </div>
+              <div class="flex gap-2">
+                <!-- Japandi (Active) -->
+                <button class="h-8 flex-1 bg-[#383B26] text-[#FDFCFB] border border-[#383B26] shadow-sm rounded-sm flex items-center justify-center text-[9px] font-medium transition-all">
+        Japandi
+      </button>
+                <!-- Modern -->
+                <button class="h-8 flex-1 bg-[#F2F0E9] text-[#383B26] border border-[#EBE5DA] hover:border-[#8F907E] hover:bg-white shadow-sm rounded-sm flex items-center justify-center text-[9px] font-medium transition-all">
+        Modern
+      </button>
+                <!-- Nordic -->
+                <button class="h-8 flex-1 bg-[#F2F0E9] text-[#383B26] border border-[#EBE5DA] hover:border-[#8F907E] hover:bg-white shadow-sm rounded-sm flex items-center justify-center text-[9px] font-medium transition-all">
+        Nordic
+      </button>
+              </div>
+              <button class="w-full bg-[#DADFDB] hover:bg-[#EBE5DA] text-[#383B26] text-[10px] font-semibold py-2 uppercase tracking-widest transition-colors rounded-sm">
+      Regenerate
+    </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+    <!-- Tech Specs / Philosophy -->
+    <section class="py-24 border-y border-[#EBE5DA] bg-[#F2F0E9]">
+      <div class="max-w-screen-2xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+          <!-- Main Text -->
+          <div class="lg:col-span-6 animate-on-scroll">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="w-8 h-[1px] bg-[#8F907E]"></span>
+              <span class="text-xs font-semibold uppercase tracking-widest text-[#8F907E]">
+                Design Intelligence
+              </span>
+            </div>
+            <h2 class="md:text-7xl leading-[0.95] serif text-5xl font-normal text-[#2C2825] tracking-tight">Powered by semantics, <br> <span class="italic text-[#8F907E]">perfected by light.</span></h2>
+            <p class="leading-relaxed text-xl font-light text-stone-600 max-w-xl mt-8">Our model understands not just spatial geometry, but the subtle interplay of material, texture, and natural light that makes a house a home.</p>
+
+            <div class="mt-10 flex gap-12 border-t border-[#DADFDB] pt-8">
+              <div>
+                <div class="text-3xl font-medium text-[#383B26] serif">
+                  1.2s
+                </div>
+                <div class="text-[10px] text-stone-500 uppercase tracking-widest mt-1">
+                  Generation Time
+                </div>
+              </div>
+              <div class="">
+                <div class="text-3xl font-medium text-[#383B26] serif">
+                  200+
+                </div>
+                <div class="text-[10px] text-stone-500 uppercase tracking-widest mt-1">
+                  Design Styles
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Features Grid -->
+          <div class="lg:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+            <div class="group">
+              <div class="w-10 h-10 rounded-full bg-[#DADFDB] flex items-center justify-center text-[#383B26] mb-6">
+                <iconify-icon icon="lucide:scan-line" width="20"></iconify-icon>
+              </div>
+              <h3 class="text-lg font-medium mb-3 text-[#2C2825] serif">
+                Spatial Awareness
+              </h3>
+              <p class="text-sm text-stone-500 leading-relaxed">
+                Automatically identifies architectural boundaries to place
+                furniture with accurate scale and perspective.
+              </p>
+            </div>
+            <div class="group">
+              <div class="w-10 h-10 rounded-full bg-[#EBE5DA] flex items-center justify-center text-[#654C37] mb-6">
+                <iconify-icon icon="lucide:sun" width="20"></iconify-icon>
+              </div>
+              <h3 class="text-lg font-medium mb-3 text-[#2C2825] serif">
+                Organic Lighting
+              </h3>
+              <p class="text-sm text-stone-500 leading-relaxed">
+                Analyses window placement to simulate natural daylight, creating
+                soft shadows and warm highlights.
+              </p>
+            </div>
+            <div class="group">
+              <div class="w-10 h-10 rounded-full bg-[#8F907E]/20 flex items-center justify-center text-[#8F907E] mb-6">
+                <iconify-icon icon="lucide:palette" width="20"></iconify-icon>
+              </div>
+              <h3 class="text-lg font-medium mb-3 text-[#2C2825] serif">
+                Material Physics
+              </h3>
+              <p class="text-sm text-stone-500 leading-relaxed">
+                Distinguishes between velvet, linen, oak, and marble to render
+                textures you can almost feel.
+              </p>
+            </div>
+            <div class="group">
+              <div class="w-10 h-10 rounded-full bg-[#383B26]/10 flex items-center justify-center text-[#383B26] mb-6">
+                <iconify-icon icon="lucide:eraser" width="20"></iconify-icon>
+              </div>
+              <h3 class="text-lg font-medium mb-3 text-[#2C2825] serif">
+                Smart Declutter
+              </h3>
+              <p class="text-sm text-stone-500 leading-relaxed">
+                Digitally removes personal items and clutter while preserving
+                the original flooring and fixtures.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interface Spotlight -->
+    <section class="py-32 relative overflow-hidden bg-[#FDFCFB]">
+      <!-- Glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-[#EBE5DA] blur-[100px] rounded-full -z-10 opacity-60"></div>
+
+      <div class="max-w-screen-2xl mx-auto px-6 text-center">
+        <span class="text-xs text-[#8F907E] font-bold uppercase tracking-widest mb-4 block animate-on-scroll">
+          Seamless Integration
+        </span>
+        <h2 class="text-5xl md:text-7xl font-normal text-[#2C2825] tracking-tight mb-24 text-center serif">
+          Designed for flow.
+        </h2>
+
+        <div class="relative max-w-5xl mx-auto animate-on-scroll">
+          <!-- Mockup Window -->
+          <div class="rounded-sm border border-[#EBE5DA] bg-[#FDFCFB] shadow-2xl shadow-[#383B26]/5">
+            <!-- Window Header -->
+            <div class="h-10 border-b border-[#EBE5DA] flex items-center px-4 gap-2 bg-[#F9F8F6]">
+              <div class="flex gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-[#DADFDB]"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-[#EBE5DA]"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-[#EBE5DA]"></div>
+              </div>
+              <div class="mx-auto text-[10px] text-stone-400 font-mono tracking-wide">
+                studio.propvision.ai
+              </div>
+            </div>
+
+            <!-- App UI -->
+            <div class="flex h-[550px]">
+              <!-- Sidebar -->
+              <div class="w-64 border-r border-[#EBE5DA] p-5 flex flex-col gap-1 hidden md:flex bg-[#FDFCFB]">
+                <div class="py-2.5 px-3 text-xs font-semibold text-[#DADFDB] bg-[#383B26] rounded-sm mb-6 flex items-center justify-center gap-2 shadow-md hover:bg-[#2C2E1E] transition cursor-pointer">
+                  <iconify-icon icon="lucide:plus" width="14"></iconify-icon>
+                  New Project
+                </div>
+
+                <div class="space-y-4">
+                  <div class="">
+                    <div class="text-[9px] text-stone-400 uppercase font-bold tracking-widest mb-3 px-2">
+                      Recent
+                    </div>
+                    <div class="px-2 py-2 text-xs text-[#383B26] bg-[#F2F0E9] rounded-sm font-medium flex items-center gap-2">
+                      <span class="w-1.5 h-1.5 bg-[#8F907E] rounded-full"></span>
+                      Nordic Loft
+                    </div>
+                    <div class="px-2 py-2 text-xs text-stone-500 hover:bg-[#F9F8F6] rounded-sm cursor-pointer transition">
+                      Sunset Villa
+                    </div>
+                    <div class="px-2 py-2 text-xs text-stone-500 hover:bg-[#F9F8F6] rounded-sm cursor-pointer transition">
+                      Modern Ranch
+                    </div>
+                  </div>
+
+                  <div class="">
+    <div class="text-[9px] text-stone-400 uppercase font-semibold tracking-widest mb-3 px-2">
+      Design Styles
+    </div>
+    <div class="flex gap-2 text-xs text-[#383B26] bg-[#F2F0E9] rounded-sm px-2 py-1.5 items-center font-medium mb-1 cursor-pointer transition-colors">
+      <iconify-icon icon="lucide:sprout" width="12" class="text-[#8F907E]"></iconify-icon>
+      Japandi
+    </div>
+    <div class="px-2 py-1.5 text-xs text-stone-500 flex items-center gap-2 hover:bg-[#F9F8F6] rounded-sm cursor-pointer transition-colors mb-1">
+      <iconify-icon icon="lucide:layout-grid" width="12" class="text-stone-400"></iconify-icon>
+      Minimalist
+    </div>
+    <div class="px-2 py-1.5 text-xs text-stone-500 flex items-center gap-2 hover:bg-[#F9F8F6] rounded-sm cursor-pointer transition-colors">
+      <iconify-icon icon="lucide:factory" width="12" class="text-stone-400"></iconify-icon>
+      Industrial
+    </div>
+</div>
+                </div>
+              </div>
+
+              <!-- Main Canvas -->
+              <div class="flex-1 bg-[#F2F0E9] p-8 flex items-center justify-center relative">
+                <!-- Canvas Image -->
+                <div class="relative p-3 bg-white shadow-lg rotate-1 border border-[#EBE5DA]">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" class="max-h-[400px] object-cover grayscale-[0.1]" alt="Dashboard">
+                </div>
+
+                <!-- Processing Badge -->
+                <div class="absolute top-6 right-6 bg-white/95 backdrop-blur border border-[#DADFDB] text-[#383B26] text-[10px] px-4 py-2 flex items-center gap-2 shadow-sm font-medium tracking-wide uppercase">
+                  <iconify-icon icon="lucide:loader-2" class="animate-spin text-[#8F907E]"></iconify-icon>
+                  Rendering
+                </div>
+              </div>
+
+              <!-- Properties Panel -->
+              <div class="w-72 border-l border-[#EBE5DA] p-6 hidden lg:block text-left bg-[#FDFCFB]">
+                <div class="mb-8">
+                  <label class="text-[9px] text-stone-400 uppercase tracking-widest block mb-3 font-bold">
+                    Room Type
+                  </label>
+                  <div class="w-full py-2 bg-[#F9F8F6] border border-[#EBE5DA] rounded-sm px-3 flex items-center justify-between text-xs text-[#383B26]">
+                    Living Room
+                    <iconify-icon icon="lucide:chevron-down" class="text-stone-400"></iconify-icon>
+                  </div>
+                </div>
+
+                <div class="mb-8">
+                  <label class="text-[9px] text-stone-400 uppercase tracking-widest block mb-3 font-bold">
+                    Aesthetic
+                  </label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="h-20 border border-[#8F907E] bg-[#F2F0E9] rounded-sm flex flex-col items-center justify-center gap-2 cursor-pointer">
+                      <div class="w-6 h-6 rounded-full bg-[#DADFDB] border border-[#8F907E]"></div>
+                      <span class="text-[10px] text-[#383B26] font-medium uppercase tracking-wider">
+                        Mist
+                      </span>
+                    </div>
+                    <div class="h-20 border border-[#EBE5DA] bg-white rounded-sm flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#DADFDB]">
+                      <div class="w-6 h-6 rounded-full bg-[#654C37]"></div>
+                      <span class="text-[10px] text-stone-400 font-medium uppercase tracking-wider">
+                        Earth
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-[9px] text-stone-400 uppercase tracking-widest block mb-3 font-bold">
+                    Natural Light
+                  </label>
+                  <div class="w-full bg-[#EBE5DA] h-1 rounded-full overflow-hidden">
+                    <div class="w-3/4 bg-[#8F907E] h-full"></div>
+                  </div>
+                  <div class="flex justify-between mt-2 text-[9px] text-stone-400">
+                    <span>Soft</span>
+                    <span>Intense</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-32 bg-[#FDFCFB] border-t border-[#EBE5DA]">
+      <div class="max-w-screen-2xl mx-auto px-6">
+        <div class="flex justify-between items-end mb-16 animate-on-scroll">
+          <h2 class="text-4xl md:text-6xl font-normal text-[#2C2825] tracking-tight serif">
+            Trusted Voices.
+          </h2>
+          <div class="flex gap-2">
+            <button id="prev-voice" class="w-12 h-12 border border-[#EBE5DA] bg-[#FDFCFB] rounded-full flex items-center justify-center text-stone-400 hover:text-[#383B26] hover:border-[#8F907E] transition duration-300">
+              <iconify-icon icon="lucide:arrow-left" width="20" class=""></iconify-icon>
+            </button>
+            <button id="next-voice" class="w-12 h-12 border border-[#EBE5DA] bg-[#FDFCFB] rounded-full flex items-center justify-center text-stone-400 hover:text-[#383B26] hover:border-[#8F907E] transition duration-300">
+              <iconify-icon icon="lucide:arrow-right" width="20" class=""></iconify-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Slider Container -->
+        <div class="relative w-full overflow-hidden">
+          <div id="testimonial-track" class="slider-track flex w-full" style="transform: translateX(0%);">
+            <!-- Slide 1 -->
+            <div class="testimonial-slide min-w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center" style="opacity: 1;">
+              <div class="p-0 border-0 h-full flex flex-col justify-center">
+                <iconify-icon icon="lucide:quote" width="32" class="text-[#8F907E] mb-8 opacity-50"></iconify-icon>
+                <p class="md:text-4xl leading-[1.2] serif text-3xl font-light italic text-[#383B26] tracking-tight mb-10">"The object removal tool is magic. We took photos of a messy estate sale and had clean, modern visuals for the listing in
+                minutes."</p>
+                <div class="flex items-center gap-4 border-t border-[#EBE5DA] pt-8 w-max">
+                  <div class="text-sm font-bold text-[#2C2825] uppercase tracking-widest">
+                    Elena Rostova
+                  </div>
+                  <span class="text-[#DADFDB]">•</span>
+                  <div class="text-xs text-stone-500 font-serif italic">
+                    Senior Designer, Sotheby's
+                  </div>
+                </div>
+              </div>
+              <!-- Decorative visual -->
+              <div class="hidden md:block h-[400px] bg-[#F2F0E9] rounded-sm p-4">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg" class="w-full h-full object-cover grayscale-[0.2]" alt="Interior">
+              </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="testimonial-slide min-w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center" style="opacity: 0.4;">
+              <div class="p-0 border-0 h-full flex flex-col justify-center">
+                <iconify-icon icon="lucide:quote" width="32" class="text-[#8F907E] mb-8 opacity-50"></iconify-icon>
+                <p class="text-3xl md:text-4xl text-[#383B26] leading-[1.2] font-light mb-10 tracking-tight serif italic">
+                  "We needed to remove clutter from a heritage property.
+                  PropVision kept the original pine floors perfectly intact
+                  while modernizing the furniture."
+                </p>
+                <div class="flex items-center gap-4 border-t border-[#EBE5DA] pt-8 w-max">
+                  <div class="text-sm font-bold text-[#2C2825] uppercase tracking-widest">
+                    Marcus Chen
+                  </div>
+                  <span class="text-[#DADFDB]">•</span>
+                  <div class="text-xs text-stone-500 font-serif italic">
+                    Founder, ArchDaily
+                  </div>
+                </div>
+              </div>
+              <div class="hidden md:block h-[400px] bg-[#F2F0E9] rounded-sm p-4">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" class="w-full h-full object-cover grayscale-[0.2]" alt="Interior">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Use Case Grid -->
+    <section class="py-24 bg-[#F9F8F6]">
+      <div class="max-w-screen-2xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 animate-on-scroll">
+          <div class="">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-1.5 h-1.5 bg-[#8F907E] rounded-full"></span>
+              <span class="text-xs font-bold text-[#8F907E] uppercase tracking-widest">
+                Capabilities
+              </span>
+            </div>
+            <h2 class="text-4xl md:text-6xl font-normal text-[#2C2825] tracking-tight serif">
+              Adaptive Scenarios.
+            </h2>
+          </div>
+
+          <div id="use-case-toggles" class="relative flex items-center bg-[#F2F0E9] rounded-sm p-1 border border-[#EBE5DA]">
+            <div id="toggle-bg" class="absolute left-1 top-1 bg-white rounded-sm shadow-sm transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]" style="width: 96px; height: 31px; left: 4px; top: 4px;"></div>
+            <button class="relative z-10 px-5 py-2 text-[10px] uppercase font-bold tracking-widest text-[#383B26] bg-transparent transition-colors duration-300 focus:outline-none">
+              Interior
+            </button>
+            <button class="relative z-10 px-5 py-2 text-[10px] uppercase font-bold tracking-widest text-stone-400 bg-transparent hover:text-[#383B26] transition-colors duration-300 focus:outline-none">
+              Exterior
+            </button>
+            <button class="relative z-10 px-5 py-2 text-[10px] uppercase font-bold tracking-widest text-stone-400 bg-transparent hover:text-[#383B26] transition-colors duration-300 focus:outline-none">
+              Commercial
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8">
+          <!-- Case 1 -->
+          <div class="group cursor-pointer animate-on-scroll">
+            <div class="relative bg-[#DADFDB] aspect-[4/3] mb-5 overflow-hidden group-hover:shadow-xl transition-all duration-500">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp" class="w-full h-full object-cover transition duration-1000 group-hover:scale-105 opacity-90 group-hover:opacity-100" alt="Room">
+              <div class="absolute inset-0 bg-[#383B26]/20 group-hover:bg-transparent transition duration-500"></div>
+              <div class="absolute top-4 right-4">
+                <div class="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center text-[#383B26] opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                  <iconify-icon icon="lucide:arrow-up-right" width="16"></iconify-icon>
+                </div>
+              </div>
+              <div class="absolute bottom-4 left-4">
+                <span class="text-[9px] font-bold text-[#DADFDB] bg-[#383B26] px-3 py-1.5 uppercase tracking-widest">
+                  Virtual Furnishing
+                </span>
+              </div>
+            </div>
+            <div class="">
+              <h3 class="text-lg font-medium text-[#2C2825] serif">
+                Minimalist Staging
+              </h3>
+              <p class="text-sm font-light text-stone-500 mt-2">Populate empty spaces with scale-accurate furniture.</p>
+            </div>
+          </div>
+
+          <!-- Case 2 -->
+          <div class="group cursor-pointer animate-on-scroll">
+            <div class="relative bg-[#654C37] aspect-[4/3] mb-5 overflow-hidden group-hover:shadow-xl transition-all duration-500">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/30104e3c-5eea-4b93-93e9-5313698a7156_1600w.webp" class="w-full h-full object-cover transition duration-1000 group-hover:scale-105 opacity-90 group-hover:opacity-100" alt="Kitchen">
+              <div class="absolute inset-0 bg-[#654C37]/20 group-hover:bg-transparent transition duration-500"></div>
+              <div class="absolute bottom-4 left-4">
+                <span class="text-[9px] font-bold text-[#383B26] bg-[#DADFDB] px-3 py-1.5 uppercase tracking-widest">
+                  Declutter
+                </span>
+              </div>
+            </div>
+            <div class="">
+              <h3 class="text-lg font-medium text-[#2C2825] serif">
+                Modernize Finishes
+              </h3>
+              <p class="text-sm font-light text-stone-500 mt-2">Remove personal items and update cabinetry and fixtures to modern style.</p>
+            </div>
+          </div>
+
+          <!-- Case 3 -->
+          <div class="group cursor-pointer animate-on-scroll">
+            <div class="relative bg-[#8F907E] aspect-[4/3] mb-5 overflow-hidden group-hover:shadow-xl transition-all duration-500">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" class="w-full h-full object-cover transition duration-1000 group-hover:scale-105 opacity-90 group-hover:opacity-100" alt="Pool">
+              <div class="absolute inset-0 bg-[#8F907E]/20 group-hover:bg-transparent transition duration-500"></div>
+              <div class="absolute bottom-4 left-4">
+                <span class="text-[9px] font-bold text-[#DADFDB] bg-[#8F907E] px-3 py-1.5 uppercase tracking-widest">
+                  Atmosphere
+                </span>
+              </div>
+            </div>
+            <div class="">
+              <h3 class="text-lg font-medium text-[#2C2825] serif">
+                Golden Hour
+              </h3>
+              <p class="text-sm text-stone-500 mt-2 font-light">
+                Adjust lighting to simulate the warm glow of late afternoon sun.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-24 bg-[#FDFCFB] border-t border-[#EBE5DA]">
+      <div class="max-w-screen-2xl mr-auto ml-auto pr-6 pl-6">
+        <div class="mb-20 text-center max-w-2xl mx-auto animate-on-scroll">
+          <h2 class="text-4xl md:text-5xl font-normal text-[#2C2825] tracking-tight mb-6 serif">
+            Simple, natural pricing.
+          </h2>
+          <p class="text-stone-500 font-light text-lg">
+            Start for free, then scale with your agency.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 gap-x-6 gap-y-6">
+          <!-- Starter -->
+          <div class="flex flex-col animate-on-scroll transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#383B26]/5 hover:border-[#8F907E]/50 cursor-pointer group bg-[#F9F8F6] border-[#EBE5DA] border rounded-sm pt-8 pr-8 pb-8 pl-8 relative">
+  <div class="mb-4">
+    <span class="text-xs font-semibold text-stone-400 uppercase tracking-widest group-hover:text-[#8F907E] transition-colors duration-300">
+                Starter
+              </span>
+  </div>
+  <div class="mb-6">
+    <span class="text-4xl font-medium text-[#383B26] tracking-tight serif">
+                $0
+              </span>
+    <span class="text-stone-400">/mo</span>
+  </div>
+  <p class="text-sm text-stone-500 border-[#EBE5DA] border-b mb-8 pb-8 transition-colors duration-300">Perfect for trying out the platform
+    and small
+    projects.</p>
+  <ul class="flex-col gap-4 flex-1 flex mb-8 gap-x-4 gap-y-4">
+    <li class="flex gap-3 text-sm text-stone-600 gap-x-3 gap-y-3 items-center">
+      <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+      5 renderings/mo
+    </li>
+    <li class="flex items-center gap-3 text-sm text-stone-400">
+      <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+      Standard resolution
+    </li>
+    <li class="flex items-center gap-3 text-sm text-stone-400">
+      <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+      Personal use license
+    </li>
+  </ul>
+  <button class="w-full py-3 rounded-sm border border-[#EBE5DA] text-stone-500 text-xs font-bold uppercase tracking-widest group-hover:border-[#8F907E] group-hover:text-[#383B26] group-hover:bg-white transition-all duration-300 bg-[#F9F8F6]">
+              Get Started
+            </button>
+</div>
+
+          <!-- Pro -->
+          <div class="p-8 rounded-sm border border-[#8F907E] bg-white flex flex-col relative animate-on-scroll shadow-2xl shadow-[#8F907E]/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-3xl hover:shadow-[#8F907E]/20 cursor-pointer group z-10 hover:scale-[1.01]">
+            <div class="absolute top-0 right-0 p-3">
+              <div class="px-3 py-1 bg-[#F2F0E9] text-[#383B26] text-[9px] font-bold uppercase tracking-widest border border-[#EBE5DA] group-hover:bg-[#8F907E] group-hover:text-white group-hover:border-[#8F907E] transition-all duration-300">
+                Agency Choice
+              </div>
+            </div>
+            <div class="mb-4">
+              <span class="text-xs font-semibold text-[#8F907E] uppercase tracking-widest">
+                Pro
+              </span>
+            </div>
+            <div class="mb-6">
+              <span class="text-4xl font-medium text-[#2C2825] tracking-tight serif">
+                $49
+              </span>
+              <span class="text-stone-400">/mo</span>
+            </div>
+            <p class="text-sm text-stone-500 border-[#F2F0E9] border-b mb-8 pb-8">For real estate agents and professional stagers.</p>
+            <ul class="flex-col gap-4 mb-8 flex-1 flex">
+              <li class="flex items-center gap-3 text-sm text-stone-600">
+                <iconify-icon icon="lucide:check" class="text-[#383B26]"></iconify-icon>
+                50 renderings/mo
+              </li>
+              <li class="flex items-center gap-3 text-sm text-stone-600">
+                <iconify-icon icon="lucide:check" class="text-[#383B26]"></iconify-icon>
+                4K Export
+              </li>
+              <li class="flex items-center gap-3 text-sm text-stone-600">
+                <iconify-icon icon="lucide:check" class="text-[#383B26]"></iconify-icon>
+                Commercial license
+              </li>
+            </ul>
+            <button class="w-full py-3 rounded-sm bg-[#383B26] text-[#DADFDB] text-xs font-bold uppercase tracking-widest hover:bg-[#2C2E1E] transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:scale-[1.02]">
+              Start Free Trial
+            </button>
+          </div>
+
+          <!-- Enterprise -->
+          <div class="p-8 rounded-sm border border-[#383B26] bg-[#2C2825] flex flex-col animate-on-scroll transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#383B26]/40 cursor-pointer group">
+            <div class="mb-4">
+              <span class="text-xs font-semibold text-[#DADFDB] uppercase tracking-widest group-hover:text-[#8F907E] transition-colors duration-300">
+                Enterprise
+              </span>
+            </div>
+            <div class="mb-6">
+              <span class="text-4xl font-medium text-[#DADFDB] tracking-tight serif">
+                Custom
+              </span>
+            </div>
+            <p class="text-sm text-[#8F907E] border-white/10 border-b mb-8 pb-8 group-hover:border-white/20 transition-colors duration-300">For brokerages and large volume needs.</p>
+            <ul class="flex-col gap-4 mb-8 flex-1 flex">
+              <li class="flex items-center gap-3 text-sm text-[#DADFDB]">
+                <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+                Unlimited renderings
+              </li>
+              <li class="flex items-center gap-3 text-sm text-[#DADFDB]">
+                <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+                Custom Model Training
+              </li>
+              <li class="flex items-center gap-3 text-sm text-[#DADFDB]">
+                <iconify-icon icon="lucide:check" class="text-[#8F907E]"></iconify-icon>
+                SSO &amp; SLA
+              </li>
+            </ul>
+            <button class="w-full py-3 rounded-sm border border-white/20 text-[#DADFDB] text-xs font-bold uppercase tracking-widest hover:bg-[#383B26] hover:border-[#8F907E] transition-all duration-300 group-hover:bg-[#383B26] group-hover:border-[#8F907E] group-hover:text-white">
+              Contact Sales
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-32 mx-6 mb-20 relative bg-[#8F907E] rounded-sm overflow-hidden">
+      <!-- Texture overlay -->
+      <div class="absolute inset-0 bg-[#383B26] opacity-10 mix-blend-multiply"></div>
+
+      <div class="relative max-w-2xl mx-auto text-center py-12 px-6">
+        <h2 class="text-5xl md:text-7xl font-normal text-[#FDFCFB] tracking-tight mb-8 serif">
+          Elevate your
+          
+          <span class="text-[#DADFDB] italic">visual strategy.</span>
+        </h2>
+        <p class="text-[#F2F0E9] mb-10 text-base font-light opacity-90">
+          Join 10,000+ real estate professionals using PropVision to create
+          emotionally resonant imagery.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <button class="bg-[#FDFCFB] text-[#383B26] px-8 py-3.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#F2F0E9] transition shadow-lg">
+            Start Free Trial
+          </button>
+          <button class="bg-transparent border border-[#FDFCFB] text-[#FDFCFB] px-8 py-3.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#FDFCFB] hover:text-[#383B26] transition flex items-center justify-center gap-2">
+            Contact Sales
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer - Earth/Pine Tone -->
+    <footer class="bg-[#2C2825] text-[#DADFDB] pt-32 pb-12 border-t border-[#383B26]">
+      <div class="max-w-screen-2xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row justify-between mb-20">
+          <div class="max-w-md mb-12 md:mb-0">
+            <div class="flex items-center gap-2 mb-6">
+              <iconify-icon icon="lucide:armchair" width="20" class="text-[#8F907E]"></iconify-icon>
+              <span class="text-lg font-medium tracking-tight text-[#FDFCFB] serif">
+                PropVision
+              </span>
+            </div>
+            <h3 class="text-2xl font-light leading-snug text-[#8F907E] serif">
+              The operating system for
+              <br>
+              <span class="text-[#FDFCFB]">interior excellence.</span>
+            </h3>
+          </div>
+          <div class="flex gap-4">
+            <a href="#" class="w-10 h-10 rounded-sm border border-white/10 flex items-center justify-center hover:bg-white/5 hover:border-[#8F907E] transition text-stone-400 hover:text-[#8F907E]">
+              <iconify-icon icon="lucide:twitter" width="18"></iconify-icon>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-sm border border-white/10 flex items-center justify-center hover:bg-white/5 hover:border-[#8F907E] transition text-stone-400 hover:text-[#8F907E]">
+              <iconify-icon icon="lucide:instagram" width="18"></iconify-icon>
+            </a>
+            <a href="#" class="w-10 h-10 rounded-sm border border-white/10 flex items-center justify-center hover:bg-white/5 hover:border-[#8F907E] transition text-stone-400 hover:text-[#8F907E]">
+              <iconify-icon icon="lucide:linkedin" width="18"></iconify-icon>
+            </a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-xs text-stone-400 mb-16 border-t border-white/5 pt-16 font-medium">
+          <div class="flex flex-col gap-4">
+            <span class="text-[#FDFCFB] mb-2 uppercase tracking-widest font-bold">
+              Product
+            </span>
+            <a href="#" class="hover:text-[#8F907E] transition">
+              Virtual Staging
+            </a>
+            <a href="#" class="hover:text-[#8F907E] transition">
+              Style Transfer
+            </a>
+            <a href="#" class="hover:text-[#8F907E] transition">Declutter AI</a>
+          </div>
+          <div class="flex flex-col gap-4">
+            <span class="text-[#FDFCFB] mb-2 uppercase tracking-widest font-bold">
+              Company
+            </span>
+            <a href="#" class="hover:text-[#8F907E] transition">Philosophy</a>
+            <a href="#" class="hover:text-[#8F907E] transition">Journal</a>
+            <a href="#" class="hover:text-[#8F907E] transition">Careers</a>
+          </div>
+          <div class="flex flex-col gap-4">
+            <span class="text-[#FDFCFB] mb-2 uppercase tracking-widest font-bold">
+              Resources
+            </span>
+            <a href="#" class="hover:text-[#8F907E] transition">Gallery</a>
+            <a href="#" class="hover:text-[#8F907E] transition">Support</a>
+            <a href="#" class="hover:text-[#8F907E] transition">API Docs</a>
+          </div>
+          <div class="flex flex-col gap-4">
+            <span class="text-[#FDFCFB] mb-2 uppercase tracking-widest font-bold">
+              Legal
+            </span>
+            <a href="#" class="hover:text-[#8F907E] transition">Privacy</a>
+            <a href="#" class="hover:text-[#8F907E] transition">Terms</a>
+          </div>
+        </div>
+
+        <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center text-[10px] text-stone-500 uppercase tracking-widest">
+          <div class="">© 2024 PropVision AI. San Francisco.</div>
+          <div class="flex items-center gap-2 mt-4 md:mt-0">
+            <span class="w-2 h-2 rounded-full bg-[#8F907E]"></span>
+            <span class="text-[#8F907E]">Systems Operational</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById('use-case-toggles');
+        if (!container) return;
+        const bg = document.getElementById('toggle-bg');
+        const btns = container.querySelectorAll('button');
+
+        function update(target) {
+          bg.style.width = `${target.offsetWidth}px`;
+          bg.style.height = `${target.offsetHeight}px`;
+          bg.style.left = `${target.offsetLeft}px`;
+          bg.style.top = `${target.offsetTop}px`;
+
+          btns.forEach(b => {
+            if (b === target) {
+              b.classList.remove('text-stone-400');
+              b.classList.add('text-[#383B26]');
+            } else {
+              b.classList.add('text-stone-400');
+              b.classList.remove('text-[#383B26]');
+            }
+          });
+        }
+
+        // Init
+        update(btns[0]);
+
+        // Listeners
+        btns.forEach(btn => btn.addEventListener('click', () => update(btn)));
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            const active = Array.from(btns).find(b => b.classList.contains('text-[#383B26]'));
+            if(active) update(active);
+        });
+      });
+    </script>
+  
+</body></html>

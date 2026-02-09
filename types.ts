@@ -1,0 +1,50 @@
+
+export interface RoadmapItem {
+  id: number;
+  title: string;
+  description: string;
+  status: 'pending' | 'active' | 'completed';
+}
+
+export interface GeneratedFile {
+  name: string;
+  language: string;
+  content: string;
+}
+
+export interface ProjectState {
+  roadmap: RoadmapItem[];
+  files: Record<string, GeneratedFile>;
+  status: 'idle' | 'planning' | 'coding' | 'completed';
+  activeFile: string | null;
+  progress: number;
+}
+
+export interface DesignTemplate {
+  name: string;
+  description: string;
+  content?: string;
+  path?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'ai';
+  text: string;
+  timestamp: number;
+  attachments?: string[];
+  // New fields for rich chat UI
+  roadmap?: RoadmapItem[]; 
+  isStreaming?: boolean;
+  statusPhase?: 'analyzing' | 'planning' | 'coding' | 'done';
+}
+
+export interface ProjectSession {
+  id: string;
+  title: string; // Usually the first user prompt
+  lastModified: number;
+  template: DesignTemplate;
+  chatHistory: ChatMessage[];
+  roadmap: RoadmapItem[];
+  files: Record<string, GeneratedFile>;
+}

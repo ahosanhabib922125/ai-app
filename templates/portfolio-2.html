@@ -1,0 +1,1475 @@
+<html lang="en" class="scroll-smooth"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X.Studio Portfolio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<style>
+body { font-family: 'Manrope', sans-serif; }
+/* Palette */
+:root{
+--page:#0B1020;
+--panel:#11172A;
+--panel-hover:#161E36;
+--border:rgba(230,233,242,0.08);
+--border-hover:rgba(79,107,255,0.4);
+--primary:#E6E9F2;
+--muted:#9AA3BF;
+--accent:#4F6BFF;
+--signal:#E5484D;
+}
+.bg-page{background-color:var(--page) !important;}
+.bg-panel{background-color:var(--panel) !important;}
+.border-border{border-color:var(--border) !important;}
+.text-primary{color:var(--primary) !important;}
+.text-muted{color:var(--muted) !important;}
+.text-accent{color:var(--accent) !important;}
+.bg-accent{background-color:var(--accent) !important;}
+/* Utilities */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.fade-enter { opacity: 0; transform: translateY(10px); }
+.fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 300ms ease, transform 300ms ease; }
+/* Loaders & Animation */
+.loader {
+border-top-color: #4F6BFF;
+animation: spinner 1.5s linear infinite;
+}
+@keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* Hover Effects */
+.hover-card {
+transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.hover-card:hover {
+transform: translateY(-4px);
+background-color: var(--panel-hover);
+border-color: var(--border-hover);
+box-shadow: 0 10px 40px -10px rgba(79,107,255,0.15);
+}
+.text-gradient {
+background: linear-gradient(135deg, var(--primary) 0%, var(--muted) 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+/* Custom Selection */
+::selection { background-color: var(--accent); color: var(--page); }
+</style>
+<script>
+// Configure Tailwind to include our custom 3D transform utilities
+tailwind.config = {
+theme: {
+extend: {
+// Add any custom theme extensions here if needed
+}
+},
+plugins: [
+function({ addUtilities }) {
+const rotateXUtilities = {};
+const rotateYUtilities = {};
+const rotateZUtilities = {};
+const rotateValues = [0, 5, 10, 15, 20, 30, 45, 75];
+// Generate rotate-x utilities
+rotateValues.forEach((value) => {
+rotateXUtilities[`.rotate-x-${value}`] = {
+'--tw-rotate-x': `${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+if (value !== 0) {
+rotateXUtilities[`.-rotate-x-${value}`] = {
+'--tw-rotate-x': `-${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+}
+});
+// Generate rotate-y utilities
+rotateValues.forEach((value) => {
+rotateYUtilities[`.rotate-y-${value}`] = {
+'--tw-rotate-y': `${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+if (value !== 0) {
+rotateYUtilities[`.-rotate-y-${value}`] = {
+'--tw-rotate-y': `-${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+}
+});
+// Generate rotate-z utilities
+rotateValues.forEach((value) => {
+rotateZUtilities[`.rotate-z-${value}`] = {
+'--tw-rotate-z': `${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+if (value !== 0) {
+rotateZUtilities[`.-rotate-z-${value}`] = {
+'--tw-rotate-z': `-${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+}
+});
+// Perspective utilities
+const perspectiveUtilities = {
+".perspective-none": { perspective: "none" },
+".perspective-dramatic": { perspective: "100px" },
+".perspective-near": { perspective: "300px" },
+".perspective-normal": { perspective: "500px" },
+".perspective-midrange": { perspective: "800px" },
+".perspective-distant": { perspective: "1200px" },
+};
+// Transform style utilities
+const transformStyleUtilities = {
+".transform-style-preserve-3d": { "transform-style": "preserve-3d" },
+".transform-style-flat": { "transform-style": "flat" },
+};
+addUtilities({
+...rotateXUtilities,
+...rotateYUtilities,
+...rotateZUtilities,
+...perspectiveUtilities,
+...transformStyleUtilities,
+});
+}
+]
+};
+</script>
+<style id="aura-editor-visibility-style">
+.invisible { visibility: hidden !important; }
+</style>
+<style>
+@keyframes fadeInUp {
+from { opacity: 0; transform: translateY(20px) scale(0.98); }
+to { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>
+<link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">
+.font-geist { font-family: 'Geist', sans-serif !important; }
+</style><link id="all-fonts-link-font-roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-roboto">
+.font-roboto { font-family: 'Roboto', sans-serif !important; }
+</style><link id="all-fonts-link-font-montserrat" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-montserrat">
+.font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+</style><link id="all-fonts-link-font-poppins" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-poppins">
+.font-poppins { font-family: 'Poppins', sans-serif !important; }
+</style><link id="all-fonts-link-font-playfair" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap"><style id="all-fonts-style-font-playfair">
+.font-playfair { font-family: 'Playfair Display', serif !important; }
+</style><link id="all-fonts-link-font-instrument-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-instrument-serif">
+.font-instrument-serif { font-family: 'Instrument Serif', serif !important; }
+</style><link id="all-fonts-link-font-merriweather" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap"><style id="all-fonts-style-font-merriweather">
+.font-merriweather { font-family: 'Merriweather', serif !important; }
+</style><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">
+.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }
+</style><link id="all-fonts-link-font-jakarta" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-jakarta">
+.font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-manrope" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-manrope">
+.font-manrope { font-family: 'Manrope', sans-serif !important; }
+</style><link id="all-fonts-link-font-space-grotesk" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-space-grotesk">
+.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }
+</style><link id="all-fonts-link-font-work-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-work-sans">
+.font-work-sans { font-family: 'Work Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-pt-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-pt-serif">
+.font-pt-serif { font-family: 'PT Serif', serif !important; }
+</style><link id="all-fonts-link-font-geist-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist-mono">
+.font-geist-mono { font-family: 'Geist Mono', monospace !important; }
+</style><link id="all-fonts-link-font-space-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-space-mono">
+.font-space-mono { font-family: 'Space Mono', monospace !important; }
+</style><link id="all-fonts-link-font-quicksand" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-quicksand">
+.font-quicksand { font-family: 'Quicksand', sans-serif !important; }
+</style><link id="all-fonts-link-font-nunito" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-nunito">
+.font-nunito { font-family: 'Nunito', sans-serif !important; }
+</style><link id="all-fonts-link-font-newsreader" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&amp;display=swap"><style id="all-fonts-style-font-newsreader">
+.font-newsreader { font-family: 'Newsreader', serif !important; }
+</style><link id="all-fonts-link-font-google-sans-flex" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-google-sans-flex">
+.font-google-sans-flex { font-family: 'Google Sans Flex', sans-serif !important; }
+</style><link id="all-fonts-link-font-oswald" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-oswald">
+.font-oswald { font-family: 'Oswald', sans-serif !important; }
+</style><link id="all-fonts-link-font-dm-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-dm-sans">
+.font-dm-sans { font-family: 'DM Sans', sans-serif !important; }
+</style>  <style>
+/* 3D Transform utilities */
+.perspective-none { perspective: none !important; }
+.perspective-dramatic { perspective: 100px !important; }
+.perspective-near { perspective: 300px !important; }
+.perspective-normal { perspective: 500px !important; }
+.perspective-midrange { perspective: 800px !important; }
+.perspective-distant { perspective: 1200px !important; }
+.transform-style-preserve-3d { transform-style: preserve-3d !important; }
+.transform-style-flat { transform-style: flat !important; }
+</style></head>
+  <body class="bg-page text-muted antialiased overflow-x-hidden">
+    <!-- Background Gradients -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-accent/5 blur-[120px] rounded-full mix-blend-screen"></div>
+      <div class="absolute bottom-0 right-0 w-[800px] h-[600px] bg-signal/5 blur-[120px] rounded-full mix-blend-screen"></div>
+      <div class="absolute top-0 left-0 w-full h-full opacity-20" style="background-image: url('https://grainy-gradients.vercel.app/noise.svg');"></div>
+    </div>
+
+    <!-- Preloader -->
+    <div id="preloader" class="fixed inset-0 z-[100] bg-page flex items-center justify-center transition-opacity duration-500" style="opacity: 0; display: none;">
+      <div class="loader ease-linear rounded-full border-2 border-t-2 border-panel h-8 w-8"></div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="fixed w-4 h-4 bg-accent rounded-full pointer-events-none z-[90] hidden md:block transform -translate-x-1/2 -translate-y-1/2 transition-all duration-150 ease-out shadow-[0_0_15px_rgba(79,107,255,0.55)]" id="cursor" style="left: 1277px; top: 109px; background-color: var(--accent); box-shadow: rgba(79, 107, 255, 0.55) 0px 0px 15px;"></div>
+
+    <!-- Navigation Overlay -->
+    <div id="nav-overlay" class="fixed inset-0 bg-page/95 backdrop-blur-xl z-[80] translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+      <div class="absolute top-0 right-0 p-8 w-20 flex justify-center">
+        <button id="close-nav" class="text-primary hover:text-signal hover:rotate-90 transition-all duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" class="lucide lucide-x w-8 h-8"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+      <div class="h-full flex flex-col justify-center items-center text-center space-y-8">
+        <a href="#" class="nav-link text-5xl md:text-7xl font-semibold text-muted hover:text-accent transition-colors tracking-tight">
+          Home
+        </a>
+        <a href="#portfolio-grid" class="nav-link text-5xl md:text-7xl font-semibold text-muted hover:text-accent transition-colors tracking-tight">
+          Work
+        </a>
+        <a href="#services" class="nav-link text-5xl md:text-7xl font-semibold text-muted hover:text-accent transition-colors tracking-tight">
+          Services
+        </a>
+        <a href="#about" class="nav-link text-5xl md:text-7xl font-semibold text-muted hover:text-accent transition-colors tracking-tight">
+          About
+        </a>
+      </div>
+    </div>
+
+    <!-- Header Logo -->
+    <a href="#" id="header-logo" class="fixed top-6 left-6 md:left-12 z-50 px-5 py-2.5 rounded-full border border-white/5 bg-panel/50 backdrop-blur-md hover:bg-panel hover:border-accent/30 transition-all duration-300 group">
+      <span class="text-sm font-bold tracking-tight text-primary uppercase group-hover:text-accent transition-colors">
+        X.Studio
+      </span>
+    </a>
+
+    <!-- Sidebar Navigation -->
+    <aside class="fixed top-0 right-0 h-screen w-20 border-l border-border bg-page/50 backdrop-blur-sm z-50 flex flex-col items-center py-8 hidden md:flex">
+      <button id="open-nav" class="group flex flex-col gap-1.5 p-2 opacity-100 transition-opacity" aria-label="Open menu" type="button">
+        <span class="w-8 h-0.5 bg-primary group-hover:bg-accent transition-all duration-300"></span>
+        <span class="w-8 h-0.5 bg-primary group-hover:bg-accent transition-all duration-300"></span>
+        <span class="w-8 h-0.5 bg-primary group-hover:bg-accent transition-all duration-300"></span>
+      </button>
+
+      <div class="flex-grow w-px bg-gradient-to-b from-transparent via-white/20 to-transparent my-8"></div>
+
+      <div class="flex flex-col gap-6 items-center">
+        <a href="#" class="text-muted hover:text-accent transition-colors hover:scale-110 duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="instagram" class="lucide lucide-instagram w-5 h-5"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+        </a>
+        <a href="#" class="text-muted hover:text-accent transition-colors hover:scale-110 duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="twitter" class="lucide lucide-twitter w-5 h-5"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+        </a>
+        <a href="#" class="text-muted hover:text-accent transition-colors hover:scale-110 duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="linkedin" class="lucide lucide-linkedin w-5 h-5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+        </a>
+      </div>
+
+      <div class="h-24 flex items-center justify-center mt-8">
+        <span class="text-[10px] font-bold tracking-[0.25em] text-muted uppercase -rotate-90 whitespace-nowrap opacity-50">
+          Est. 2024
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="w-full md:pr-20">
+      <!-- Hero Section -->
+      <section class="min-h-screen flex justify-center py-24 px-4 sm:px-6 lg:px-8 relative bg-cover bg-center" style="background-image: url('https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c66be9d4-d504-42e3-b028-2573e4293134_3840w.jpg');">
+        <div class="absolute inset-0 bg-page/80 backdrop-blur-sm"></div>
+        <div class="w-full max-w-[1400px] border border-border bg-panel/80 backdrop-blur-xl overflow-hidden relative z-10 shadow-2xl rounded-none">
+          <!-- Top Bar -->
+          <header class="flex sm:px-10 sm:pt-8 pt-6 pr-6 pl-6 items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="flex w-9 h-9 border rounded-full items-center justify-center bg-primary/10 border-primary/20 text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                  <circle cx="12" cy="12" r="7" opacity=".5"></circle>
+                  <path fill-rule="evenodd" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-3a7 7 0 1 0 0-14a7 7 0 0 0 0 14" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm font-medium tracking-tight font-geist text-primary">
+                  X.Studio
+                </span>
+                <span class="text-[11px] font text-muted font-geist">
+                  Design &amp; Frontend Practice
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3"></div>
+          </header>
+          <!-- Main Content -->
+          <main class="grid grid-cols-1 lg:grid-cols-2 sm:p-10 pt-6 pr-6 pb-6 pl-6 gap-x-10 gap-y-10">
+            <!-- Left Column -->
+            <section class="flex flex-col justify-between space-y-8">
+              <div class="space-y-6">
+                <p class="inline-flex items-center text-[11px] uppercase text-accent border-accent/20 font-medium tracking-tight font-geist w-max border rounded-full pt-1 pr-3 pb-1 pl-3">
+                  <span class="w-1.5 h-1.5 mr-1.5 bg-accent rounded-full animate-pulse"></span>
+                  Design · Motion · Editing · Code
+                </p>
+                <h1 class="text-[clamp(3rem,6vw,6rem)] sm:text-[clamp(3.25rem,6vw,6.25rem)] md:text-[clamp(3.5rem,6vw,6.5rem)] font-medium tracking-tight font-geist text-primary leading-[1.12]">
+                  <span class="block font-normal text-primary/80 tracking-tight" id="intent-text">
+                    Design with intent.
+                  </span>
+                  <span class="block font-semibold text-primary tracking-tight">
+                    Build with clarity.
+                  </span>
+                </h1>
+                <p class="text-muted leading-relaxed text-base font-geist max-w-md mt-8">
+                  I help teams and founders design, edit, and build digital
+                  products that are clear, scalable, and built to last — from
+                  early concepts to production-ready systems and visual
+                  narratives.
+                </p>
+                <div class="border border-border bg-page/30 p-5 rounded-xl font-geist">
+                  <p class="text-[11px] uppercase text-muted font-medium tracking-tight">
+                    Focus
+                  </p>
+                  <p class="text-primary leading-relaxed text-sm mt-2">
+                    Product design, motion, and visual storytelling
+                  </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button class="hover:text-slate- transition-all flex text-sm font-medium bg-gradient-to-b rounded-full pt-3 pr-6 pb-3 pl-6 shadow-[0px_0px_0px_1px_rgba(0,0,0,0.06),0px_1px_1px_-0.5px_rgba(0,0,0,0.06),0px_3px_3px_-1.5px_rgba(0,0,0,0.06),_0px_6px_6px_-3px_rgba(0,0,0,0.06),0px_12px_12px_-6px_rgba(0,0,0,0.06),0px_24px_24px_-12px_rgba(0,0,0,0.06)] gap-x-2 gap-y-2 items-center hover:bg-slate-950 text-slate-400 from-white/10 via-white/20 to-white/10" style="box-shadow: 0 18px 35px rgba(31, 41, 55, 0.25), 0 0 0 1px rgba(209, 213, 219, 0.3);                  color: #e5e7eb; position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.8)); --border-radius-before: 9999px">
+                    <span class="text-sm font-medium text-white/60 tracking-tight">
+                      View selected work
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="lucide lucide-arrow-right w-[16px] h-[16px]" data-icon-set="lucide" data-icon-replaced="true" style="color: rgb(229, 231, 235); width: 16px; height: 16px;"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    <style id="border-gradient-shared-style">
+  [style*="--border-gradient"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: var(--border-radius-before, inherit);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    background: var(--border-gradient);
+    pointer-events: none;
+  }</style>
+                  </button>
+                  <button class="inline-flex text-muted hover:text-primary transition-colors text-sm font-medium font-geist pt-3 pr-6 pb-3 pl-6 items-center justify-center">
+                    Start a conversation
+                  </button>
+                </div>
+              </div>
+              <p class="text-[12px] text-muted font-geist tracking-tight mt-4">
+                10+ shipped products · Design → Production
+              </p>
+              <a href="#portfolio-grid" class="inline-flex items-center gap-2 text-[12px] text-muted/80 hover:text-muted transition-colors font-geist tracking-tight mt-3 w-max">
+                Scroll to see selected work
+                <span aria-hidden="true">↓</span>
+              </a>
+            </section>
+            <!-- Right Column (Grid) -->
+            <section class="relative flex items-center justify-center perspective-[1000px] group min-h-[640px] md:min-h-[720px] lg:min-h-[820px] self-stretch">
+              <!-- Grid Item 1 (TL) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-0 opacity-0 scale-[0.5] group-hover:opacity-100 group-hover:scale-[0.8] group-hover:-translate-x-[80%] group-hover:-translate-y-[80%] group-hover:rotate-0 ring-1 ring-border/40 rounded-none">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 rounded-none">
+              </div>
+              <!-- Grid Item 2 (TM) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-0 opacity-0 scale-[0.5] group-hover:opacity-100 group-hover:scale-[0.8] group-hover:-translate-y-[80%] group-hover:rotate-0">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg" class="group-hover:grayscale-0 transition-all duration-700 rounded-none w-full h-full object-cover grayscale">
+              </div>
+              <!-- Grid Item 3 (TR) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-0 opacity-0 scale-[0.5] group-hover:opacity-100 group-hover:scale-[0.8] group-hover:translate-x-[80%] group-hover:-translate-y-[80%] group-hover:rotate-0">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+              </div>
+              <!-- Grid Item 4 (ML - Back) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-10 opacity-60 scale-90 rotate-6 translate-x-12 group-hover:opacity-100 group-hover:scale-[0.8] group-hover:-translate-x-[80%] group-hover:translate-y-0 group-hover:rotate-0">
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10"></div>
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+              </div>
+              <!-- Grid Item 5 (Center - Front) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-30 opacity-100 scale-100 rotate-1 group-hover:scale-[0.8] group-hover:translate-x-0 group-hover:translate-y-0 group-hover:rotate-0">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/30104e3c-5eea-4b93-93e9-5313698a7156_1600w.webp" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+              </div>
+              <!-- Grid Item 6 (MR - Middle) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-20 opacity-80 scale-95 -rotate-3 translate-x-4 group-hover:opacity-100 group-hover:scale-[0.8] group-hover:translate-x-[80%] group-hover:translate-y-0 group-hover:rotate-0">
+                <div class="group-hover:bg-transparent transition-colors bg-black/20 z-10 absolute top-0 right-0 bottom-0 left-0"></div>
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+              </div>
+              <!-- Grid Item 7 (BL) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-0 opacity-0 scale-[0.5] group-hover:opacity-100 group-hover:scale-[0.8] group-hover:-translate-x-[80%] group-hover:translate-y-[80%] group-hover:rotate-0">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+              </div>
+              <!-- Grid Item 8 (BM) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-0 opacity-0 scale-[0.5] group-hover:opacity-100 group-hover:scale-[0.8] group-hover:translate-y-[80%] group-hover:rotate-0">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+              </div>
+              <!-- Grid Item 9 (BR) -->
+              <div class="absolute w-64 h-80 md:w-[320px] md:h-[460px] bg-panel rounded-xl shadow-2xl border border-border overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] origin-center z-0 opacity-0 scale-[0.5] group-hover:opacity-100 group-hover:scale-[0.8] group-hover:translate-x-[80%] group-hover:translate-y-[80%] group-hover:rotate-0">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+              </div>
+            </section>
+          </main>
+        </div>
+      </section>
+
+      <!-- What I Do Section (Cards) -->
+      <section class="border-border border-b pt-24 pb-24 relative">
+        <div class="container mx-auto px-6 md:px-12">
+          <div class="mb-16">
+            <h2 class="text-4xl md:text-5xl font-semibold text-primary tracking-tight mb-4">
+              Core Competencies
+            </h2>
+            <p class="text-accent uppercase text-sm tracking-widest font-mono">
+              A focused set of skills, applied with intention.
+            </p>
+          </div>
+
+          <section class="sm:p-8 bg-zinc-900 border-zinc-800 border mt-8 pt-6 pr-6 pb-6 pl-6" style="position: relative; overflow: hidden;">
+            <!-- Background dividers -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none">
+              <div class="absolute top-1/4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+              <div class="absolute top-3/4 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+              <div class="absolute top-0 bottom-0 left-1/3 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+              <div class="absolute top-0 bottom-0 right-1/3 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 items-start relative z-10">
+              <!-- Left: Heading + copy -->
+              <div class="flex flex-col justify-between min-h-full">
+                <div class="">
+                  <h2 class="text-[44px] sm:text-6xl lg:text-7xl leading-[0.9] text-primary font-medium tracking-tighter font-geist">
+                    Design, motion, and code — working as one system.
+                  </h2>
+
+                  <!-- subtle plus markers with divider -->
+                  <div class="mt-8 relative">
+                    <div class="absolute inset-0 flex items-center">
+                      <div class="w-full h-px bg-gradient-to-r from-white/5 via-white/10 to-white/5"></div>
+                    </div>
+                    <div class="hidden sm:grid grid-cols-3 gap-6 text-muted bg-panel px-4 relative">
+                      <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus h-4 w-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                        <span class="text-sm font-normal font-geist">
+                          Systems over screens
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus h-4 w-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                        <span class="text-sm font-normal font-geist">
+                          Motion with purpose
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus h-4 w-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                        <span class="text-sm font-normal font-geist">
+                          Code that respects design
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div class="">
+                    <p class="text-sm text-primary font-medium tracking-tight font-geist" style="">
+                      A focused practice
+                    </p>
+                    <p class="mt-1 text-sm text-muted font-geist leading-relaxed" style="">
+                      I don’t offer everything. I focus on a small set of skills
+                      that compound when used together — from design systems and
+                      motion to frontend implementation and visual storytelling.
+                    </p>
+                  </div>
+
+                  <!-- Vertical divider -->
+                  <div class="relative">
+                    <div class="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-zinc-700 to-transparent sm:block hidden"></div>
+                    <p class="text-base text-muted leading-relaxed sm:text-right sm:pl-8 font-geist" style="">
+                      The work lives in the details: hierarchy, rhythm, spacing,
+                      transitions, and the handoff between design and
+                      implementation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Team grid -->
+              <div class="grid grid-cols-2 gap-4 relative gap-x-4 gap-y-4">
+                <!-- Competency 1 -->
+                <article class="relative overflow-hidden bg-panel border border-border rounded-none p-4 sm:p-5">
+                  <div class="flex gap-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden border border-border bg-page/30 rounded-none">
+                      <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/30104e3c-5eea-4b93-93e9-5313698a7156_1600w.webp" alt="Design systems and UI" class="w-full h-full object-cover">
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="text-white text-base sm:text-lg font-medium tracking-tight leading-tight font-geist">
+                          Design Systems &amp; UI
+                        </p>
+                        <span class="px-2 py-1 rounded-none bg-page/40 text-[11px] text-muted font-normal border border-border font-geist">
+                          Systems
+                        </span>
+                      </div>
+                      <p class="mt-2 text-sm text-muted font-geist leading-relaxed">
+                        Interfaces designed to scale. I build component systems
+                        that bridge Figma and code for consistency across
+                        touchpoints.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Competency 2 -->
+                <article class="overflow-hidden border-border sm:p-5 border rounded-none pt-4 pr-4 pb-4 pl-4 relative">
+                  <div class="flex gap-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden border border-border bg-page/30 rounded-none">
+                      <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" alt="Motion and interaction" class="w-full h-full object-cover">
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="text-white text-base sm:text-lg font-medium tracking-tight leading-tight font-geist">
+                          Motion &amp; Interaction
+                        </p>
+                        <span class="px-2 py-1 rounded-none bg-page/40 text-[11px] text-muted font-normal border border-border font-geist">
+                          Intent
+                        </span>
+                      </div>
+                      <p class="mt-2 text-sm text-muted font-geist leading-relaxed">
+                        Subtle motion used to guide attention, explain
+                        hierarchy, and make interfaces feel responsive and
+                        alive.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Competency 3 -->
+                <article class="relative overflow-hidden bg-panel border border-border rounded-none p-4 sm:p-5">
+                  <div class="flex gap-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden border border-border bg-page/30 rounded-none">
+                      <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg" alt="Frontend engineering" class="w-full h-full object-cover">
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="text-white text-base sm:text-lg font-medium tracking-tight leading-tight font-geist">
+                          Frontend Engineering
+                        </p>
+                        <span class="px-2 py-1 rounded-none bg-page/40 text-[11px] text-muted font-normal border border-border font-geist">
+                          Fidelity
+                        </span>
+                      </div>
+                      <p class="mt-2 text-sm text-muted font-geist leading-relaxed">
+                        Clean, maintainable frontend code with strong focus on
+                        performance, accessibility, and design fidelity.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Competency 4 -->
+                <article class="relative overflow-hidden bg-panel border border-border rounded-none p-4 sm:p-5">
+                  <div class="flex gap-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden border border-border bg-page/30 rounded-none">
+                      <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" alt="Editing and visual storytelling" class="w-full h-full object-cover">
+                    </div>
+                    <div class="min-w-0">
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="text-white text-base sm:text-lg font-medium tracking-tight leading-tight font-geist">
+                          Editing &amp; Visual Storytelling
+                        </p>
+                        <span class="px-2 py-1 rounded-none bg-page/40 text-[11px] text-muted font-normal border border-border font-geist">
+                          Narrative
+                        </span>
+                      </div>
+                      <p class="mt-2 text-sm text-muted font-geist leading-relaxed">
+                        Editing that sharpens the message — from product videos
+                        to motion sequences that support clarity, rhythm, and
+                        narrative.
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              <!-- Outputs row -->
+              <div class="mt-8 border border-border bg-page/30 p-5 rounded-xl font-geist">
+                <p class="text-[11px] uppercase text-muted font-medium tracking-tight">
+                  Outputs
+                </p>
+                <p class="text-primary leading-relaxed text-sm mt-2">
+                  Design systems · Motion studies · Frontend builds · Product
+                  edits
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Portfolio Gallery -->
+      <section class="border-b border-border pt-24 pb-24 relative">
+        <div class="container mx-auto px-6 md:px-12">
+          <div class="mb-16">
+            <h2 class="md:text-5xl text-primary text-4xl font-semibold tracking-tight mb-4">
+              Selected Work
+            </h2>
+            <p class="text-accent uppercase text-sm tracking-widest font-mono">
+              Chosen for clarity, not volume.
+            </p>
+          </div>
+          <!-- Filters -->
+          <p class="text-center text-sm md:text-base text-muted font-geist tracking-tight mb-8">
+            A selection of projects where clarity was the goal.
+          </p>
+          <div class="flex flex-wrap justify-center gap-3 mb-20" id="filters">
+            <button class="filter-btn active px-5 py-2.5 text-xs font-medium uppercase tracking-wider rounded-full border border-accent bg-accent transition-all hover:bg-accent/80 text-white" data-filter="all">
+              All
+            </button>
+            <button class="filter-btn px-5 py-2.5 text-xs font-medium uppercase tracking-wider rounded-full border border-transparent text-muted hover:text-primary hover:bg-white/5 transition-all" data-filter="design">
+              Design
+            </button>
+            <button class="filter-btn px-5 py-2.5 text-xs font-medium uppercase tracking-wider rounded-full border border-transparent text-muted hover:text-primary hover:bg-white/5 transition-all" data-filter="frontend">
+              Frontend
+            </button>
+            <button class="filter-btn px-5 py-2.5 text-xs font-medium uppercase tracking-wider rounded-full border border-transparent text-muted hover:text-primary hover:bg-white/5 transition-all" data-filter="motion">
+              Motion
+            </button>
+            <button class="filter-btn px-5 py-2.5 text-xs font-medium uppercase tracking-wider rounded-full border border-transparent text-muted hover:text-primary hover:bg-white/5 transition-all" data-filter="editing">
+              Editing
+            </button>
+          </div>
+          <div class="mt-14 flex justify-center"></div>
+
+          <!-- Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="portfolio-grid">
+            <!-- Item 1 -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel rounded-none" data-category="design frontend motion">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp" alt="Reframing a Fintech Dashboard" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Design
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div class="">
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Reframing a Fintech Dashboard
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      UI Design · Frontend · Motion
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="design">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/30104e3c-5eea-4b93-93e9-5313698a7156_1600w.webp" alt="A Modular Design System" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Design
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div>
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      A Modular Design System
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      Design Systems · UI · Documentation
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="design frontend">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" alt="Editorial Website for a Creative Studio" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Design
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div class="">
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Editorial Website for a Creative Studio
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      Web Design · Frontend · Typography
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="design">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg" alt="Onboarding that Reduces Drop-off" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Design
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div class="">
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Onboarding that Reduces Drop-off
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      Product Design · Prototyping · UX
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="motion">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" alt="Motion Studies for Product UI" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Motion
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div>
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Motion Studies for Product UI
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      Interaction · Motion · Prototyping
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 6 -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="frontend design">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp" alt="Landing Page with a Conversion Focus" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Frontend
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div class="">
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Landing Page with a Conversion Focus
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      Web Design · Frontend · Performance
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 7 (NEW) -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="editing">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/30104e3c-5eea-4b93-93e9-5313698a7156_1600w.webp" alt="Product Story Edit" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute inset-0 bg-gradient-to-t from-page/70 via-transparent to-transparent"></div>
+              </div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Editing
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div class="">
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Product Story Edit
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      Editing · Visual storytelling
+                    </p>
+                    <p class="mt-2 text-xs text-muted/90 tracking-wide max-w-[34ch]">
+                      Inspired by product launch films, interface transitions,
+                      and abstract UI motion.
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 8 (NEW) -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="editing">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/28a01c26-7ca0-4d6d-be1b-52f7e2c5ece7_3840w.webp?w=800&amp;q=80" alt="Editorial Cut" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute inset-0 bg-gradient-to-t from-page/70 via-transparent to-transparent"></div>
+              </div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Editing
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div>
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Editorial Cut
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      Editing · Visual storytelling
+                    </p>
+                    <p class="mt-2 text-xs text-muted/90 tracking-wide max-w-[34ch]">
+                      Inspired by brand storytelling, pacing, and emotional
+                      visual flow.
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 9 -->
+            <div class="portfolio-item group relative aspect-[4/5] overflow-hidden bg-panel" data-category="design frontend">
+              <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" alt="Data-heavy UI, Simplified" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-page/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute bottom-0 left-0 w-full p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out delay-100">
+                <span class="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-2 block">
+                  Design
+                </span>
+                <div class="flex items-end justify-between gap-6">
+                  <div class="">
+                    <h3 class="text-xl font-medium text-primary tracking-tight font-display">
+                      Data-heavy UI, Simplified
+                    </h3>
+                    <p class="mt-2 text-xs text-muted tracking-wide">
+                      UI Design · Frontend · Information Design
+                    </p>
+                  </div>
+                  <div class="w-10 h-10 shrink-0 rounded-full border border-border flex items-center justify-center text-primary bg-panel/50 backdrop-blur-sm group-hover:bg-accent group-hover:text-black group-hover:border-accent transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Process Section -->
+      <section class="py-24 border-b border-border bg-page">
+        <div class="container md:px-12 mx-auto px-6">
+          <div class="mb-16 text-center max-w-4xl mx-auto">
+            <div class="inline-flex items-center justify-center px-4 py-1.5 rounded-full border mb-8 backdrop-blur-sm bg-panel/50 border-border">
+              <span class="text-xs font-medium uppercase tracking-widest text-accent font-geist">
+                PROCESS &amp; METHODOLOGY
+              </span>
+            </div>
+
+            <h2 class="text-4xl md:text-5xl font-semibold text-primary tracking-tight mb-4">
+              A clear process,
+
+              <span class="italic text-muted">guided by intention.</span>
+            </h2>
+            <p class="text-sm md:text-base max-w-2xl mx-auto leading-relaxed text-muted font-geist tracking-tight">
+              No rigid frameworks — the process adapts to the product, not the
+              other way around.
+            </p>
+            <p class="text-base md:text-lg max-w-2xl mx-auto leading-relaxed text-muted mt-4">
+              My work follows a simple structure — understand the problem, align
+              on direction, shape the solution, and refine it through execution.
+              Each step builds on the last, keeping decisions clear and outcomes
+              intentional.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 max-w-[1400px] mx-auto items-start">
+            <!-- Left Column: Navigation / Steps -->
+            <div class="lg:col-span-5 flex flex-col gap-3">
+              <!-- Active Item (01) -->
+              <div class="group relative overflow-hidden rounded-xl bg-panel/80 p-8 md:p-10 border border-border" data-step-nav="0" style="--border-gradient: linear-gradient(135deg, rgba(79, 107, 255, 0.55), rgba(79, 107, 255, 0)); --border-radius-before: 0.75rem; position: relative;"><div class="absolute inset-0 pointer-events-none" style="background: rgba(79, 107, 255, 0.06);"></div><div class="flex items-start justify-between w-full relative z-10"><div class="min-w-0"><h3 class="text-4xl md:text-5xl tracking-tight font-normal text-primary">Audit</h3><p class="mt-2 text-[11px] text-muted/80 font-geist tracking-tight">Deliverables: Findings, risks, opportunities</p></div><span class="text-sm font-medium mt-1 ml-2 font-mono text-accent">01</span></div></div>
+
+              <!-- Inactive Item (02) -->
+              <div class="group relative rounded-xl p-8 md:p-10 cursor-pointer transition-all duration-300 border border-border hover:bg-panel/60" data-step-nav="1" style=""><div class="flex items-start justify-between w-full"><div class="min-w-0"><h3 class="text-4xl md:text-5xl text-muted group-hover:text-primary tracking-tight font-normal transition-colors duration-300">Align</h3><p class="mt-2 text-[11px] text-muted/70 group-hover:text-muted font-geist tracking-tight transition-colors">Deliverables: Direction, priorities</p></div><span class="text-sm font-medium text-muted/70 group-hover:text-muted mt-1 ml-2 font-mono transition-colors">02</span></div></div>
+
+              <!-- Inactive Item (03) -->
+              <div class="group relative rounded-xl p-8 md:p-10 cursor-pointer transition-all duration-300 border border-border hover:bg-panel/60" data-step-nav="2" style=""><div class="flex items-start justify-between w-full"><div class="min-w-0"><h3 class="text-4xl md:text-5xl text-muted group-hover:text-primary tracking-tight font-normal transition-colors duration-300">Elevate</h3><p class="mt-2 text-[11px] text-muted/70 group-hover:text-muted font-geist tracking-tight transition-colors">Deliverables: Design, motion, build</p></div><span class="text-sm font-medium text-muted/70 group-hover:text-muted mt-1 ml-2 font-mono transition-colors">03</span></div></div>
+
+              <!-- Inactive Item (04) -->
+              <div class="group relative rounded-xl p-8 md:p-10 cursor-pointer transition-all duration-300 border border-border hover:bg-panel/60" data-step-nav="3" style=""><div class="flex items-start justify-between w-full"><div class="min-w-0"><h3 class="text-4xl md:text-5xl text-muted group-hover:text-primary tracking-tight font-normal transition-colors duration-300">Sustain</h3><p class="mt-2 text-[11px] text-muted/70 group-hover:text-muted font-geist tracking-tight transition-colors">Deliverables: Handoff, iteration</p></div><span class="text-sm font-medium text-muted/70 group-hover:text-muted mt-1 ml-2 font-mono transition-colors">04</span></div></div>
+            </div>
+
+            <!-- Right Column: Content & Visual -->
+            <div class="lg:col-span-7 flex flex-col gap-10 pt-2 lg:pt-0 lg:sticky lg:top-10">
+              <div class="w-full aspect-[16/10] overflow-hidden rounded-xl relative group bg-panel border border-border" style="--border-gradient: linear-gradient(135deg, rgba(230, 233, 242, 0.12), rgba(230, 233, 242, 0)); --border-radius-before: 0.75rem; position: relative;">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/40d52a45-f7ad-4bd2-bcf1-0017c94fb79c_3840w.webp" alt="Abstract blooming visual" class="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105" data-step-image="" style="transition: opacity 500ms; opacity: 1;">
+                <div class="absolute inset-0 bg-gradient-to-tr from-page via-transparent to-transparent z-10"></div>
+                <style>
+                  [style*="--border-gradient"]::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    padding: 1px;
+                    border-radius: var(--border-radius-before, inherit);
+                    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                    -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+                    background: var(--border-gradient);
+                    pointer-events: none;
+                  }
+                </style>
+              </div>
+
+              <div>
+                <h3 class="text-2xl md:text-3xl font-normal tracking-tight mb-4 text-primary" data-step-title="">Audit</h3>
+                <p class="text-base md:text-lg leading-relaxed font-normal mb-8 text-muted" data-step-description="">Understanding context, constraints, and goals. I review existing systems, references, and requirements to identify what matters — and what doesn't.</p>
+                <p class="text-[11px] text-muted/80 font-geist tracking-tight" data-step-deliverables="">Deliverables: Findings, risks, opportunities</p>
+
+                <p class="text-sm text-muted font-geist">
+                  This process adapts to each project.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            lucide.createIcons();
+
+            const steps = [
+              {
+                title: 'Audit',
+                deliverables: 'Findings, risks, opportunities',
+                description: 'Understanding context, constraints, and goals. I review existing systems, references, and requirements to identify what matters — and what doesn\'t.',
+                image: 'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/40d52a45-f7ad-4bd2-bcf1-0017c94fb79c_3840w.webp'
+              },
+              {
+                title: 'Align',
+                deliverables: 'Direction, priorities',
+                description: 'Clarifying direction before execution. I align with you on priorities, success criteria, and scope so design and build decisions stay focused.',
+                image: 'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/26b1cd90-0d39-4698-9929-d4d2e625aedf_3840w.webp'
+              },
+              {
+                title: 'Elevate',
+                deliverables: 'Design, motion, build',
+                description: 'Designing systems, interactions, and narratives. This is where structure, motion, and visual language come together into a coherent solution.',
+                image: 'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3453d673-f3c6-4f7b-bba9-f5756406f3c7_3840w.webp'
+              },
+              {
+                title: 'Sustain',
+                deliverables: 'Handoff, iteration',
+                description: 'Building, editing, and refining the work. I translate decisions into production-ready code, motion, and assets — polishing details until it holds up.',
+                image: 'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/6c133bac-27cf-429d-9c5d-de08f82858c1_3840w.jpg'
+              }
+            ];
+
+            let currentStep = 0;
+
+            function setActiveStep(index) {
+              currentStep = index;
+              const step = steps[index];
+
+              document.querySelectorAll('[data-step-nav]').forEach((nav, i) => {
+                const isActive = i === index;
+
+                if (isActive) {
+                  nav.className = 'group relative overflow-hidden rounded-xl bg-panel/80 p-8 md:p-10 border border-border';
+                  nav.style.cssText = '--border-gradient: linear-gradient(135deg, rgba(79, 107, 255, 0.55), rgba(79, 107, 255, 0)); --border-radius-before: 0.75rem; position: relative;';
+                  nav.innerHTML =
+                    '<div class="absolute inset-0 pointer-events-none" style="background: rgba(79, 107, 255, 0.06);"></div>' +
+                    '<div class="flex items-start justify-between w-full relative z-10">' +
+                    '<div class="min-w-0">' +
+                    '<h3 class="text-4xl md:text-5xl tracking-tight font-normal text-primary">' + steps[i].title + '</h3>' +
+                    '<p class="mt-2 text-[11px] text-muted/80 font-geist tracking-tight">Deliverables: ' + steps[i].deliverables + '</p>' +
+                    '</div>' +
+                    '<span class="text-sm font-medium mt-1 ml-2 font-mono text-accent">0' + (i + 1) + '</span>' +
+                    '</div>';
+                } else {
+                  nav.className = 'group relative rounded-xl p-8 md:p-10 cursor-pointer transition-all duration-300 border border-border hover:bg-panel/60';
+                  nav.style.cssText = '';
+                  nav.innerHTML =
+                    '<div class="flex items-start justify-between w-full">' +
+                    '<div class="min-w-0">' +
+                    '<h3 class="text-4xl md:text-5xl text-muted group-hover:text-primary tracking-tight font-normal transition-colors duration-300">' + steps[i].title + '</h3>' +
+                    '<p class="mt-2 text-[11px] text-muted/70 group-hover:text-muted font-geist tracking-tight transition-colors">Deliverables: ' + steps[i].deliverables + '</p>' +
+                    '</div>' +
+                    '<span class="text-sm font-medium text-muted/70 group-hover:text-muted mt-1 ml-2 font-mono transition-colors">0' + (i + 1) + '</span>' +
+                    '</div>';
+                }
+              });
+
+              const img = document.querySelector('[data-step-image]');
+              if (img) {
+                img.style.opacity = '0';
+                setTimeout(() => {
+                  img.src = step.image;
+                  img.style.opacity = '1';
+                }, 250);
+              }
+
+              const title = document.querySelector('[data-step-title]');
+              const desc = document.querySelector('[data-step-description]');
+              const del = document.querySelector('[data-step-deliverables]');
+              if (title) title.textContent = step.title;
+              if (desc) desc.textContent = step.description;
+              if (del) del.textContent = 'Deliverables: ' + step.deliverables;
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+              document.querySelectorAll('[data-step-nav]').forEach((nav, i) => {
+                nav.addEventListener('click', () => setActiveStep(i));
+              });
+
+              const img = document.querySelector('[data-step-image]');
+              if (img && !img.style.opacity) img.style.opacity = '1';
+
+              // Ensure the initial step content matches the authored copy
+              setActiveStep(0);
+            });
+          </script>
+        </div>
+      </section>
+
+      <!-- Credibility / Stats Section -->
+      <section class="py-24 border-b border-border relative bg-panel/30">
+        <div class="container mx-auto px-6 md:px-12">
+          <div class="mb-10">
+            <p class="md:text-5xl text-primary text-4xl font-semibold tracking-tight mb-4">
+              Experience
+            </p>
+            <p class="text-accent uppercase text-sm tracking-widest font-mono">
+              Built through practice, not promises.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div class="relative group">
+              <div class="text-6xl font-bold text-white mb-2 group-hover:text-accent transition-colors">
+                10+
+              </div>
+              <div class="h-1 w-12 bg-accent mb-6 group-hover:w-full transition-all duration-500 ease-out"></div>
+              <p class="text-lg text-muted">
+                Years designing and shipping production digital products.
+              </p>
+            </div>
+            <div class="relative group">
+              <div class="text-6xl font-bold text-white mb-2 group-hover:text-accent transition-colors">
+                50+
+              </div>
+              <div class="h-1 w-12 bg-white/20 mb-6 group-hover:w-full group-hover:bg-accent transition-all duration-500 ease-out"></div>
+              <p class="text-lg text-muted">
+                Projects delivered across SaaS, fintech, and creator tools.
+              </p>
+            </div>
+            <div class="relative group">
+              <div class="text-6xl font-bold text-white mb-2 group-hover:text-accent transition-colors">
+                100%
+              </div>
+              <div class="h-1 w-12 bg-white/20 mb-6 group-hover:w-full group-hover:bg-accent transition-all duration-500 ease-out"></div>
+              <p class="text-lg text-muted">
+                Commitment to design fidelity, performance, and maintainability.
+              </p>
+            </div>
+          </div>
+
+          <p class="mt-16 text-[12px] text-muted tracking-tight">
+            The tools I use support the work — they don’t define it.
+          </p>
+          <div class="mt-20 p-10 bg-page border border-border rounded-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+              <h3 class="text-2xl font-medium text-primary mb-2">
+                Tools &amp; Stack
+              </h3>
+              <p class="text-muted text-sm">
+                Chosen for reliability and speed.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-x-10 gap-y-4 justify-center md:justify-end items-center opacity-60">
+              <div class="flex items-center gap-3">
+                <span class="text-[11px] font-medium uppercase tracking-widest text-muted/80">
+                  Design
+                </span>
+                <span class="text-lg font-bold text-muted hover:text-white transition-colors cursor-default">
+                  Figma
+                </span>
+              </div>
+              <span class="hidden md:inline-block h-6 w-px bg-white/10"></span>
+              <div class="flex items-center gap-3">
+                <span class="text-[11px] font-medium uppercase tracking-widest text-muted/80">
+                  Frontend
+                </span>
+                <span class="text-lg font-bold text-muted hover:text-white transition-colors cursor-default">
+                  React
+                </span>
+                <span class="text-lg font-bold text-muted hover:text-white transition-colors cursor-default">
+                  Next.js
+                </span>
+                <span class="text-lg font-bold text-muted hover:text-white transition-colors cursor-default">
+                  TypeScript
+                </span>
+              </div>
+              <span class="hidden md:inline-block h-6 w-px bg-white/10"></span>
+              <div class="flex items-center gap-3">
+                <span class="text-[11px] font-medium uppercase tracking-widest text-muted/80">
+                  Styling
+                </span>
+                <span class="text-lg font-bold text-muted hover:text-white transition-colors cursor-default">
+                  Tailwind
+                </span>
+              </div>
+              <span class="hidden md:inline-block h-6 w-px bg-white/10"></span>
+              <div class="flex items-center gap-3">
+                <span class="text-[11px] font-medium uppercase tracking-widest text-muted/80">
+                  Motion
+                </span>
+                <span class="text-lg font-bold text-muted hover:text-white transition-colors cursor-default">
+                  Framer Motion
+                </span>
+              </div>
+            </div>
+          </div>
+          <p class="mt-10 text-[12px] text-muted/90 tracking-tight">
+            This combination allows me to move from concept to production
+            without losing intent along the way.
+          </p>
+        </div>
+      </section>
+
+      <!-- Services Section (List Layout) -->
+      <section id="services" class="py-24 border-b border-border bg-page">
+        <div class="container mx-auto px-6 md:px-12">
+          <div class="mb-16">
+            <h2 class="text-4xl md:text-5xl font-semibold text-primary tracking-tight mb-4">
+              Services
+            </h2>
+            <p class="text-sm font-mono text-accent uppercase tracking-widest">
+              Clear engagements. Predictable outcomes.
+              <span class="block mt-3 text-muted/90 font-geist tracking-tight normal-case">
+                Engagements: Project-based · Retainer · Advisory
+              </span>
+              <span class="block mt-1 text-muted/80 font-geist tracking-tight normal-case">
+                Best for early teams, solo founders, and product-led startups.
+              </span>
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Service 1 -->
+            <div class="group p-8 rounded-2xl border border-border bg-transparent hover:bg-panel transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center cursor-default">
+              <div class="flex gap-6 items-center">
+                <span class="text-accent/50 font-mono text-sm">01</span>
+                <h3 class="text-2xl font-medium text-primary group-hover:text-accent transition-colors">
+                  Product Design (UX/UI)
+                </h3>
+              </div>
+              <p class="text-muted max-w-md text-sm mt-4 md:mt-0 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-4 group-hover:translate-x-0">
+                Comprehensive systems design for complex applications.
+              </p>
+              <div class="hidden md:block text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-6 h-6"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+              </div>
+            </div>
+
+            <!-- Service 2 -->
+            <div class="group p-8 rounded-2xl border border-border bg-transparent hover:bg-panel transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center cursor-default">
+              <div class="flex gap-6 items-center">
+                <span class="text-accent/50 font-mono text-sm">02</span>
+                <h3 class="text-2xl font-medium text-primary group-hover:text-accent transition-colors">
+                  Web Development
+                </h3>
+              </div>
+              <p class="text-muted max-w-md text-sm mt-4 md:mt-0 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-4 group-hover:translate-x-0">
+                Marketing sites, portfolios, and e-commerce platforms.
+              </p>
+              <div class="hidden md:block text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-6 h-6"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+              </div>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="group p-8 rounded-2xl border border-border bg-transparent hover:bg-panel transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center cursor-default">
+              <div class="flex gap-6 items-center">
+                <span class="text-accent/50 font-mono text-sm">03</span>
+                <h3 class="text-2xl font-medium text-primary group-hover:text-accent transition-colors">
+                  Design Systems
+                </h3>
+              </div>
+              <p class="text-muted max-w-md text-sm mt-4 md:mt-0 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-4 group-hover:translate-x-0">
+                Scalable component libraries and style guides.
+              </p>
+              <div class="hidden md:block text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-6 h-6"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+              </div>
+            </div>
+            <!-- Service 4 -->
+            <div class="group p-8 rounded-2xl border border-border bg-transparent hover:bg-panel transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center cursor-default">
+              <div class="flex gap-6 items-center">
+                <span class="text-accent/50 font-mono text-sm">04</span>
+                <h3 class="text-2xl font-medium text-primary group-hover:text-accent transition-colors">
+                  Editing
+                </h3>
+              </div>
+              <p class="text-muted max-w-md text-sm mt-4 md:mt-0 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-4 group-hover:translate-x-0">
+                Product edits, pacing, and storytelling for clear narratives.
+              </p>
+              <div class="hidden md:block text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-6 h-6"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About / CTA -->
+      <section id="about" class="py-32 bg-page relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(79,107,255,0.08),transparent_70%)]"></div>
+
+        <div class="container mx-auto px-6 md:px-12 relative z-10 text-center">
+          <h2 class="text-5xl md:text-7xl font-semibold tracking-tight text-primary mb-8">
+            Ready to build
+            <br>
+            something
+            <span class="text-accent">exceptional?</span>
+          </h2>
+          <p class="text-xl text-muted max-w-2xl mx-auto mb-12">
+            I'm currently available for new projects. Let's discuss how we can
+            elevate your product or brand.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="mailto:hello@xstudio.co" class="inline-flex items-center gap-3 px-10 py-5 bg-accent text-white rounded-full font-semibold text-lg hover:bg-signal transition-colors duration-300 shadow-[0_0_30px_rgba(79,107,255,0.3)] hover:shadow-[0_0_30px_rgba(229,72,77,0.4)]">
+              Start a Conversation
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="lucide lucide-arrow-right w-5 h-5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </a>
+            <a href="#portfolio-grid" class="inline-flex items-center gap-3 px-10 py-5 rounded-full border border-border bg-panel/30 text-primary font-semibold text-lg hover:bg-panel hover:border-accent/30 transition-all duration-300">
+              View selected work
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right" class="lucide lucide-arrow-right w-5 h-5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-panel border-t border-border pt-24 pb-12 relative md:pr-20">
+      <div class="container mx-auto px-6 md:px-12">
+        <div class="flex flex-col md:flex-row justify-between gap-16 mb-24">
+          <div class="md:w-1/2">
+            <span class="text-2xl font-bold tracking-tight text-white mb-6 block">
+              X.Studio
+            </span>
+            <p class="text-muted text-lg max-w-md">
+              A digital design and engineering studio focused on clarity,
+              performance, and aesthetic precision.
+            </p>
+          </div>
+
+          <div class="flex gap-16">
+            <div class="flex flex-col gap-4">
+              <span class="text-white font-bold uppercase tracking-widest text-xs mb-2">
+                Socials
+              </span>
+              <a href="#" class="text-muted hover:text-accent transition-colors">
+                Twitter / X
+              </a>
+              <a href="#" class="text-muted hover:text-accent transition-colors">
+                Instagram
+              </a>
+              <a href="#" class="text-muted hover:text-accent transition-colors">
+                LinkedIn
+              </a>
+            </div>
+            <div class="flex flex-col gap-4">
+              <span class="text-white font-bold uppercase tracking-widest text-xs mb-2">
+                Legal
+              </span>
+              <a href="#" class="text-muted hover:text-accent transition-colors">
+                Privacy Policy
+              </a>
+              <a href="#" class="text-muted hover:text-accent transition-colors">
+                Terms of Use
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-sm text-muted">© 2026 X.Studio. Built with intent.</p>
+          <p class="text-[120px] md:text-[180px] font-bold text-white/5 leading-none absolute bottom-0 right-4 pointer-events-none select-none">
+            X.STUDIO
+          </p>
+
+          <button id="scroll-to-top" class="w-12 h-12 rounded-full border border-border bg-page text-primary flex items-center justify-center hover:bg-accent hover:border-accent hover:text-white transition-all z-20">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-5 h-5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Initialize Lucide Icons
+      lucide.createIcons();
+
+      // Preloader Logic
+      window.addEventListener('load', () => {
+          const preloader = document.getElementById('preloader');
+          if(preloader) {
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 500);
+          }
+      });
+
+      // Navigation Logic
+      const openNav = document.getElementById('open-nav');
+      const closeNav = document.getElementById('close-nav');
+      const navOverlay = document.getElementById('nav-overlay');
+      const navLinks = document.querySelectorAll('.nav-link');
+
+      function toggleNav() {
+          navOverlay.classList.toggle('translate-x-full');
+          document.body.classList.toggle('overflow-hidden');
+      }
+
+      if(openNav) openNav.addEventListener('click', toggleNav);
+      if(closeNav) closeNav.addEventListener('click', toggleNav);
+      navLinks.forEach(link => link.addEventListener('click', toggleNav));
+
+      // Scroll to Top
+      const scrollTopBtn = document.getElementById('scroll-to-top');
+      if(scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
+      // Cursor Logic
+      const cursor = document.getElementById('cursor');
+      if(cursor) {
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        const hoverElements = document.querySelectorAll('a, button, .portfolio-item, .hover-card, .group');
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('scale-[3]', 'bg-white', 'mix-blend-difference'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('scale-[3]', 'bg-white', 'mix-blend-difference'));
+        });
+
+        // Red cursor on "intent"
+        const intentText = document.getElementById('intent-text');
+        if (intentText) {
+            intentText.addEventListener('mouseenter', () => {
+                cursor.style.backgroundColor = 'var(--signal)';
+                cursor.style.boxShadow = '0 0 20px var(--signal)';
+                cursor.classList.remove('mix-blend-difference');
+            });
+            intentText.addEventListener('mouseleave', () => {
+                cursor.style.backgroundColor = 'var(--accent)';
+                cursor.style.boxShadow = '0 0 15px rgba(79,107,255,0.55)';
+                cursor.classList.add('mix-blend-difference');
+            });
+        }
+      }
+
+      // Filter Logic
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const items = document.querySelectorAll('.portfolio-item');
+
+      filterBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+              // Update Active Button
+              filterBtns.forEach(b => {
+                  b.classList.remove('bg-accent', 'text-white', 'border-accent');
+                  b.classList.add('bg-transparent', 'text-muted', 'border-transparent');
+              });
+              btn.classList.remove('bg-transparent', 'text-muted', 'border-transparent');
+              btn.classList.add('bg-accent', 'text-white', 'border-accent');
+
+              const filter = btn.getAttribute('data-filter');
+              let visibleCount = 0;
+
+              items.forEach(item => {
+                  const category = item.getAttribute('data-category');
+                  if (filter === 'all' || category.includes(filter)) {
+                      item.style.display = 'block';
+                      // Reset animation
+                      item.style.animation = 'none';
+                      item.offsetHeight; /* trigger reflow */
+                      item.style.animation = `fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards ${visibleCount * 0.05}s`;
+                      item.style.opacity = '0'; // Start hidden
+                      visibleCount++;
+                  } else {
+                      item.style.display = 'none';
+                  }
+              });
+          });
+      });
+    </script>
+  
+</body></html>
