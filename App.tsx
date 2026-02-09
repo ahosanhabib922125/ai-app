@@ -131,6 +131,21 @@ const App: React.FC = () => {
     });
   }, [chatHistory, roadmap, files, sessionId, selectedTemplate]);
 
+  // Listen for navigation messages from preview iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'navigate' && event.data?.file) {
+        const targetFile = event.data.file;
+        // Check if the file exists in our generated files
+        if (files[targetFile]) {
+          setActiveFile(targetFile);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [files]);
+
   // Auto-scroll chat
   useEffect(() => {
     if (activeTab === 'chat' && chatEndRef.current) {
@@ -1174,7 +1189,19 @@ const App: React.FC = () => {
                 <div className="flex-1 min-h-0 relative">
                   <iframe
                     title="preview"
-                    srcDoc={files[activeFile].content}
+                    srcDoc={files[activeFile].content + `<script>
+document.addEventListener('click', function(e) {
+  var anchor = e.target.closest('a');
+  if (anchor && anchor.getAttribute('href')) {
+    var href = anchor.getAttribute('href');
+    if (href && !href.startsWith('http') && !href.startsWith('#') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+      e.preventDefault();
+      var fileName = href.split('/').pop().split('?')[0].split('#')[0];
+      window.parent.postMessage({ type: 'navigate', file: fileName }, '*');
+    }
+  }
+});
+</script>`}
                     className="absolute inset-0 w-full h-full border-none bg-white"
                     sandbox="allow-scripts allow-same-origin"
                   />
