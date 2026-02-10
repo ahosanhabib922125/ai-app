@@ -31,6 +31,20 @@ export interface PageAnalysisItem {
   name: string;
   description: string;
   type: 'page' | 'subpage' | 'modal' | 'component';
+  status?: 'pending' | 'active' | 'completed';
+}
+
+export interface PRDColors {
+  primary?: string;
+  secondary?: string;
+  accent?: string;
+  background?: string;
+  text?: string;
+}
+
+export interface PRDAnalysisResult {
+  pages: PageAnalysisItem[];
+  colors: PRDColors | null;
 }
 
 export interface ChatMessage {

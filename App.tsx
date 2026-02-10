@@ -7,11 +7,11 @@ import {
   ArrowRight, ChevronLeft, MessageSquare, Bot, User, BrainCircuit,
   Download, Package, Terminal, AlertTriangle,
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
-  PanelTop, Workflow, PanelTopOpen, Maximize
+  PanelTop, Workflow, PanelTopOpen, Maximize, Undo2, Redo2
 } from 'lucide-react';
 import { generateArchitectureStream, analyzePRD } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
-import { RoadmapItem, GeneratedFile, DesignTemplate, ChatMessage, ProjectSession, PageAnalysisItem } from './types';
+import { RoadmapItem, GeneratedFile, DesignTemplate, ChatMessage, ProjectSession, PageAnalysisItem, PRDColors } from './types';
 // JSZip and domToFigmaScript are lazy-loaded when needed
 
 // --- Sub-components ---
@@ -97,9 +97,16 @@ const App: React.FC = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
+  // Undo/Redo State
+  const [filesHistory, setFilesHistory] = useState<Record<string, GeneratedFile>[]>([]);
+  const [filesHistoryIndex, setFilesHistoryIndex] = useState(-1);
+  const isUndoRedoRef = useRef(false);
+
   // Derived State (memoized)
   const currentTask = useMemo(() => roadmap.find(r => r.status === 'active'), [roadmap]);
   const hasStarted = chatHistory.length > 0;
+  const canUndo = filesHistoryIndex > 0;
+  const canRedo = filesHistoryIndex < filesHistory.length - 1;
 
   // --- Persistence Logic ---
 
@@ -173,6 +180,22 @@ const App: React.FC = () => {
     }
   }, [chatHistory, activeTab]);
 
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
   // --- Actions ---
 
   const handleNewChat = () => {
@@ -187,7 +210,44 @@ const App: React.FC = () => {
     setStatusMessage('Ready to build');
     setStep('selection'); // Go back to selection for a fresh start
     setActiveTab('chat');
+    setFilesHistory([]);
+    setFilesHistoryIndex(-1);
   };
+
+  // Push a snapshot to undo/redo history
+  const pushFilesSnapshot = useCallback((snapshot: Record<string, GeneratedFile>) => {
+    if (Object.keys(snapshot).length === 0) return;
+    setFilesHistory(prev => {
+      const newHistory = prev.slice(0, filesHistoryIndex + 1);
+      newHistory.push(snapshot);
+      return newHistory;
+    });
+    setFilesHistoryIndex(prev => prev + 1);
+  }, [filesHistoryIndex]);
+
+  const handleUndo = useCallback(() => {
+    if (!canUndo) return;
+    const newIndex = filesHistoryIndex - 1;
+    isUndoRedoRef.current = true;
+    setFilesHistoryIndex(newIndex);
+    setFiles(filesHistory[newIndex]);
+    const fileKeys = Object.keys(filesHistory[newIndex]);
+    if (fileKeys.length > 0 && (!activeFile || !filesHistory[newIndex][activeFile])) {
+      setActiveFile(fileKeys[0]);
+    }
+  }, [canUndo, filesHistoryIndex, filesHistory, activeFile]);
+
+  const handleRedo = useCallback(() => {
+    if (!canRedo) return;
+    const newIndex = filesHistoryIndex + 1;
+    isUndoRedoRef.current = true;
+    setFilesHistoryIndex(newIndex);
+    setFiles(filesHistory[newIndex]);
+    const fileKeys = Object.keys(filesHistory[newIndex]);
+    if (fileKeys.length > 0 && (!activeFile || !filesHistory[newIndex][activeFile])) {
+      setActiveFile(fileKeys[0]);
+    }
+  }, [canRedo, filesHistoryIndex, filesHistory, activeFile]);
 
   const handleLoadSession = (session: ProjectSession) => {
     setSessionId(session.id);
@@ -338,10 +398,13 @@ const App: React.FC = () => {
 
     // PRD Analysis Step (only for fresh builds)
     let pageAnalysis: PageAnalysisItem[] = [];
+    let prdColors: PRDColors | null = null;
 
     if (!isModification) {
       try {
-        pageAnalysis = await analyzePRD(capturedPrompt, capturedFiles);
+        const analysisResult = await analyzePRD(capturedPrompt, capturedFiles);
+        pageAnalysis = analysisResult.pages;
+        prdColors = analysisResult.colors;
 
         if (pageAnalysis.length > 0) {
           updateAiMessage({
@@ -360,13 +423,20 @@ const App: React.FC = () => {
       }
     }
 
-    // Build enhanced prompt with page analysis context
+    // Build enhanced prompt with page analysis context and colors
     let enhancedPrompt = capturedPrompt;
     if (pageAnalysis.length > 0) {
       const pageListText = pageAnalysis
         .map(p => `- ${p.name} (${p.type}): ${p.description}`)
         .join('\n');
       enhancedPrompt = `${capturedPrompt}\n\nPRE-ANALYZED PAGE STRUCTURE (build ALL of these):\n${pageListText}`;
+    }
+    if (prdColors) {
+      const colorEntries = Object.entries(prdColors).filter(([, v]) => v);
+      if (colorEntries.length > 0) {
+        const colorText = colorEntries.map(([k, v]) => `${k}: ${v}`).join(', ');
+        enhancedPrompt += `\n\nCOLOR SCHEME (MUST use these exact colors in the design):\n${colorText}`;
+      }
     }
 
     let currentPhase = 'planning';
@@ -455,6 +525,25 @@ const App: React.FC = () => {
           if (currentFileCount > lastFileCount) {
             lastFileCount = currentFileCount;
 
+            // Collect all generated file names so far
+            const generatedFileNames = parts.slice(1).map(p => p.trim().split("\n")[0].trim()).filter(Boolean);
+
+            // Update page analysis items status based on generated files
+            if (pageAnalysis.length > 0) {
+              const updatedPageAnalysis = pageAnalysis.map((item, idx) => {
+                const itemNameLower = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const isGenerated = generatedFileNames.some(fn => {
+                  const fnLower = fn.toLowerCase().replace(/\.html$/, '').replace(/[^a-z0-9]/g, '');
+                  return fnLower.includes(itemNameLower) || itemNameLower.includes(fnLower);
+                });
+                // Mark sequentially: items up to current file count as completed, next as active
+                if (idx < currentFileCount - 1 || isGenerated) return { ...item, status: 'completed' as const };
+                if (idx === currentFileCount - 1) return { ...item, status: 'active' as const };
+                return { ...item, status: 'pending' as const };
+              });
+              updateAiMessage({ pageAnalysis: updatedPageAnalysis });
+            }
+
             // Mark completed files and set the current one as active
             setRoadmap(prevRoadmap => {
               const completedIdx = currentFileCount - 1; // files are 0-based, last completed
@@ -482,11 +571,23 @@ const App: React.FC = () => {
       const finalRoadmap = roadmap.map(item => ({ ...item, status: 'completed' as const } as RoadmapItem));
       setRoadmap(finalRoadmap);
 
+      // Push completed files to undo/redo history
+      setFiles(prev => {
+        pushFilesSnapshot({ ...prev });
+        return prev;
+      });
+
+      // Mark all page analysis items as completed
+      const finalPageAnalysis = pageAnalysis.length > 0
+        ? pageAnalysis.map(item => ({ ...item, status: 'completed' as const }))
+        : undefined;
+
       updateAiMessage({
         text: "Build complete! I've generated the files based on the roadmap.",
         isStreaming: false,
         statusPhase: 'done',
-        roadmap: finalRoadmap
+        roadmap: finalRoadmap,
+        ...(finalPageAnalysis ? { pageAnalysis: finalPageAnalysis } : {})
       });
 
     } catch (e: any) {
@@ -933,32 +1034,54 @@ navigateTo('${activeFile}');
                         const modals = msg.pageAnalysis.filter(p => p.type === 'modal');
                         const components = msg.pageAnalysis.filter(p => p.type === 'component');
 
+                        const completedCount = msg.pageAnalysis.filter(p => p.status === 'completed').length;
+                        const totalCount = msg.pageAnalysis.length;
+
                         const groups = [
-                          { label: 'Pages', items: pages, icon: <PanelTop className="w-3 h-3" />, cls: 'text-indigo-500', dotCls: 'bg-indigo-400' },
-                          { label: 'Sub-pages', items: subpages, icon: <Workflow className="w-3 h-3" />, cls: 'text-amber-500', dotCls: 'bg-amber-400' },
-                          { label: 'Modals', items: modals, icon: <PanelTopOpen className="w-3 h-3" />, cls: 'text-violet-500', dotCls: 'bg-violet-400' },
-                          { label: 'Components', items: components, icon: <Layout className="w-3 h-3" />, cls: 'text-emerald-500', dotCls: 'bg-emerald-400' },
+                          { label: 'Pages', items: pages, icon: <PanelTop className="w-3 h-3" />, cls: 'text-indigo-500' },
+                          { label: 'Sub-pages', items: subpages, icon: <Workflow className="w-3 h-3" />, cls: 'text-amber-500' },
+                          { label: 'Modals', items: modals, icon: <PanelTopOpen className="w-3 h-3" />, cls: 'text-violet-500' },
+                          { label: 'Components', items: components, icon: <Layout className="w-3 h-3" />, cls: 'text-emerald-500' },
                         ].filter(g => g.items.length > 0);
 
                         return (
                           <div className="mt-3 space-y-2">
+                            {/* Progress bar */}
+                            {completedCount > 0 && (
+                              <div className="flex items-center gap-2 px-1">
+                                <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+                                    style={{ width: `${(completedCount / totalCount) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="text-[10px] text-slate-400 font-medium shrink-0">{completedCount}/{totalCount}</span>
+                              </div>
+                            )}
                             {groups.map((group) => (
                               <div key={group.label} className="bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
                                 <div className={`flex items-center gap-1.5 mb-1.5 ${group.cls}`}>
                                   {group.icon}
                                   <span className="text-[10px] font-bold uppercase tracking-wider">{group.label}</span>
-                                  <span className="text-[9px] text-slate-300 ml-auto">{group.items.length}</span>
+                                  <span className="text-[9px] text-slate-300 ml-auto">
+                                    {group.items.filter(i => i.status === 'completed').length}/{group.items.length}
+                                  </span>
                                 </div>
                                 <div className="space-y-1">
                                   {group.items.map((item, idx) => (
-                                    <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] bg-white border border-slate-100">
-                                      <div className={`w-2 h-2 rounded-full ${group.dotCls} shrink-0`} />
-                                      <div className="flex-1 min-w-0">
-                                        <span className="font-semibold text-slate-700">{item.name}</span>
-                                        {item.description && (
-                                          <span className="text-slate-400 ml-1.5">{item.description}</span>
-                                        )}
+                                    <div key={idx} className={`flex items-center gap-2 px-2 py-1 rounded-md text-[11px] font-medium transition-all
+                                      ${item.status === 'completed' ? 'bg-emerald-50 text-emerald-700' :
+                                        item.status === 'active' ? 'bg-indigo-50 text-indigo-700 animate-pulse' :
+                                        'bg-white text-slate-500 border border-slate-100'}`}>
+                                      <div className="shrink-0">
+                                        {item.status === 'completed' ? <Check className="w-3 h-3 text-emerald-500" /> :
+                                          item.status === 'active' ? <Loader className="w-3 h-3 text-indigo-500 animate-spin" /> :
+                                          <div className="w-3 h-3 rounded-full border border-slate-200" />}
                                       </div>
+                                      <span className={item.status === 'completed' ? 'line-through opacity-60' : ''}>{item.name}</span>
+                                      {item.description && item.status !== 'completed' && (
+                                        <span className="text-slate-400 ml-auto text-[10px] truncate max-w-[120px]">{item.description}</span>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -1203,6 +1326,26 @@ navigateTo('${activeFile}');
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Undo/Redo */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl mr-2">
+              <button
+                onClick={handleUndo}
+                disabled={!canUndo}
+                className={`p-1.5 rounded-lg transition-all ${canUndo ? 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm' : 'text-slate-300 cursor-not-allowed'}`}
+                title="Undo"
+              >
+                <Undo2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleRedo}
+                disabled={!canRedo}
+                className={`p-1.5 rounded-lg transition-all ${canRedo ? 'text-slate-600 hover:bg-white hover:text-indigo-600 hover:shadow-sm' : 'text-slate-300 cursor-not-allowed'}`}
+                title="Redo"
+              >
+                <Redo2 className="w-4 h-4" />
+              </button>
+            </div>
+
             <div className="flex items-center bg-slate-100 p-1 rounded-xl mr-4">
               <button
                 onClick={() => setViewMode('desktop')}

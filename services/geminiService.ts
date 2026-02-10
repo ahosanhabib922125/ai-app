@@ -1,7 +1,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { SYSTEM_INSTRUCTION, PRD_ANALYSIS_INSTRUCTION } from "../constants";
-import { GeneratedFile, ChatMessage, PageAnalysisItem } from "../types";
+import { GeneratedFile, ChatMessage, PageAnalysisItem, PRDAnalysisResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -103,7 +103,7 @@ export const generateArchitectureStream = async function* (
 export const analyzePRD = async (
   prompt: string,
   attachmentFiles: File[]
-): Promise<PageAnalysisItem[]> => {
+): Promise<PRDAnalysisResult> => {
   let attachmentContext = "";
   for (const file of attachmentFiles) {
     if (file.type.includes("text") || file.name.endsWith(".md") || file.name.endsWith(".html") || file.name.endsWith(".txt")) {
@@ -130,19 +130,24 @@ export const analyzePRD = async (
         }
       });
 
-      const text = response.text?.trim() || "[]";
+      const text = response.text?.trim() || "{}";
       const cleaned = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-      const parsed: PageAnalysisItem[] = JSON.parse(cleaned);
+      const parsed = JSON.parse(cleaned);
 
-      return parsed
-        .filter(item => item.name && item.type)
-        .map(item => ({
+      // Handle both old format (array) and new format (object with pages/colors)
+      const pages: PageAnalysisItem[] = (Array.isArray(parsed) ? parsed : parsed.pages || [])
+        .filter((item: any) => item.name && item.type)
+        .map((item: any) => ({
           name: item.name,
           description: item.description || '',
           type: (['page', 'subpage', 'modal', 'component'].includes(item.type)
             ? item.type
             : 'page') as PageAnalysisItem['type']
         }));
+
+      const colors = (!Array.isArray(parsed) && parsed.colors) ? parsed.colors : null;
+
+      return { pages, colors };
 
     } catch (error: any) {
       const errorMessage = error.message || JSON.stringify(error);
@@ -155,12 +160,12 @@ export const analyzePRD = async (
 
       if (error instanceof SyntaxError) {
         console.warn("PRD analysis returned non-JSON response, skipping analysis step");
-        return [];
+        return { pages: [], colors: null };
       }
 
       throw error;
     }
   }
 
-  return [];
+  return { pages: [], colors: null };
 };

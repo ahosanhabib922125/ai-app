@@ -56,22 +56,44 @@ DEEP LINKS: Ensure all sub-pages and 4th-level depth pages are interlinked corre
 
 ZERO CHAT: Output only the Roadmap followed by the Files. Focus exclusively on technical execution. `;
 
-export const PRD_ANALYSIS_INSTRUCTION = `You are an expert software architect. Analyze the user's PRD/prompt and extract ALL pages, screens, sub-pages, modals, and key components that should be built.
+export const PRD_ANALYSIS_INSTRUCTION = `You are an expert software architect performing a DEEP analysis of a PRD/prompt. Your job is to extract a COMPREHENSIVE list of every page, screen, sub-page, modal, and component the system needs.
 
-OUTPUT FORMAT: Return ONLY a valid JSON array. No explanation, no markdown, no code fences. Each item must have:
-- "name": short page/screen name (e.g., "Landing Page", "Dashboard", "User Settings")
+THINK DEEPLY: A real production app has MANY pages. For example, a simple e-commerce site needs: Landing, Product Listing, Product Detail, Cart, Checkout, Order Confirmation, Login, Register, Forgot Password, User Dashboard, Order History, Order Detail, Wishlist, Profile Settings, Address Book, Payment Methods, About Us, Contact, FAQ, Privacy Policy, Terms of Service, 404 Error, Search Results, etc. That's 20+ pages minimum.
+
+OUTPUT FORMAT: Return a JSON object with two fields. No explanation, no markdown, no code fences.
+{
+  "colors": { "primary": "#hex", "secondary": "#hex", "accent": "#hex", "background": "#hex", "text": "#hex" },
+  "pages": [...]
+}
+
+COLOR RULES:
+- If the PRD/prompt mentions specific colors, brand colors, or color schemes, extract them into the "colors" field
+- If no colors are mentioned, set "colors" to null
+- Map mentioned colors to: primary (main brand), secondary (supporting), accent (highlights/CTA), background, text
+
+PAGE RULES:
+Each page item must have:
+- "name": short page/screen name
 - "description": one-line description of what it contains
 - "type": one of "page", "subpage", "modal", or "component"
 
-Example output:
-[{"name":"Landing Page","description":"Hero section with CTA, features grid, testimonials, and footer","type":"page"},{"name":"Dashboard","description":"Main user dashboard with stats cards, activity feed, and quick actions","type":"page"},{"name":"Settings","description":"User account and preference settings","type":"subpage"},{"name":"Delete Confirmation","description":"Confirmation dialog for destructive actions","type":"modal"}]
+COMPLETENESS IS CRITICAL:
+- Think through the ENTIRE user journey from first visit to power user
+- Include authentication flow pages (Login, Register, Forgot Password, Email Verification)
+- Include all CRUD pages (List, Detail, Create, Edit for each entity)
+- Include settings/profile sub-pages (General, Security, Notifications, Billing)
+- Include error/utility pages (404, 500, Maintenance, Loading)
+- Include legal pages (Privacy Policy, Terms of Service, Cookie Policy)
+- Include marketing pages (About, Contact, FAQ, Blog, Pricing)
+- For dashboards: include each dashboard section as its own sub-page
+- For e-commerce: include every step of the purchase flow
+- For SaaS: include onboarding, billing, team management pages
+- Minimum 15 pages for simple projects, 25-40+ for complex ones
+- DO NOT be lazy. List EVERY page the system needs.
 
-Rules:
-- Include ALL pages a complete system would need, even if the user didn't explicitly mention them (e.g., 404 page, login, footer)
-- Categorize correctly: top-level screens are "page", nested screens are "subpage", popups are "modal", shared UI blocks are "component"
-- Keep descriptions concise (under 15 words)
-- Return 5-20 items depending on project complexity
-- Output ONLY the JSON array, nothing else`;
+Categorize correctly: top-level screens are "page", nested screens are "subpage", popups/dialogs are "modal", reusable UI blocks are "component"
+Keep descriptions concise (under 15 words)
+Output ONLY the JSON object, nothing else`;
 
 export const PRESET_TEMPLATES = [
   {
