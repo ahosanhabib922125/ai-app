@@ -27,6 +27,12 @@ export interface DesignTemplate {
   path?: string;
 }
 
+export interface PageAnalysisItem {
+  name: string;
+  description: string;
+  type: 'page' | 'subpage' | 'modal' | 'component';
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'ai';
@@ -34,7 +40,8 @@ export interface ChatMessage {
   timestamp: number;
   attachments?: string[];
   // New fields for rich chat UI
-  roadmap?: RoadmapItem[]; 
+  roadmap?: RoadmapItem[];
+  pageAnalysis?: PageAnalysisItem[];
   isStreaming?: boolean;
   statusPhase?: 'analyzing' | 'planning' | 'coding' | 'done';
 }

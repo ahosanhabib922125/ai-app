@@ -56,6 +56,23 @@ DEEP LINKS: Ensure all sub-pages and 4th-level depth pages are interlinked corre
 
 ZERO CHAT: Output only the Roadmap followed by the Files. Focus exclusively on technical execution. `;
 
+export const PRD_ANALYSIS_INSTRUCTION = `You are an expert software architect. Analyze the user's PRD/prompt and extract ALL pages, screens, sub-pages, modals, and key components that should be built.
+
+OUTPUT FORMAT: Return ONLY a valid JSON array. No explanation, no markdown, no code fences. Each item must have:
+- "name": short page/screen name (e.g., "Landing Page", "Dashboard", "User Settings")
+- "description": one-line description of what it contains
+- "type": one of "page", "subpage", "modal", or "component"
+
+Example output:
+[{"name":"Landing Page","description":"Hero section with CTA, features grid, testimonials, and footer","type":"page"},{"name":"Dashboard","description":"Main user dashboard with stats cards, activity feed, and quick actions","type":"page"},{"name":"Settings","description":"User account and preference settings","type":"subpage"},{"name":"Delete Confirmation","description":"Confirmation dialog for destructive actions","type":"modal"}]
+
+Rules:
+- Include ALL pages a complete system would need, even if the user didn't explicitly mention them (e.g., 404 page, login, footer)
+- Categorize correctly: top-level screens are "page", nested screens are "subpage", popups are "modal", shared UI blocks are "component"
+- Keep descriptions concise (under 15 words)
+- Return 5-20 items depending on project complexity
+- Output ONLY the JSON array, nothing else`;
+
 export const PRESET_TEMPLATES = [
   {
     name: "Vantage DeFi",

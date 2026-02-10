@@ -1,7 +1,7 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { SYSTEM_INSTRUCTION } from "../constants";
-import { GeneratedFile, ChatMessage } from "../types";
+import { SYSTEM_INSTRUCTION, PRD_ANALYSIS_INSTRUCTION } from "../constants";
+import { GeneratedFile, ChatMessage, PageAnalysisItem } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -98,4 +98,69 @@ export const generateArchitectureStream = async function* (
       throw error;
     }
   }
+};
+
+export const analyzePRD = async (
+  prompt: string,
+  attachmentFiles: File[]
+): Promise<PageAnalysisItem[]> => {
+  let attachmentContext = "";
+  for (const file of attachmentFiles) {
+    if (file.type.includes("text") || file.name.endsWith(".md") || file.name.endsWith(".html") || file.name.endsWith(".txt")) {
+      const text = await file.text();
+      attachmentContext += `\n[ATTACHMENT: ${file.name}]\n${text}\n`;
+    }
+  }
+
+  const fullPrompt = `
+    USER ATTACHMENTS:\n${attachmentContext}\n
+    USER REQUEST:\n${prompt}
+  `;
+
+  const modelsToTry = ["gemini-3-flash-preview", "gemini-3-pro-preview"];
+
+  for (const model of modelsToTry) {
+    try {
+      const response = await ai.models.generateContent({
+        model: model,
+        contents: fullPrompt,
+        config: {
+          systemInstruction: PRD_ANALYSIS_INSTRUCTION,
+          temperature: 0.3,
+        }
+      });
+
+      const text = response.text?.trim() || "[]";
+      const cleaned = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+      const parsed: PageAnalysisItem[] = JSON.parse(cleaned);
+
+      return parsed
+        .filter(item => item.name && item.type)
+        .map(item => ({
+          name: item.name,
+          description: item.description || '',
+          type: (['page', 'subpage', 'modal', 'component'].includes(item.type)
+            ? item.type
+            : 'page') as PageAnalysisItem['type']
+        }));
+
+    } catch (error: any) {
+      const errorMessage = error.message || JSON.stringify(error);
+      const isQuotaError = errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED");
+
+      if (isQuotaError && model !== modelsToTry[modelsToTry.length - 1]) {
+        console.warn(`Model ${model} hit quota limit for analysis. Falling back...`);
+        continue;
+      }
+
+      if (error instanceof SyntaxError) {
+        console.warn("PRD analysis returned non-JSON response, skipping analysis step");
+        return [];
+      }
+
+      throw error;
+    }
+  }
+
+  return [];
 };

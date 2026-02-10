@@ -9,9 +9,9 @@ import {
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
   PanelTop, Workflow, PanelTopOpen, Maximize
 } from 'lucide-react';
-import { generateArchitectureStream } from './services/geminiService';
+import { generateArchitectureStream, analyzePRD } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
-import { RoadmapItem, GeneratedFile, DesignTemplate, ChatMessage, ProjectSession } from './types';
+import { RoadmapItem, GeneratedFile, DesignTemplate, ChatMessage, ProjectSession, PageAnalysisItem } from './types';
 // JSZip and domToFigmaScript are lazy-loaded when needed
 
 // --- Sub-components ---
@@ -311,6 +311,10 @@ const App: React.FC = () => {
     // SWITCH TO CHAT TAB IMMEDIATELY
     setActiveTab('chat');
 
+    // Capture prompt and files BEFORE clearing state
+    const capturedPrompt = prompt;
+    const capturedFiles = [...attachedFiles];
+
     // Reset Input
     setStatus('planning');
     setProgress(5);
@@ -332,6 +336,39 @@ const App: React.FC = () => {
       ));
     };
 
+    // PRD Analysis Step (only for fresh builds)
+    let pageAnalysis: PageAnalysisItem[] = [];
+
+    if (!isModification) {
+      try {
+        pageAnalysis = await analyzePRD(capturedPrompt, capturedFiles);
+
+        if (pageAnalysis.length > 0) {
+          updateAiMessage({
+            text: `I've analyzed your requirements and identified ${pageAnalysis.length} pages/components to build:`,
+            pageAnalysis: pageAnalysis,
+            statusPhase: 'planning',
+          });
+
+          setProgress(10);
+          setStatusMessage('Page analysis complete. Starting generation...');
+
+          await new Promise(resolve => setTimeout(resolve, 1500));
+        }
+      } catch (analysisError) {
+        console.warn("PRD analysis step failed, proceeding with generation:", analysisError);
+      }
+    }
+
+    // Build enhanced prompt with page analysis context
+    let enhancedPrompt = capturedPrompt;
+    if (pageAnalysis.length > 0) {
+      const pageListText = pageAnalysis
+        .map(p => `- ${p.name} (${p.type}): ${p.description}`)
+        .join('\n');
+      enhancedPrompt = `${capturedPrompt}\n\nPRE-ANALYZED PAGE STRUCTURE (build ALL of these):\n${pageListText}`;
+    }
+
     let currentPhase = 'planning';
     let fullBuffer = "";
     let lastFileCount = 0;
@@ -342,9 +379,9 @@ const App: React.FC = () => {
 
     try {
       const stream = generateArchitectureStream(
-        newUserMsg.text,
+        enhancedPrompt,
         dnaContent,
-        attachedFiles,
+        capturedFiles,
         currentFilesSnapshot,
         chatHistory
       );
@@ -888,6 +925,48 @@ navigateTo('${activeFile}');
 
                       {/* Message Text */}
                       <div className="mb-2 font-medium whitespace-pre-wrap break-words">{msg.text}</div>
+
+                      {/* Render Page Analysis list if present */}
+                      {msg.role === 'ai' && msg.pageAnalysis && msg.pageAnalysis.length > 0 && (() => {
+                        const pages = msg.pageAnalysis.filter(p => p.type === 'page');
+                        const subpages = msg.pageAnalysis.filter(p => p.type === 'subpage');
+                        const modals = msg.pageAnalysis.filter(p => p.type === 'modal');
+                        const components = msg.pageAnalysis.filter(p => p.type === 'component');
+
+                        const groups = [
+                          { label: 'Pages', items: pages, icon: <PanelTop className="w-3 h-3" />, cls: 'text-indigo-500', dotCls: 'bg-indigo-400' },
+                          { label: 'Sub-pages', items: subpages, icon: <Workflow className="w-3 h-3" />, cls: 'text-amber-500', dotCls: 'bg-amber-400' },
+                          { label: 'Modals', items: modals, icon: <PanelTopOpen className="w-3 h-3" />, cls: 'text-violet-500', dotCls: 'bg-violet-400' },
+                          { label: 'Components', items: components, icon: <Layout className="w-3 h-3" />, cls: 'text-emerald-500', dotCls: 'bg-emerald-400' },
+                        ].filter(g => g.items.length > 0);
+
+                        return (
+                          <div className="mt-3 space-y-2">
+                            {groups.map((group) => (
+                              <div key={group.label} className="bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+                                <div className={`flex items-center gap-1.5 mb-1.5 ${group.cls}`}>
+                                  {group.icon}
+                                  <span className="text-[10px] font-bold uppercase tracking-wider">{group.label}</span>
+                                  <span className="text-[9px] text-slate-300 ml-auto">{group.items.length}</span>
+                                </div>
+                                <div className="space-y-1">
+                                  {group.items.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] bg-white border border-slate-100">
+                                      <div className={`w-2 h-2 rounded-full ${group.dotCls} shrink-0`} />
+                                      <div className="flex-1 min-w-0">
+                                        <span className="font-semibold text-slate-700">{item.name}</span>
+                                        {item.description && (
+                                          <span className="text-slate-400 ml-1.5">{item.description}</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
 
                       {/* Render Roadmap INSIDE Chat if present */}
                       {msg.role === 'ai' && msg.roadmap && msg.roadmap.length > 0 && (() => {
