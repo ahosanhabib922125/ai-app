@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   Sparkles, Layout, Activity, Loader,
   Monitor, Smartphone, Wand2, Image as ImageIcon, FileText,
@@ -12,13 +12,30 @@ import {
 import { generateArchitectureStream } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
 import { RoadmapItem, GeneratedFile, DesignTemplate, ChatMessage, ProjectSession } from './types';
-import JSZip from 'jszip';
-import { domToFigmaScript } from './utils/domToFigmaSvg';
+// JSZip and domToFigmaScript are lazy-loaded when needed
 
 // --- Sub-components ---
 
-const TemplateThumbnail: React.FC<{ template: DesignTemplate }> = ({ template }) => {
+const TemplateThumbnail: React.FC<{ template: DesignTemplate }> = React.memo(({ template }) => {
   const [loaded, setLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   if (!template.path) {
     return (
@@ -29,31 +46,25 @@ const TemplateThumbnail: React.FC<{ template: DesignTemplate }> = ({ template })
   }
 
   return (
-    <div className="w-full h-full relative bg-white group-hover:shadow-sm transition-all overflow-hidden">
+    <div ref={containerRef} className="w-full h-full relative bg-white group-hover:shadow-sm transition-all overflow-hidden">
       {!loaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-50 z-10">
           <Loader className="w-4 h-4 text-slate-300 animate-spin" />
         </div>
       )}
-      {/* 
-         Scale Strategy: 
-         - Render iframe at 1280px width (standard desktop).
-         - Scale down to 25% (0.25).
-         - This effectively fits a 1280px wide view into a ~320px wide container.
-         - 400% width = 100% / 0.25
-       */}
-      <iframe
-        src={template.path}
-        className={`w-[400%] h-[400%] origin-top-left scale-[0.25] pointer-events-none border-none transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        onLoad={() => setLoaded(true)}
-        title={template.name}
-        loading="lazy"
-      />
-      {/* Transparent overlay to prevent iframe interaction but allow clicks on parent */}
+      {isVisible && (
+        <iframe
+          src={template.path}
+          className={`w-[400%] h-[400%] origin-top-left scale-[0.25] pointer-events-none border-none transition-opacity duration-700 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setLoaded(true)}
+          title={template.name}
+          loading="lazy"
+        />
+      )}
       <div className="absolute inset-0 z-20 bg-transparent" />
     </div>
   );
-};
+});
 
 const App: React.FC = () => {
   // Flow State
@@ -84,9 +95,10 @@ const App: React.FC = () => {
   // Chat History
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Derived State
-  const currentTask = roadmap.find(r => r.status === 'active');
+  // Derived State (memoized)
+  const currentTask = useMemo(() => roadmap.find(r => r.status === 'active'), [roadmap]);
   const hasStarted = chatHistory.length > 0;
 
   // --- Persistence Logic ---
@@ -103,32 +115,40 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Save current session state whenever it changes
+  // Save current session state whenever it changes (debounced to avoid lag during streaming)
   useEffect(() => {
     if (chatHistory.length === 0) return;
 
-    const currentSession: ProjectSession = {
-      id: sessionId,
-      title: chatHistory[0]?.text.slice(0, 50) + (chatHistory[0]?.text.length > 50 ? '...' : '') || 'Untitled Project',
-      lastModified: Date.now(),
-      template: selectedTemplate,
-      chatHistory,
-      roadmap,
-      files
-    };
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
 
-    setSessions(prev => {
-      const existingIdx = prev.findIndex(s => s.id === sessionId);
-      let newSessions;
-      if (existingIdx >= 0) {
-        newSessions = [...prev];
-        newSessions[existingIdx] = currentSession;
-      } else {
-        newSessions = [currentSession, ...prev];
-      }
-      localStorage.setItem('ai_architect_sessions', JSON.stringify(newSessions));
-      return newSessions;
-    });
+    saveTimeoutRef.current = setTimeout(() => {
+      const currentSession: ProjectSession = {
+        id: sessionId,
+        title: chatHistory[0]?.text.slice(0, 50) + (chatHistory[0]?.text.length > 50 ? '...' : '') || 'Untitled Project',
+        lastModified: Date.now(),
+        template: selectedTemplate,
+        chatHistory,
+        roadmap,
+        files
+      };
+
+      setSessions(prev => {
+        const existingIdx = prev.findIndex(s => s.id === sessionId);
+        let newSessions;
+        if (existingIdx >= 0) {
+          newSessions = [...prev];
+          newSessions[existingIdx] = currentSession;
+        } else {
+          newSessions = [currentSession, ...prev];
+        }
+        localStorage.setItem('ai_architect_sessions', JSON.stringify(newSessions));
+        return newSessions;
+      });
+    }, 1000);
+
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
   }, [chatHistory, roadmap, files, sessionId, selectedTemplate]);
 
   // Listen for navigation messages from preview iframe
@@ -470,6 +490,7 @@ const App: React.FC = () => {
   };
 
   const handleDownloadProject = async () => {
+    const JSZip = (await import('jszip')).default;
     const zip = new JSZip();
 
     Object.values(files).forEach(file => {
@@ -531,7 +552,8 @@ const App: React.FC = () => {
       const pageHeight = doc.body.scrollHeight || 900;
       iframe.style.height = `${pageHeight}px`;
 
-      // Convert rendered DOM → Figma Plugin API script with auto-layout
+      // Convert rendered DOM → Figma Plugin API script with auto-layout (lazy loaded)
+      const { domToFigmaScript } = await import('./utils/domToFigmaSvg');
       const script = domToFigmaScript(doc, pageWidth, pageHeight);
 
       await navigator.clipboard.writeText(script);
