@@ -51,10 +51,17 @@ export const generateArchitectureStream = async function* (
     }
   }
 
+  const dnaSection = dna ? `
+STYLE DNA REFERENCE TEMPLATE (MANDATORY — match this visual style exactly):
+Analyze this HTML template below. Extract its colors, fonts, spacing, shadows, border-radius, component patterns, dark/light mode, and CSS approach. ALL files you generate MUST follow this same visual language.
+---START DNA---
+${dna}
+---END DNA---
+` : '';
+
   const fullPrompt = `
     ${historyContext}
-    
-    STYLE DNA:\n${dna}\n
+    ${dnaSection}
     ${projectContext}
     USER ATTACHMENTS:\n${attachmentContext}\n
     USER REQUEST:\n${prompt}

@@ -1,0 +1,227 @@
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Estate App UI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+.no-scrollbar::-webkit-scrollbar {
+display: none;
+}
+.no-scrollbar {
+-ms-overflow-style: none;
+scrollbar-width: none;
+}
+body {
+font-feature-settings: "cv11", "ss01";
+}
+</style>
+<link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">.font-geist { font-family: 'Geist', sans-serif !important; }</style><link id="all-fonts-link-font-roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-roboto">.font-roboto { font-family: 'Roboto', sans-serif !important; }</style><link id="all-fonts-link-font-montserrat" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-montserrat">.font-montserrat { font-family: 'Montserrat', sans-serif !important; }</style><link id="all-fonts-link-font-poppins" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-poppins">.font-poppins { font-family: 'Poppins', sans-serif !important; }</style><link id="all-fonts-link-font-playfair" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap"><style id="all-fonts-style-font-playfair">.font-playfair { font-family: 'Playfair Display', serif !important; }</style><link id="all-fonts-link-font-instrument-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-instrument-serif">.font-instrument-serif { font-family: 'Instrument Serif', serif !important; }</style><link id="all-fonts-link-font-merriweather" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap"><style id="all-fonts-style-font-merriweather">.font-merriweather { font-family: 'Merriweather', serif !important; }</style><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }</style><link id="all-fonts-link-font-jakarta" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-jakarta">.font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }</style><link id="all-fonts-link-font-manrope" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-manrope">.font-manrope { font-family: 'Manrope', sans-serif !important; }</style><link id="all-fonts-link-font-space-grotesk" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-space-grotesk">.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }</style><link id="all-fonts-link-font-work-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-work-sans">.font-work-sans { font-family: 'Work Sans', sans-serif !important; }</style><link id="all-fonts-link-font-pt-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-pt-serif">.font-pt-serif { font-family: 'PT Serif', serif !important; }</style><link id="all-fonts-link-font-geist-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist-mono">.font-geist-mono { font-family: 'Geist Mono', monospace !important; }</style><link id="all-fonts-link-font-space-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-space-mono">.font-space-mono { font-family: 'Space Mono', monospace !important; }</style><link id="all-fonts-link-font-quicksand" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-quicksand">.font-quicksand { font-family: 'Quicksand', sans-serif !important; }</style><link id="all-fonts-link-font-nunito" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-nunito">.font-nunito { font-family: 'Nunito', sans-serif !important; }</style><link id="all-fonts-link-font-newsreader" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&amp;display=swap"><style id="all-fonts-style-font-newsreader">.font-newsreader { font-family: 'Newsreader', serif !important; }</style><link id="all-fonts-link-font-google-sans-flex" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-google-sans-flex">.font-google-sans-flex { font-family: 'Google Sans Flex', sans-serif !important; }</style><link id="all-fonts-link-font-oswald" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-oswald">.font-oswald { font-family: 'Oswald', sans-serif !important; }</style><link id="all-fonts-link-font-dm-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-dm-sans">.font-dm-sans { font-family: 'DM Sans', sans-serif !important; }</style></head>
+<body class="flex items-center justify-center min-h-screen antialiased sm:p-8 text-gray-900 bg-gray-50 pt-4 pr-4 pb-4 pl-4">
+
+    <!-- Mobile Container -->
+    <div class="w-full max-w-[400px] h-[852px] sm:rounded-[3rem] shadow-2xl overflow-hidden relative border-[8px] ring-1 bg-white border-gray-900 ring-gray-900/5" bis_size="{&quot;x&quot;:176,&quot;y&quot;:86,&quot;w&quot;:400,&quot;h&quot;:852,&quot;abs_x&quot;:422,&quot;abs_y&quot;:39}">
+        
+        <!-- Status Bar -->
+        <div class="h-14 w-full flex items-end justify-between px-8 pb-2 z-20 relative bg-white" bis_size="{&quot;x&quot;:184,&quot;y&quot;:94,&quot;w&quot;:384,&quot;h&quot;:56,&quot;abs_x&quot;:430,&quot;abs_y&quot;:47}">
+            <span class="text-sm font-semibold tracking-wide" bis_size="{&quot;x&quot;:216,&quot;y&quot;:122,&quot;w&quot;:28,&quot;h&quot;:20,&quot;abs_x&quot;:462,&quot;abs_y&quot;:75}">9:41</span>
+            <div class="flex gap-1.5 items-center" bis_size="{&quot;x&quot;:472,&quot;y&quot;:126,&quot;w&quot;:64,&quot;h&quot;:16,&quot;abs_x&quot;:718,&quot;abs_y&quot;:79}">
+                <div class="w-4 h-4" bis_size="{&quot;x&quot;:472,&quot;y&quot;:126,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:718,&quot;abs_y&quot;:79}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="signal" class="lucide lucide-signal w-4 h-4" bis_size="{&quot;x&quot;:472,&quot;y&quot;:126,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:718,&quot;abs_y&quot;:79}"><path d="M2 20h.01"></path><path d="M7 20v-4"></path><path d="M12 20v-8"></path><path d="M17 20V8"></path><path d="M22 4v16"></path></svg></div>
+                <div class="w-4 h-4" bis_size="{&quot;x&quot;:494,&quot;y&quot;:126,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:740,&quot;abs_y&quot;:79}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="wifi" class="lucide lucide-wifi w-4 h-4" bis_size="{&quot;x&quot;:494,&quot;y&quot;:126,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:740,&quot;abs_y&quot;:79}"><path d="M12 20h.01"></path><path d="M2 8.82a15 15 0 0 1 20 0"></path><path d="M5 12.859a10 10 0 0 1 14 0"></path><path d="M8.5 16.429a5 5 0 0 1 7 0"></path></svg></div>
+                <div class="w-5 h-3 border rounded-sm relative border-gray-800" bis_size="{&quot;x&quot;:516,&quot;y&quot;:128,&quot;w&quot;:20,&quot;h&quot;:12,&quot;abs_x&quot;:762,&quot;abs_y&quot;:81}"><div class="absolute inset-y-0 right-0 w-3 bg-gray-800" bis_size="{&quot;x&quot;:523,&quot;y&quot;:128,&quot;w&quot;:12,&quot;h&quot;:10,&quot;abs_x&quot;:769,&quot;abs_y&quot;:81}"></div></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="h-full overflow-y-auto no-scrollbar pb-32 bg-white" bis_size="{&quot;x&quot;:184,&quot;y&quot;:150,&quot;w&quot;:384,&quot;h&quot;:836,&quot;abs_x&quot;:430,&quot;abs_y&quot;:103}">
+            
+            <!-- Header -->
+            <header class="flex justify-between items-center px-6 pt-2 pb-6" bis_size="{&quot;x&quot;:184,&quot;y&quot;:150,&quot;w&quot;:384,&quot;h&quot;:82,&quot;abs_x&quot;:430,&quot;abs_y&quot;:103}">
+                <div class="flex flex-col" bis_size="{&quot;x&quot;:208,&quot;y&quot;:158,&quot;w&quot;:153,&quot;h&quot;:50,&quot;abs_x&quot;:454,&quot;abs_y&quot;:111}">
+                    <span class="text-sm mb-0.5 text-gray-400" bis_size="{&quot;x&quot;:208,&quot;y&quot;:158,&quot;w&quot;:153,&quot;h&quot;:20,&quot;abs_x&quot;:454,&quot;abs_y&quot;:111}">Location</span>
+                    <div class="flex items-center gap-1 cursor-pointer text-gray-900" bis_size="{&quot;x&quot;:208,&quot;y&quot;:180,&quot;w&quot;:153,&quot;h&quot;:28,&quot;abs_x&quot;:454,&quot;abs_y&quot;:133}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="map-pin" class="lucide lucide-map-pin w-4 h-4 fill-gray-900 text-gray-900" bis_size="{&quot;x&quot;:208,&quot;y&quot;:186,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:454,&quot;abs_y&quot;:139}"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <span class="text-lg font-semibold tracking-tight" bis_size="{&quot;x&quot;:228,&quot;y&quot;:180,&quot;w&quot;:113,&quot;h&quot;:28,&quot;abs_x&quot;:474,&quot;abs_y&quot;:133}">Dublin, Ireland</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-down" class="lucide lucide-chevron-down w-4 h-4 text-gray-400" bis_size="{&quot;x&quot;:345,&quot;y&quot;:186,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:591,&quot;abs_y&quot;:139}"><path d="m6 9 6 6 6-6"></path></svg>
+                    </div>
+                </div>
+                <div class="relative" bis_size="{&quot;x&quot;:504,&quot;y&quot;:163,&quot;w&quot;:40,&quot;h&quot;:40,&quot;abs_x&quot;:750,&quot;abs_y&quot;:116}">
+                    <div class="w-2.5 h-2.5 bg-orange-500 rounded-full border-2 absolute top-0 right-0 border-white" bis_size="{&quot;x&quot;:534,&quot;y&quot;:163,&quot;w&quot;:10,&quot;h&quot;:10,&quot;abs_x&quot;:780,&quot;abs_y&quot;:116}"></div>
+                    <button class="w-10 h-10 border rounded-full flex items-center justify-center transition-colors border-gray-100 hover:bg-gray-50" bis_size="{&quot;x&quot;:504,&quot;y&quot;:163,&quot;w&quot;:40,&quot;h&quot;:40,&quot;abs_x&quot;:750,&quot;abs_y&quot;:116}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="bell" class="lucide lucide-bell w-5 h-5 text-gray-900" bis_size="{&quot;x&quot;:514,&quot;y&quot;:173,&quot;w&quot;:20,&quot;h&quot;:20,&quot;abs_x&quot;:760,&quot;abs_y&quot;:126}"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Search & Filter -->
+            <div class="px-6 flex gap-3 mb-6" bis_size="{&quot;x&quot;:184,&quot;y&quot;:232,&quot;w&quot;:384,&quot;h&quot;:48,&quot;abs_x&quot;:430,&quot;abs_y&quot;:185}">
+                <div class="flex-1 relative group" bis_size="{&quot;x&quot;:208,&quot;y&quot;:232,&quot;w&quot;:276,&quot;h&quot;:48,&quot;abs_x&quot;:454,&quot;abs_y&quot;:185}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="search" class="lucide lucide-search absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 group-focus-within:text-gray-600 transition-colors text-gray-400" bis_size="{&quot;x&quot;:224,&quot;y&quot;:246,&quot;w&quot;:20,&quot;h&quot;:20,&quot;abs_x&quot;:470,&quot;abs_y&quot;:199}"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+                    <input type="text" placeholder="Search..." class="w-full h-12 rounded-xl pl-12 pr-4 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/5 transition-all bg-gray-50" bis_size="{&quot;x&quot;:208,&quot;y&quot;:232,&quot;w&quot;:276,&quot;h&quot;:48,&quot;abs_x&quot;:454,&quot;abs_y&quot;:185}">
+                </div>
+                <button class="w-12 h-12 rounded-xl flex items-center justify-center transition-colors shadow-lg bg-gray-900 text-white hover:bg-gray-800 shadow-gray-900/20" bis_size="{&quot;x&quot;:496,&quot;y&quot;:232,&quot;w&quot;:48,&quot;h&quot;:48,&quot;abs_x&quot;:742,&quot;abs_y&quot;:185}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="sliders-horizontal" class="lucide lucide-sliders-horizontal w-5 h-5" bis_size="{&quot;x&quot;:510,&quot;y&quot;:246,&quot;w&quot;:20,&quot;h&quot;:20,&quot;abs_x&quot;:756,&quot;abs_y&quot;:199}"><path d="M10 5H3"></path><path d="M12 19H3"></path><path d="M14 3v4"></path><path d="M16 17v4"></path><path d="M21 12h-9"></path><path d="M21 19h-5"></path><path d="M21 5h-7"></path><path d="M8 10v4"></path><path d="M8 12H3"></path></svg>
+                </button>
+            </div>
+
+            <!-- Categories (Added for Combination) -->
+            <div class="pl-6 mb-8 overflow-x-auto no-scrollbar flex gap-3 pr-6" bis_size="{&quot;x&quot;:184,&quot;y&quot;:304,&quot;w&quot;:384,&quot;h&quot;:41,&quot;abs_x&quot;:430,&quot;abs_y&quot;:257}">
+                <button class="flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap shadow-md transition-transform active:scale-95 bg-gray-900 text-white shadow-gray-900/10" bis_size="{&quot;x&quot;:208,&quot;y&quot;:304,&quot;w&quot;:80,&quot;h&quot;:41,&quot;abs_x&quot;:454,&quot;abs_y&quot;:257}">
+                    <span class="text-sm font-medium" bis_size="{&quot;x&quot;:228,&quot;y&quot;:314,&quot;w&quot;:40,&quot;h&quot;:20,&quot;abs_x&quot;:474,&quot;abs_y&quot;:267}">House</span>
+                </button>
+                <button class="flex items-center gap-2 px-5 py-2.5 border text-gray-500 rounded-full whitespace-nowrap transition-colors bg-white border-gray-100 hover:bg-gray-50" bis_size="{&quot;x&quot;:300,&quot;y&quot;:304,&quot;w&quot;:110,&quot;h&quot;:41,&quot;abs_x&quot;:546,&quot;abs_y&quot;:257}">
+                    <span class="text-sm font-medium" bis_size="{&quot;x&quot;:321,&quot;y&quot;:314,&quot;w&quot;:68,&quot;h&quot;:20,&quot;abs_x&quot;:567,&quot;abs_y&quot;:267}">Apartment</span>
+                </button>
+                <button class="flex items-center gap-2 px-5 py-2.5 border text-gray-500 rounded-full whitespace-nowrap transition-colors bg-white border-gray-100 hover:bg-gray-50" bis_size="{&quot;x&quot;:422,&quot;y&quot;:304,&quot;w&quot;:68,&quot;h&quot;:41,&quot;abs_x&quot;:668,&quot;abs_y&quot;:257}">
+                    <span class="text-sm font-medium" bis_size="{&quot;x&quot;:443,&quot;y&quot;:314,&quot;w&quot;:27,&quot;h&quot;:20,&quot;abs_x&quot;:689,&quot;abs_y&quot;:267}">Villa</span>
+                </button>
+                <button class="flex items-center gap-2 px-5 py-2.5 border text-gray-500 rounded-full whitespace-nowrap transition-colors bg-white border-gray-100 hover:bg-gray-50" bis_size="{&quot;x&quot;:503,&quot;y&quot;:304,&quot;w&quot;:76,&quot;h&quot;:41,&quot;abs_x&quot;:749,&quot;abs_y&quot;:257}">
+                    <span class="text-sm font-medium" bis_size="{&quot;x&quot;:524,&quot;y&quot;:314,&quot;w&quot;:34,&quot;h&quot;:20,&quot;abs_x&quot;:770,&quot;abs_y&quot;:267}">Hotel</span>
+                </button>
+            </div>
+
+            <!-- Featured Property -->
+            <div class="px-6 mb-8" bis_size="{&quot;x&quot;:184,&quot;y&quot;:377,&quot;w&quot;:384,&quot;h&quot;:424,&quot;abs_x&quot;:430,&quot;abs_y&quot;:330}">
+                <div class="flex justify-between items-end mb-4" bis_size="{&quot;x&quot;:208,&quot;y&quot;:377,&quot;w&quot;:336,&quot;h&quot;:28,&quot;abs_x&quot;:454,&quot;abs_y&quot;:330}">
+                    <h2 class="text-xl font-semibold tracking-tight text-gray-900" bis_size="{&quot;x&quot;:208,&quot;y&quot;:377,&quot;w&quot;:78,&quot;h&quot;:28,&quot;abs_x&quot;:454,&quot;abs_y&quot;:330}">Near You</h2>
+                    <a href="#" class="text-sm transition-colors text-gray-400 hover:text-gray-900" bis_size="{&quot;x&quot;:504,&quot;y&quot;:385,&quot;w&quot;:39,&quot;h&quot;:20,&quot;abs_x&quot;:750,&quot;abs_y&quot;:338}">See all</a>
+                </div>
+
+                <div class="relative w-full h-[380px] rounded-[2rem] overflow-hidden shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] group" bis_size="{&quot;x&quot;:208,&quot;y&quot;:421,&quot;w&quot;:336,&quot;h&quot;:380,&quot;abs_x&quot;:454,&quot;abs_y&quot;:374}">
+                    <!-- Image -->
+                    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/16171892-70c8-494d-ad98-93dd858aff0f_800w.webp" class="transition-transform duration-700 group-hover:scale-105 w-full h-full object-cover" alt="Modern House" bis_size="{&quot;x&quot;:208,&quot;y&quot;:421,&quot;w&quot;:336,&quot;h&quot;:380,&quot;abs_x&quot;:454,&quot;abs_y&quot;:374}">
+                    
+                    <!-- Top Price Tag -->
+                    <div class="absolute top-4 left-4 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm z-10 bg-white/95" bis_size="{&quot;x&quot;:224,&quot;y&quot;:437,&quot;w&quot;:98,&quot;h&quot;:40,&quot;abs_x&quot;:470,&quot;abs_y&quot;:390}">
+                        <span class="text-sm font-bold text-gray-900" bis_size="{&quot;x&quot;:240,&quot;y&quot;:448,&quot;w&quot;:66,&quot;h&quot;:18,&quot;abs_x&quot;:486,&quot;abs_y&quot;:401}">$2,400<span class="text-gray-500 font-normal text-xs" bis_size="{&quot;x&quot;:284,&quot;y&quot;:451,&quot;w&quot;:22,&quot;h&quot;:16,&quot;abs_x&quot;:530,&quot;abs_y&quot;:404}">/mo</span></span>
+                    </div>
+
+                    <!-- Favorite Button -->
+                    <button class="absolute top-4 right-4 w-10 h-10 backdrop-blur-md rounded-full flex items-center justify-center transition-all group/btn z-10 border bg-black/20 hover:bg-white border-white/10" bis_size="{&quot;x&quot;:488,&quot;y&quot;:437,&quot;w&quot;:40,&quot;h&quot;:40,&quot;abs_x&quot;:734,&quot;abs_y&quot;:390}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="heart" class="lucide lucide-heart w-5 h-5 group-hover/btn:text-red-500 group-hover/btn:fill-red-500 transition-colors text-white" bis_size="{&quot;x&quot;:498,&quot;y&quot;:447,&quot;w&quot;:20,&quot;h&quot;:20,&quot;abs_x&quot;:744,&quot;abs_y&quot;:400}"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"></path></svg>
+                    </button>
+
+                    <!-- Info Overlay -->
+                    <div class="bg-slate-100/90 border rounded-[1.5rem] pt-4 pr-4 pb-4 pl-4 absolute right-4 bottom-4 left-4 shadow-lg backdrop-blur-sm brightness-105" bis_size="{&quot;x&quot;:224,&quot;y&quot;:665,&quot;w&quot;:304,&quot;h&quot;:120,&quot;abs_x&quot;:470,&quot;abs_y&quot;:618}">
+                        <div class="flex justify-between items-start mb-3" bis_size="{&quot;x&quot;:241,&quot;y&quot;:682,&quot;w&quot;:270,&quot;h&quot;:46,&quot;abs_x&quot;:487,&quot;abs_y&quot;:635}">
+                            <div bis_size="{&quot;x&quot;:241,&quot;y&quot;:682,&quot;w&quot;:187,&quot;h&quot;:46,&quot;abs_x&quot;:487,&quot;abs_y&quot;:635}" class="">
+                                <h3 class="text-lg font-semibold tracking-tight text-gray-900" bis_size="{&quot;x&quot;:241,&quot;y&quot;:682,&quot;w&quot;:187,&quot;h&quot;:28,&quot;abs_x&quot;:487,&quot;abs_y&quot;:635}">Equestrian Family Home</h3>
+                                <p class="text-gray-500 text-xs mt-0.5" bis_size="{&quot;x&quot;:241,&quot;y&quot;:712,&quot;w&quot;:187,&quot;h&quot;:16,&quot;abs_x&quot;:487,&quot;abs_y&quot;:665}">2821 Lake Sevilla, Palm Harbor, TX</p>
+                            </div>
+                            <div class="flex items-center gap-1 px-2 py-1 rounded-md bg-orange-100" bis_size="{&quot;x&quot;:462,&quot;y&quot;:682,&quot;w&quot;:49,&quot;h&quot;:24,&quot;abs_x&quot;:708,&quot;abs_y&quot;:635}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="star" class="lucide lucide-star w-3 h-3 text-orange-500 fill-orange-500" bis_size="{&quot;x&quot;:470,&quot;y&quot;:688,&quot;w&quot;:12,&quot;h&quot;:12,&quot;abs_x&quot;:716,&quot;abs_y&quot;:641}"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
+                                <span class="text-xs font-bold text-orange-700" bis_size="{&quot;x&quot;:486,&quot;y&quot;:686,&quot;w&quot;:17,&quot;h&quot;:16,&quot;abs_x&quot;:732,&quot;abs_y&quot;:639}">4.8</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Specs -->
+                        <div class="flex items-center gap-4 border-t pt-3 border-gray-100" bis_size="{&quot;x&quot;:241,&quot;y&quot;:740,&quot;w&quot;:270,&quot;h&quot;:28,&quot;abs_x&quot;:487,&quot;abs_y&quot;:693}">
+                            <div class="flex items-center gap-1.5" bis_size="{&quot;x&quot;:241,&quot;y&quot;:752,&quot;w&quot;:58,&quot;h&quot;:16,&quot;abs_x&quot;:487,&quot;abs_y&quot;:705}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="bed" class="lucide lucide-bed w-4 h-4 text-gray-400" bis_size="{&quot;x&quot;:241,&quot;y&quot;:752,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:487,&quot;abs_y&quot;:705}"><path d="M2 4v16"></path><path d="M2 8h18a2 2 0 0 1 2 2v10"></path><path d="M2 17h20"></path><path d="M6 8v9"></path></svg>
+                                <span class="text-xs font-medium text-gray-600" bis_size="{&quot;x&quot;:263,&quot;y&quot;:752,&quot;w&quot;:36,&quot;h&quot;:16,&quot;abs_x&quot;:509,&quot;abs_y&quot;:705}">4 Beds</span>
+                            </div>
+                            <div class="flex items-center gap-1.5" bis_size="{&quot;x&quot;:315,&quot;y&quot;:752,&quot;w&quot;:56,&quot;h&quot;:16,&quot;abs_x&quot;:561,&quot;abs_y&quot;:705}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="bath" class="lucide lucide-bath w-4 h-4 text-gray-400" bis_size="{&quot;x&quot;:315,&quot;y&quot;:752,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:561,&quot;abs_y&quot;:705}"><path d="M10 4 8 6"></path><path d="M17 19v2"></path><path d="M2 12h20"></path><path d="M7 19v2"></path><path d="M9 5 7.621 3.621A2.121 2.121 0 0 0 4 5v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path></svg>
+                                <span class="text-xs font-medium text-gray-600" bis_size="{&quot;x&quot;:337,&quot;y&quot;:752,&quot;w&quot;:34,&quot;h&quot;:16,&quot;abs_x&quot;:583,&quot;abs_y&quot;:705}">3 Bath</span>
+                            </div>
+                            <div class="flex items-center gap-1.5" bis_size="{&quot;x&quot;:388,&quot;y&quot;:752,&quot;w&quot;:57,&quot;h&quot;:16,&quot;abs_x&quot;:634,&quot;abs_y&quot;:705}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="maximize" class="lucide lucide-maximize w-4 h-4 text-gray-400" bis_size="{&quot;x&quot;:388,&quot;y&quot;:752,&quot;w&quot;:16,&quot;h&quot;:16,&quot;abs_x&quot;:634,&quot;abs_y&quot;:705}"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
+                                <span class="text-xs font-medium text-gray-600" bis_size="{&quot;x&quot;:410,&quot;y&quot;:752,&quot;w&quot;:35,&quot;h&quot;:16,&quot;abs_x&quot;:656,&quot;abs_y&quot;:705}">240m²</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best for you (List View) -->
+            <div class="px-6 pb-6" bis_size="{&quot;x&quot;:184,&quot;y&quot;:833,&quot;w&quot;:384,&quot;h&quot;:327,&quot;abs_x&quot;:430,&quot;abs_y&quot;:786}">
+                <h2 class="text-xl font-semibold tracking-tight mb-4 text-gray-900" bis_size="{&quot;x&quot;:208,&quot;y&quot;:833,&quot;w&quot;:336,&quot;h&quot;:28,&quot;abs_x&quot;:454,&quot;abs_y&quot;:786}">Best for you</h2>
+
+                <div class="flex flex-col gap-4" bis_size="{&quot;x&quot;:208,&quot;y&quot;:877,&quot;w&quot;:336,&quot;h&quot;:259,&quot;abs_x&quot;:454,&quot;abs_y&quot;:830}">
+                    <!-- List Item 1 -->
+                    <div class="group flex p-3 rounded-[1.5rem] gap-4 border shadow-sm hover:shadow-md transition-all cursor-pointer bg-white border-gray-100" bis_size="{&quot;x&quot;:208,&quot;y&quot;:877,&quot;w&quot;:336,&quot;h&quot;:121,&quot;abs_x&quot;:454,&quot;abs_y&quot;:830}">
+                        <div class="relative w-24 h-24 shrink-0" bis_size="{&quot;x&quot;:221,&quot;y&quot;:890,&quot;w&quot;:96,&quot;h&quot;:96,&quot;abs_x&quot;:467,&quot;abs_y&quot;:843}">
+                            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&amp;w=300&amp;auto=format&amp;fit=crop" class="w-full h-full rounded-2xl object-cover" alt="Apartment" bis_size="{&quot;x&quot;:221,&quot;y&quot;:890,&quot;w&quot;:96,&quot;h&quot;:96,&quot;abs_x&quot;:467,&quot;abs_y&quot;:843}">
+                            <div class="absolute inset-0 rounded-2xl bg-black/5" bis_size="{&quot;x&quot;:221,&quot;y&quot;:890,&quot;w&quot;:96,&quot;h&quot;:96,&quot;abs_x&quot;:467,&quot;abs_y&quot;:843}"></div>
+                        </div>
+                        <div class="flex flex-col flex-1 py-1 pr-1" bis_size="{&quot;x&quot;:333,&quot;y&quot;:890,&quot;w&quot;:198,&quot;h&quot;:96,&quot;abs_x&quot;:579,&quot;abs_y&quot;:843}">
+                            <div class="flex justify-between items-start" bis_size="{&quot;x&quot;:333,&quot;y&quot;:894,&quot;w&quot;:194,&quot;h&quot;:20,&quot;abs_x&quot;:579,&quot;abs_y&quot;:847}">
+                                <h3 class="text-base font-semibold leading-tight text-gray-900" bis_size="{&quot;x&quot;:333,&quot;y&quot;:894,&quot;w&quot;:103,&quot;h&quot;:20,&quot;abs_x&quot;:579,&quot;abs_y&quot;:847}">Orchad House</h3>
+                                <span class="text-sm font-bold text-orange-600" bis_size="{&quot;x&quot;:473,&quot;y&quot;:894,&quot;w&quot;:54,&quot;h&quot;:20,&quot;abs_x&quot;:719,&quot;abs_y&quot;:847}">$200<span class="text-xs font-normal text-gray-400" bis_size="{&quot;x&quot;:505,&quot;y&quot;:897,&quot;w&quot;:22,&quot;h&quot;:16,&quot;abs_x&quot;:751,&quot;abs_y&quot;:850}">/mo</span></span>
+                            </div>
+                            <span class="text-xs mt-1 text-gray-400" bis_size="{&quot;x&quot;:333,&quot;y&quot;:918,&quot;w&quot;:194,&quot;h&quot;:16,&quot;abs_x&quot;:579,&quot;abs_y&quot;:871}">Jakarta, Indonesia</span>
+                            
+                            <div class="mt-auto flex items-center gap-3" bis_size="{&quot;x&quot;:333,&quot;y&quot;:966,&quot;w&quot;:194,&quot;h&quot;:16,&quot;abs_x&quot;:579,&quot;abs_y&quot;:919}">
+                                <div class="flex items-center gap-1" bis_size="{&quot;x&quot;:333,&quot;y&quot;:966,&quot;w&quot;:24,&quot;h&quot;:16,&quot;abs_x&quot;:579,&quot;abs_y&quot;:919}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bed-double" class="lucide lucide-bed-double w-3.5 h-3.5 text-gray-400" bis_size="{&quot;x&quot;:333,&quot;y&quot;:967,&quot;w&quot;:14,&quot;h&quot;:14,&quot;abs_x&quot;:579,&quot;abs_y&quot;:920}"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"></path><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"></path><path d="M12 4v6"></path><path d="M2 18h20"></path></svg>
+                                    <span class="text-xs font-medium text-gray-600" bis_size="{&quot;x&quot;:351,&quot;y&quot;:966,&quot;w&quot;:6,&quot;h&quot;:16,&quot;abs_x&quot;:597,&quot;abs_y&quot;:919}">3</span>
+                                </div>
+                                <div class="flex items-center gap-1" bis_size="{&quot;x&quot;:369,&quot;y&quot;:966,&quot;w&quot;:24,&quot;h&quot;:16,&quot;abs_x&quot;:615,&quot;abs_y&quot;:919}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bath" class="lucide lucide-bath w-3.5 h-3.5 text-gray-400" bis_size="{&quot;x&quot;:369,&quot;y&quot;:967,&quot;w&quot;:14,&quot;h&quot;:14,&quot;abs_x&quot;:615,&quot;abs_y&quot;:920}"><path d="M10 4 8 6"></path><path d="M17 19v2"></path><path d="M2 12h20"></path><path d="M7 19v2"></path><path d="M9 5 7.621 3.621A2.121 2.121 0 0 0 4 5v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path></svg>
+                                    <span class="text-xs font-medium text-gray-600" bis_size="{&quot;x&quot;:387,&quot;y&quot;:966,&quot;w&quot;:6,&quot;h&quot;:16,&quot;abs_x&quot;:633,&quot;abs_y&quot;:919}">2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- List Item 2 -->
+                    <div class="group flex p-3 rounded-[1.5rem] gap-4 border shadow-sm hover:shadow-md transition-all cursor-pointer bg-white border-gray-100" bis_size="{&quot;x&quot;:208,&quot;y&quot;:1015,&quot;w&quot;:336,&quot;h&quot;:121,&quot;abs_x&quot;:454,&quot;abs_y&quot;:968}">
+                        <div class="relative w-24 h-24 shrink-0" bis_size="{&quot;x&quot;:221,&quot;y&quot;:1028,&quot;w&quot;:96,&quot;h&quot;:96,&quot;abs_x&quot;:467,&quot;abs_y&quot;:981}">
+                            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&amp;w=300&amp;auto=format&amp;fit=crop" class="w-full h-full rounded-2xl object-cover" alt="Villa" bis_size="{&quot;x&quot;:221,&quot;y&quot;:1028,&quot;w&quot;:96,&quot;h&quot;:96,&quot;abs_x&quot;:467,&quot;abs_y&quot;:981}">
+                            <div class="absolute inset-0 rounded-2xl bg-black/5" bis_size="{&quot;x&quot;:221,&quot;y&quot;:1028,&quot;w&quot;:96,&quot;h&quot;:96,&quot;abs_x&quot;:467,&quot;abs_y&quot;:981}"></div>
+                        </div>
+                        <div class="flex flex-col flex-1 py-1 pr-1" bis_size="{&quot;x&quot;:333,&quot;y&quot;:1028,&quot;w&quot;:198,&quot;h&quot;:96,&quot;abs_x&quot;:579,&quot;abs_y&quot;:981}">
+                            <div class="flex justify-between items-start" bis_size="{&quot;x&quot;:333,&quot;y&quot;:1032,&quot;w&quot;:194,&quot;h&quot;:20,&quot;abs_x&quot;:579,&quot;abs_y&quot;:985}">
+                                <h3 class="text-base font-semibold leading-tight text-gray-900" bis_size="{&quot;x&quot;:333,&quot;y&quot;:1032,&quot;w&quot;:80,&quot;h&quot;:20,&quot;abs_x&quot;:579,&quot;abs_y&quot;:985}">The Hollies</h3>
+                                <span class="text-sm font-bold text-orange-600" bis_size="{&quot;x&quot;:473,&quot;y&quot;:1032,&quot;w&quot;:54,&quot;h&quot;:20,&quot;abs_x&quot;:719,&quot;abs_y&quot;:985}">$450<span class="text-xs font-normal text-gray-400" bis_size="{&quot;x&quot;:505,&quot;y&quot;:1035,&quot;w&quot;:22,&quot;h&quot;:16,&quot;abs_x&quot;:751,&quot;abs_y&quot;:988}">/mo</span></span>
+                            </div>
+                            <span class="text-xs mt-1 text-gray-400" bis_size="{&quot;x&quot;:333,&quot;y&quot;:1056,&quot;w&quot;:194,&quot;h&quot;:16,&quot;abs_x&quot;:579,&quot;abs_y&quot;:1009}">Bali, Indonesia</span>
+                            
+                            <div class="mt-auto flex items-center gap-3" bis_size="{&quot;x&quot;:333,&quot;y&quot;:1104,&quot;w&quot;:194,&quot;h&quot;:16,&quot;abs_x&quot;:579,&quot;abs_y&quot;:1057}">
+                                <div class="flex items-center gap-1" bis_size="{&quot;x&quot;:333,&quot;y&quot;:1104,&quot;w&quot;:24,&quot;h&quot;:16,&quot;abs_x&quot;:579,&quot;abs_y&quot;:1057}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bed-double" class="lucide lucide-bed-double w-3.5 h-3.5 text-gray-400" bis_size="{&quot;x&quot;:333,&quot;y&quot;:1105,&quot;w&quot;:14,&quot;h&quot;:14,&quot;abs_x&quot;:579,&quot;abs_y&quot;:1058}"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"></path><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"></path><path d="M12 4v6"></path><path d="M2 18h20"></path></svg>
+                                    <span class="text-xs font-medium text-gray-600" bis_size="{&quot;x&quot;:351,&quot;y&quot;:1104,&quot;w&quot;:6,&quot;h&quot;:16,&quot;abs_x&quot;:597,&quot;abs_y&quot;:1057}">5</span>
+                                </div>
+                                <div class="flex items-center gap-1" bis_size="{&quot;x&quot;:369,&quot;y&quot;:1104,&quot;w&quot;:24,&quot;h&quot;:16,&quot;abs_x&quot;:615,&quot;abs_y&quot;:1057}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bath" class="lucide lucide-bath w-3.5 h-3.5 text-gray-400" bis_size="{&quot;x&quot;:369,&quot;y&quot;:1105,&quot;w&quot;:14,&quot;h&quot;:14,&quot;abs_x&quot;:615,&quot;abs_y&quot;:1058}"><path d="M10 4 8 6"></path><path d="M17 19v2"></path><path d="M2 12h20"></path><path d="M7 19v2"></path><path d="M9 5 7.621 3.621A2.121 2.121 0 0 0 4 5v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path></svg>
+                                    <span class="text-xs font-medium text-gray-600" bis_size="{&quot;x&quot;:387,&quot;y&quot;:1104,&quot;w&quot;:6,&quot;h&quot;:16,&quot;abs_x&quot;:633,&quot;abs_y&quot;:1057}">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Floating Navigation -->
+        <nav class="flex z-30 h-[72px] rounded-[2.5rem] px-2 absolute right-8 bottom-8 left-8 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.3)] blur-none backdrop-blur-lg items-center justify-between" bis_size="{&quot;x&quot;:216,&quot;y&quot;:826,&quot;w&quot;:320,&quot;h&quot;:72,&quot;abs_x&quot;:462,&quot;abs_y&quot;:779}">
+            <!-- Active Item -->
+            <button class="flex bg-zinc-600/10 w-14 h-14 rounded-full relative items-center justify-center" bis_size="{&quot;x&quot;:224,&quot;y&quot;:834,&quot;w&quot;:56,&quot;h&quot;:56,&quot;abs_x&quot;:470,&quot;abs_y&quot;:787}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="home" class="lucide lucide-home w-[24px] h-[24px]" bis_size="{&quot;x&quot;:240,&quot;y&quot;:850,&quot;w&quot;:24,&quot;h&quot;:24,&quot;abs_x&quot;:486,&quot;abs_y&quot;:803}" data-icon-replaced="true" style="width: 24px; height: 24px;"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                <div class="absolute -bottom-1 w-1 h-1 bg-orange-500 rounded-full" bis_size="{&quot;x&quot;:250,&quot;y&quot;:890,&quot;w&quot;:4,&quot;h&quot;:4,&quot;abs_x&quot;:496,&quot;abs_y&quot;:843}"></div>
+            </button>
+            
+            <!-- Inactive Items -->
+            <button class="w-14 h-14 flex items-center justify-center text-gray-500 transition-colors hover:text-white" bis_size="{&quot;x&quot;:307,&quot;y&quot;:834,&quot;w&quot;:56,&quot;h&quot;:56,&quot;abs_x&quot;:553,&quot;abs_y&quot;:787}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="compass" class="lucide lucide-compass w-6 h-6" bis_size="{&quot;x&quot;:323,&quot;y&quot;:850,&quot;w&quot;:24,&quot;h&quot;:24,&quot;abs_x&quot;:569,&quot;abs_y&quot;:803}"><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"></path><circle cx="12" cy="12" r="10"></circle></svg>
+            </button>
+
+            <button class="w-14 h-14 flex items-center justify-center text-gray-500 transition-colors hover:text-white" bis_size="{&quot;x&quot;:389,&quot;y&quot;:834,&quot;w&quot;:56,&quot;h&quot;:56,&quot;abs_x&quot;:635,&quot;abs_y&quot;:787}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="bookmark" class="lucide lucide-bookmark w-6 h-6" bis_size="{&quot;x&quot;:405,&quot;y&quot;:850,&quot;w&quot;:24,&quot;h&quot;:24,&quot;abs_x&quot;:651,&quot;abs_y&quot;:803}"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+            </button>
+
+            <button class="w-14 h-14 flex items-center justify-center text-gray-500 transition-colors hover:text-white" bis_size="{&quot;x&quot;:472,&quot;y&quot;:834,&quot;w&quot;:56,&quot;h&quot;:56,&quot;abs_x&quot;:718,&quot;abs_y&quot;:787}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-lucide="user" class="lucide lucide-user w-6 h-6" bis_size="{&quot;x&quot;:488,&quot;y&quot;:850,&quot;w&quot;:24,&quot;h&quot;:24,&quot;abs_x&quot;:734,&quot;abs_y&quot;:803}"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </button>
+        </nav>
+
+        <!-- Bottom Indicator -->
+        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 rounded-full z-40 mix-blend-multiply bg-gray-900" bis_size="{&quot;x&quot;:312,&quot;y&quot;:918,&quot;w&quot;:128,&quot;h&quot;:4,&quot;abs_x&quot;:558,&quot;abs_y&quot;:871}"></div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+</body></html>

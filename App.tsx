@@ -83,6 +83,10 @@ const App: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState('Ready to build');
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<DesignTemplate | null>(null);
+  const [templateSearch, setTemplateSearch] = useState('');
+  const [fontSearch, setFontSearch] = useState('');
+  const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
+  const fontDropdownRef = useRef<HTMLDivElement>(null);
   const [designMode, setDesignMode] = useState(false);
   const [selectedElement, setSelectedElement] = useState<{tag: string; classes: string; text: string; canEditText: boolean; styles: Record<string, string>; attrs?: Record<string, string>} | null>(null);
   const [unsplashQuery, setUnsplashQuery] = useState('');
@@ -131,25 +135,33 @@ const App: React.FC = () => {
   const canUndo = filesHistoryIndex > 0;
   const canRedo = filesHistoryIndex < filesHistory.length - 1;
 
-  const ATOM_KEYWORDS = ['button','input','label','badge','avatar','icon','spinner','loader','progress','tooltip','divider','tag','chip','toggle','switch','checkbox','radio','link','image','logo','indicator','dot','separator','skeleton'];
-  const MOLECULE_KEYWORDS = ['card','alert','modal','dialog','dropdown','popover','toast','notification','form','search','filter','pagination','breadcrumb','tab','accordion','steps','timeline','review','comment','stat','chart','rating','select','datepicker','upload','counter','price','testimonial-card','feature-card','pricing-card','social','share'];
-  const ORGANISM_KEYWORDS = ['navbar','nav','sidebar','footer','header','hero','banner','cta','carousel','slider','testimonial','faq','feature','team','table','list','menu','drawer','widget','section','panel','dashboard','toolbar','gallery','grid','contact','pricing','newsletter','blog-list','product-list'];
   const groupedFiles = useMemo(() => {
     const allFiles = Object.values(files) as GeneratedFile[];
     const atoms: GeneratedFile[] = [];
     const molecules: GeneratedFile[] = [];
     const organisms: GeneratedFile[] = [];
     const pages: GeneratedFile[] = [];
-    const matchKeywords = (base: string, keywords: string[]) => keywords.some(k => base === k || base.startsWith(k + '-') || base.endsWith('-' + k));
     for (const f of allFiles) {
-      const base = f.name.replace(/\.[^.]+$/, '').toLowerCase();
-      if (matchKeywords(base, ATOM_KEYWORDS)) { atoms.push(f); }
-      else if (matchKeywords(base, MOLECULE_KEYWORDS)) { molecules.push(f); }
-      else if (matchKeywords(base, ORGANISM_KEYWORDS)) { organisms.push(f); }
+      const name = f.name.toLowerCase();
+      if (name.endsWith('.atom.html')) { atoms.push(f); }
+      else if (name.endsWith('.molecule.html')) { molecules.push(f); }
+      else if (name.endsWith('.organism.html')) { organisms.push(f); }
       else { pages.push(f); }
     }
     return { atoms, molecules, organisms, pages };
   }, [files]);
+
+  // Close font dropdown on click outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (fontDropdownRef.current && !fontDropdownRef.current.contains(e.target as Node)) {
+        setFontDropdownOpen(false);
+        setFontSearch('');
+      }
+    };
+    if (fontDropdownOpen) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [fontDropdownOpen]);
 
   // --- Persistence Logic ---
 
@@ -572,11 +584,11 @@ const App: React.FC = () => {
       const updatedPageAnalysis = pageAnalysis.map((item) => {
         const itemWords = item.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
         const isGenerated = generatedFileNames.some(fn => {
-          const fnClean = fn.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+          const fnClean = fn.toLowerCase().replace(/\.(atom|molecule|organism|page)?\.html$/, '').replace(/[-_]/g, ' ');
           return itemWords.some(w => w.length > 2 && fnClean.includes(w));
         });
         const isActive = !isGenerated && latestFileName && (() => {
-          const fnClean = latestFileName.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+          const fnClean = latestFileName.toLowerCase().replace(/\.(atom|molecule|organism|page)?\.html$/, '').replace(/[-_]/g, ' ');
           return itemWords.some(w => w.length > 2 && fnClean.includes(w));
         })();
         if (isGenerated) return { ...item, status: 'completed' as const };
@@ -652,9 +664,11 @@ const App: React.FC = () => {
               const fileData = { name: fileName, language: 'html', content: content };
               buildFiles = { ...buildFiles, [fileName]: fileData };
               setFiles(prev => ({ ...prev, [fileName]: fileData }));
-              setActiveFile(prev => prev || fileName);
               if (i === parts.length - 1) {
-                setStatusMessage(`Designing ${fileName}...`);
+                setActiveFile(fileName);
+              }
+              if (i === parts.length - 1) {
+                setStatusMessage(`Designing ${fileName.replace(/\.(atom|molecule|organism|page)\.html$/, '.html')}...`);
               }
             }
           }
@@ -703,7 +717,7 @@ const App: React.FC = () => {
         const missingPages = pageAnalysis.filter(item => {
           const itemWords = item.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
           return !allFileNames.some(fn => {
-            const fnClean = fn.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+            const fnClean = fn.toLowerCase().replace(/\.(atom|molecule|organism|page)?\.html$/, '').replace(/[-_]/g, ' ');
             return itemWords.some(w => w.length > 2 && fnClean.includes(w));
           });
         });
@@ -744,6 +758,44 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
 
       // Use local accumulator for reliable file reading (avoids React batching issues)
       const finalFiles = { ...buildFiles };
+
+      // POST-PROCESS: Sync navbar/footer across all pages from organism files
+      const navbarOrg = Object.keys(finalFiles).find(k => k.toLowerCase().includes('navbar') && k.endsWith('.organism.html'));
+      const footerOrg = Object.keys(finalFiles).find(k => k.toLowerCase().includes('footer') && k.endsWith('.organism.html'));
+      const sidebarOrg = Object.keys(finalFiles).find(k => k.toLowerCase().includes('sidebar') && k.endsWith('.organism.html'));
+
+      if (navbarOrg || footerOrg || sidebarOrg) {
+        // Extract organism markup from their files
+        const extractTag = (html: string, tag: string): string | null => {
+          const regex = new RegExp(`(<${tag}[\\s>][\\s\\S]*?</${tag}>)`, 'i');
+          const match = html.match(regex);
+          return match ? match[1] : null;
+        };
+        const navHtml = navbarOrg ? extractTag(finalFiles[navbarOrg].content, 'nav') : null;
+        const footerHtml = footerOrg ? extractTag(finalFiles[footerOrg].content, 'footer') : null;
+        const sidebarHtml = sidebarOrg ? extractTag(finalFiles[sidebarOrg].content, 'aside') : null;
+
+        // Replace in all page files
+        for (const key of Object.keys(finalFiles)) {
+          if (!key.endsWith('.page.html')) continue;
+          let content = finalFiles[key].content;
+          if (navHtml) {
+            content = content.replace(/<nav[\s>][\s\S]*?<\/nav>/i, navHtml);
+          }
+          if (footerHtml) {
+            content = content.replace(/<footer[\s>][\s\S]*?<\/footer>/i, footerHtml);
+          }
+          if (sidebarHtml) {
+            content = content.replace(/<aside[\s>][\s\S]*?<\/aside>/i, sidebarHtml);
+          }
+          if (content !== finalFiles[key].content) {
+            finalFiles[key] = { ...finalFiles[key], content };
+          }
+        }
+        // Sync back to state
+        setFiles(finalFiles);
+      }
+
       const finalFileNames = Object.keys(finalFiles);
 
       // Push completed files to undo/redo history
@@ -753,7 +805,7 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
         const finalPageAnalysis = pageAnalysis.map(item => {
           const itemWords = item.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
           const isGenerated = finalFileNames.some(fn => {
-            const fnClean = fn.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+            const fnClean = fn.toLowerCase().replace(/\.(atom|molecule|organism|page)?\.html$/, '').replace(/[-_]/g, ' ');
             return itemWords.some(w => w.length > 2 && fnClean.includes(w));
           });
           return { ...item, status: isGenerated ? 'completed' as const : 'pending' as const };
@@ -927,6 +979,8 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
     return isNaN(n) ? '0' : String(Math.round(n * 10) / 10);
   };
 
+  const googleFontsLink = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto:wght@300;400;500;700;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Nunito:wght@300;400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700;800;900&family=Ubuntu:wght@300;400;500;700&family=Merriweather:wght@300;400;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Source+Sans+3:wght@300;400;500;600;700;800;900&family=PT+Sans:wght@400;700&family=PT+Serif:wght@400;700&family=Noto+Sans:wght@300;400;500;600;700;800;900&family=Work+Sans:wght@300;400;500;600;700;800;900&family=Fira+Sans:wght@300;400;500;600;700;800;900&family=Quicksand:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600;700;800;900&family=Mulish:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Sora:wght@300;400;500;600;700;800&family=Albert+Sans:wght@300;400;500;600;700;800;900&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&family=Instrument+Serif:wght@400&family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Newsreader:wght@300;400;500;600;700;800&family=Bitter:wght@300;400;500;600;700;800;900&family=Crimson+Text:wght@400;600;700&family=Lora:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Oswald:wght@300;400;500;600;700&family=Bebas+Neue&family=Archivo:wght@300;400;500;600;700;800;900&family=Lexend:wght@300;400;500;600;700;800;900&family=Cabin:wght@400;500;600;700&family=Karla:wght@300;400;500;600;700;800&family=Rubik:wght@300;400;500;600;700;800;900&family=Josefin+Sans:wght@300;400;500;600;700&family=Nunito+Sans:wght@300;400;500;600;700;800;900&family=Titillium+Web:wght@300;400;600;700;900&family=Inconsolata:wght@300;400;500;600;700;800;900&family=Source+Code+Pro:wght@300;400;500;600;700;800;900&family=Overpass:wght@300;400;500;600;700;800;900&family=Figtree:wght@300;400;500;600;700;800;900&family=Geist:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">';
+
   const designModeScript = `<style id="__dm-css__">.__dm-sel__{outline:2px solid #4f46e5!important;outline-offset:2px!important}.__dm-hov__:not(.__dm-sel__){outline:1px dashed #818cf8!important;outline-offset:1px!important}*{cursor:default!important}img,svg,video,canvas,iframe,input,select,textarea,button,a,span,i,em,strong,b,label,hr,br{pointer-events:auto!important}</style><scr` + `ipt id="__dm-js__">(function(){var sel=null;function getEl(e){var t=e.target;if(!t||t===document.body||t===document.documentElement||t.id==='__dm-css__'||t.id==='__dm-js__')return null;return t;}function getOwnText(el){var t='';for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===3)t+=el.childNodes[i].textContent;}return t.trim();}function isTextEl(el){var tag=el.tagName.toLowerCase();if(['img','svg','video','canvas','iframe','hr','br','input','select','textarea'].indexOf(tag)>=0)return false;var hasElChild=false;for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===1){hasElChild=true;break;}}if(!hasElChild)return true;if(getOwnText(el).length>0)return true;return false;}function getAttrs(el){var a={};if(el.src)a.src=el.src;if(el.getAttribute('alt')!==null)a.alt=el.getAttribute('alt')||'';if(el.href)a.href=el.href;return a;}document.addEventListener('mouseover',function(e){var t=getEl(e);if(t)t.classList.add('__dm-hov__');},true);document.addEventListener('mouseout',function(e){var t=getEl(e);if(t)t.classList.remove('__dm-hov__');},true);document.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();var t=getEl(e);if(!t)return;if(sel)sel.classList.remove('__dm-sel__');sel=t;sel.classList.add('__dm-sel__');var cs=getComputedStyle(sel);var cn=typeof sel.className==='string'?sel.className:'';var canEdit=isTextEl(sel);var txt=canEdit?(sel.innerText||sel.textContent||''):(sel.alt||sel.src||sel.textContent||'').substring(0,80);window.parent.postMessage({type:'dm-select',tag:sel.tagName.toLowerCase(),classes:cn.replace(/__dm-(sel|hov)__/g,'').trim(),text:txt,canEditText:canEdit,attrs:getAttrs(sel),styles:{fontFamily:cs.fontFamily,fontSize:cs.fontSize,fontWeight:cs.fontWeight,fontStyle:cs.fontStyle,textDecorationLine:cs.textDecorationLine||cs.textDecoration,textTransform:cs.textTransform,lineHeight:cs.lineHeight,letterSpacing:cs.letterSpacing,color:cs.color,backgroundColor:cs.backgroundColor,borderTopWidth:cs.borderTopWidth,borderTopStyle:cs.borderTopStyle,borderTopColor:cs.borderTopColor,borderRadius:cs.borderRadius,paddingTop:cs.paddingTop,paddingRight:cs.paddingRight,paddingBottom:cs.paddingBottom,paddingLeft:cs.paddingLeft,marginTop:cs.marginTop,marginRight:cs.marginRight,marginBottom:cs.marginBottom,marginLeft:cs.marginLeft,width:cs.width,height:cs.height,minWidth:cs.minWidth,maxWidth:cs.maxWidth,minHeight:cs.minHeight,maxHeight:cs.maxHeight,display:cs.display,position:cs.position,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,zIndex:cs.zIndex,overflow:cs.overflow,visibility:cs.visibility,flexDirection:cs.flexDirection,flexWrap:cs.flexWrap,justifyContent:cs.justifyContent,alignItems:cs.alignItems,alignSelf:cs.alignSelf,gap:cs.gap,flexGrow:cs.flexGrow,flexShrink:cs.flexShrink,flexBasis:cs.flexBasis,order:cs.order,gridTemplateColumns:cs.gridTemplateColumns,gridTemplateRows:cs.gridTemplateRows,opacity:cs.opacity,boxShadow:cs.boxShadow,transform:cs.transform,cursor:cs.cursor,transition:cs.transition,objectFit:cs.objectFit,textAlign:cs.textAlign,verticalAlign:cs.verticalAlign}},'*');},true);window.addEventListener('message',function(e){if(!e.data||!sel)return;if(e.data.type==='dm-set-style'){sel.style[e.data.prop]=e.data.val;var cs2=getComputedStyle(sel);window.parent.postMessage({type:'dm-style-updated',prop:e.data.prop,computed:cs2[e.data.prop]},'*');}if(e.data.type==='dm-set-text'){sel.innerText=e.data.val;}if(e.data.type==='dm-set-attr'){sel.setAttribute(e.data.attr,e.data.val);if(e.data.attr==='src'&&sel.tagName==='IMG')sel.src=e.data.val;}});})();</scr` + `ipt>`;
 
   const navScript = `<script>document.addEventListener('click', function(e) {
@@ -1067,7 +1121,7 @@ function navigateTo(fileName) {
   if (!pages[fileName]) return;
   var iframe = document.getElementById('viewer');
   iframe.srcdoc = decode(pages[fileName]) + navInterceptor;
-  document.title = fileName + ' - Full View';
+  document.title = fileName.replace(/\.(atom|molecule|organism|page)\.html$/, '.html') + ' - Full View';
   document.querySelectorAll('.nav-bar button').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.file === fileName);
   });
@@ -1094,7 +1148,7 @@ navigateTo('${activeFile}');
 <div class="nav-bar">
   <span class="title">Full View</span>
   ${fileNames.map(name =>
-    `<button data-file="${name}" class="${name === activeFile ? 'active' : ''}" onclick="navigateTo('${name}')">${name}</button>`
+    `<button data-file="${name}" class="${name === activeFile ? 'active' : ''}" onclick="navigateTo('${name}')">${name.replace(/\.(atom|molecule|organism|page)\.html$/, '.html')}</button>`
   ).join('')}
 </div>
 <iframe id="viewer" sandbox="allow-scripts allow-same-origin"></iframe>
@@ -1190,11 +1244,26 @@ navigateTo('${activeFile}');
 
         <main className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-500">
           <div className="max-w-6xl w-full">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Choose Your Foundation</h2>
               <p className="text-slate-500 text-lg max-w-2xl mx-auto">
                 Select a Design DNA to guide the AI's architectural decisions. This determines the visual language, spacing, and component behavior.
               </p>
+              <div className="mt-6 max-w-md mx-auto relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search templates..."
+                  value={templateSearch}
+                  onChange={(e) => setTemplateSearch(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 shadow-sm transition-all"
+                />
+                {templateSearch && (
+                  <button onClick={() => setTemplateSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -1220,7 +1289,7 @@ navigateTo('${activeFile}');
               </div>
 
               {/* Presets */}
-              {PRESET_TEMPLATES.map((tmpl, idx) => (
+              {PRESET_TEMPLATES.filter(t => !templateSearch || t.name.toLowerCase().includes(templateSearch.toLowerCase()) || t.description.toLowerCase().includes(templateSearch.toLowerCase())).map((tmpl, idx) => (
                 <div
                   key={idx}
                   className="group relative cursor-default h-64 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-300"
@@ -1923,7 +1992,7 @@ navigateTo('${activeFile}');
                             className={`px-3 py-1.5 rounded-t-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? group.activeTab : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
                           >
                             {group.key === 'pages' ? <FileCode className="w-3 h-3" /> : <Component className="w-3 h-3" />}
-                            {f.name}
+                            {f.name.replace(/\.(atom|molecule|organism|page)\.html$/, '.html')}
                           </button>
                         ))}
                       </div>
@@ -1943,7 +2012,7 @@ navigateTo('${activeFile}');
                     <iframe
                       ref={previewIframeRef}
                       title="preview"
-                      srcDoc={(designMode && designSrcDoc !== null ? designSrcDoc : files[activeFile].content) + (designMode ? designModeScript : navScript)}
+                      srcDoc={googleFontsLink + (designMode && designSrcDoc !== null ? designSrcDoc : files[activeFile].content) + (designMode ? designModeScript : navScript)}
                       className="absolute inset-0 w-full h-full border-none bg-white"
                       sandbox="allow-scripts allow-same-origin"
                     />
@@ -2116,13 +2185,54 @@ navigateTo('${activeFile}');
                               <div className="px-4 pb-4 space-y-3">
                                 <div>
                                   <label className="text-[10px] text-slate-400 block mb-1">Font Family</label>
-                                  <select value={selectedElement.styles.fontFamily?.split(',')[0]?.replace(/"/g,'').trim() || 'inherit'} onChange={e => updateElementStyle('fontFamily', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none">
-                                    <option value="inherit">Default (inherit)</option>
-                                    <option value="Inter">Inter</option>
-                                    <option value="Arial, sans-serif">Arial</option>
-                                    <option value="Georgia, serif">Georgia</option>
-                                    <option value="monospace">Monospace</option>
-                                  </select>
+                                  <div ref={fontDropdownRef} className="relative">
+                                    <button type="button" onClick={() => { setFontDropdownOpen(!fontDropdownOpen); setFontSearch(''); }} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none flex items-center justify-between gap-1 text-left">
+                                      <span className="truncate" style={{ fontFamily: selectedElement.styles.fontFamily || 'inherit' }}>{selectedElement.styles.fontFamily?.split(',')[0]?.replace(/"/g,'').trim() || 'Default (inherit)'}</span>
+                                      <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+                                    </button>
+                                    {fontDropdownOpen && (
+                                      <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+                                        <div className="p-1.5 border-b border-slate-100">
+                                          <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-md">
+                                            <Search className="w-3 h-3 text-slate-400 shrink-0" />
+                                            <input autoFocus type="text" value={fontSearch} onChange={e => setFontSearch(e.target.value)} placeholder="Search fonts..." className="w-full text-xs bg-transparent outline-none placeholder:text-slate-300" />
+                                          </div>
+                                        </div>
+                                        <div className="max-h-52 overflow-y-auto">
+                                          {(() => {
+                                            const q = fontSearch.toLowerCase();
+                                            const fontGroups = [
+                                              { label: 'Sans Serif', fonts: ['Inter','Roboto','Open Sans','Montserrat','Poppins','Lato','Nunito','Nunito Sans','Raleway','Ubuntu','Source Sans 3','PT Sans','Noto Sans','Work Sans','Fira Sans','Quicksand','Barlow','Mulish','DM Sans','Manrope','Space Grotesk','Plus Jakarta Sans','Outfit','Sora','Albert Sans','Bricolage Grotesque','Lexend','Cabin','Karla','Rubik','Josefin Sans','Titillium Web','Overpass','Figtree','Geist','Archivo','Oswald','Bebas Neue'] },
+                                              { label: 'Serif', fonts: ['Merriweather','Playfair Display','PT Serif','Instrument Serif','Newsreader','Bitter','Crimson Text','Lora','Libre Baskerville'] },
+                                              { label: 'Monospace', fonts: ['JetBrains Mono','Fira Code','Space Mono','IBM Plex Mono','Inconsolata','Source Code Pro'] },
+                                              { label: 'System', fonts: ['Arial','Georgia','Times New Roman','Verdana','Monospace'] },
+                                            ];
+                                            const systemMap: Record<string, string> = { 'Arial': 'Arial, sans-serif', 'Georgia': 'Georgia, serif', 'Times New Roman': 'Times New Roman, serif', 'Verdana': 'Verdana, sans-serif', 'Monospace': 'monospace' };
+                                            const currentVal = selectedElement.styles.fontFamily?.split(',')[0]?.replace(/"/g,'').trim() || 'inherit';
+                                            const items: React.ReactNode[] = [];
+                                            if (!q || 'default'.includes(q) || 'inherit'.includes(q)) {
+                                              items.push(<button key="inherit" onClick={() => { updateElementStyle('fontFamily', 'inherit'); setFontDropdownOpen(false); setFontSearch(''); }} className={`w-full text-left px-3 py-1.5 text-xs hover:bg-indigo-50 ${currentVal === 'inherit' ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-slate-600'}`}>Default (inherit)</button>);
+                                            }
+                                            for (const group of fontGroups) {
+                                              const filtered = group.fonts.filter(f => !q || f.toLowerCase().includes(q));
+                                              if (filtered.length === 0) continue;
+                                              items.push(<div key={'g-' + group.label} className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-50 sticky top-0">{group.label}</div>);
+                                              for (const font of filtered) {
+                                                const val = systemMap[font] || font;
+                                                const isActive = currentVal === font || currentVal === val;
+                                                items.push(
+                                                  <button key={font} onClick={() => { updateElementStyle('fontFamily', val); setFontDropdownOpen(false); setFontSearch(''); }} className={`w-full text-left px-3 py-1.5 text-xs hover:bg-indigo-50 transition-colors ${isActive ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-slate-700'}`} style={{ fontFamily: systemMap[font] ? undefined : font }}>
+                                                    {font}
+                                                  </button>
+                                                );
+                                              }
+                                            }
+                                            return items.length > 0 ? items : <div className="px-3 py-3 text-xs text-slate-400 text-center">No fonts found</div>;
+                                          })()}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="flex gap-2">
                                   <div className="flex-1">

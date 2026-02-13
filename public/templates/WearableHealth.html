@@ -1,0 +1,685 @@
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORBIT Smart Ring App</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+body { font-family: 'Inter', sans-serif; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+<style>
+@keyframes float-y{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}.animate-float{animation:float-y 4s ease-in-out infinite}.animate-float-delayed{animation:float-y 4s ease-in-out 2s infinite}@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.animate-spin-slow{animation:spin-slow 20s linear infinite}@keyframes grow-up{from{height:0!important;opacity:0}}.animate-grow{animation:grow-up 1s cubic-bezier(.4,0,.2,1) backwards}@keyframes equalizer{0%,100%{height:30%}50%{height:100%}}.animate-eq{animation:equalizer 1.2s ease-in-out infinite}@keyframes pulse-ring{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,255,255,.7)}70%{transform:scale(1);box-shadow:0 0 0 10px rgba(255,255,255,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,255,255,0)}}.animate-pulse-ring{animation:pulse-ring 2s infinite}.delay-100{animation-delay:100ms}.delay-200{animation-delay:200ms}.delay-300{animation-delay:300ms}
+</style>
+<style>
+.reveal-base {
+opacity: 0;
+transform: translateY(24px);
+filter: blur(4px);
+transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+will-change: transform, opacity, filter;
+}
+.reveal-scale {
+opacity: 0;
+transform: scale(0.9);
+filter: blur(4px);
+transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+will-change: transform, opacity, filter;
+}
+.reveal-fade {
+opacity: 0;
+filter: blur(4px);
+transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+will-change: opacity, filter;
+}
+.in-view {
+opacity: 1 !important;
+transform: translate(0) scale(1) !important;
+filter: blur(0) !important;
+}
+/* Delays */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+</style>
+<link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">
+.font-geist { font-family: 'Geist', sans-serif !important; }
+</style><link id="all-fonts-link-font-roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-roboto">
+.font-roboto { font-family: 'Roboto', sans-serif !important; }
+</style><link id="all-fonts-link-font-montserrat" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-montserrat">
+.font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+</style><link id="all-fonts-link-font-poppins" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-poppins">
+.font-poppins { font-family: 'Poppins', sans-serif !important; }
+</style><link id="all-fonts-link-font-playfair" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&amp;display=swap"><style id="all-fonts-style-font-playfair">
+.font-playfair { font-family: 'Playfair Display', serif !important; }
+</style><link id="all-fonts-link-font-instrument-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-instrument-serif">
+.font-instrument-serif { font-family: 'Instrument Serif', serif !important; }
+</style><link id="all-fonts-link-font-merriweather" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&amp;display=swap"><style id="all-fonts-style-font-merriweather">
+.font-merriweather { font-family: 'Merriweather', serif !important; }
+</style><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">
+.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }
+</style><link id="all-fonts-link-font-jakarta" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-jakarta">
+.font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-manrope" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-manrope">
+.font-manrope { font-family: 'Manrope', sans-serif !important; }
+</style><link id="all-fonts-link-font-space-grotesk" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-space-grotesk">
+.font-space-grotesk { font-family: 'Space Grotesk', sans-serif !important; }
+</style><link id="all-fonts-link-font-work-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-work-sans">
+.font-work-sans { font-family: 'Work Sans', sans-serif !important; }
+</style><link id="all-fonts-link-font-pt-serif" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-pt-serif">
+.font-pt-serif { font-family: 'PT Serif', serif !important; }
+</style><link id="all-fonts-link-font-geist-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist-mono">
+.font-geist-mono { font-family: 'Geist Mono', monospace !important; }
+</style><link id="all-fonts-link-font-space-mono" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap"><style id="all-fonts-style-font-space-mono">
+.font-space-mono { font-family: 'Space Mono', monospace !important; }
+</style><link id="all-fonts-link-font-quicksand" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-quicksand">
+.font-quicksand { font-family: 'Quicksand', sans-serif !important; }
+</style><link id="all-fonts-link-font-nunito" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&amp;display=swap"><style id="all-fonts-style-font-nunito">
+.font-nunito { font-family: 'Nunito', sans-serif !important; }
+</style><link id="all-fonts-link-font-newsreader" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..800&amp;display=swap"><style id="all-fonts-style-font-newsreader">
+.font-newsreader { font-family: 'Newsreader', serif !important; }
+</style><link id="all-fonts-link-font-google-sans-flex" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-google-sans-flex">
+.font-google-sans-flex { font-family: 'Google Sans Flex', sans-serif !important; }
+</style><link id="all-fonts-link-font-oswald" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-oswald">
+.font-oswald { font-family: 'Oswald', sans-serif !important; }
+</style><link id="all-fonts-link-font-dm-sans" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-dm-sans">
+.font-dm-sans { font-family: 'DM Sans', sans-serif !important; }
+</style></head>
+  <body class="min-h-screen flex items-center justify-center sm:p-8 md:p-12 bg-[#F2F4F7] pt-4 pr-4 pb-4 pl-4">
+    <!-- Main Container for the 3 Screens -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl w-full">
+      <!-- SCREEN 1: Welcome / Landing -->
+      <div class="relative h-[840px] w-full max-w-[400px] mx-auto bg-black rounded-[3rem] shadow-2xl overflow-hidden border-[6px] border-gray-900/50 flex flex-col">
+        <!-- Background Image -->
+        <img src="https://images.unsplash.com/photo-1613915617430-8ab0fd7c6baf?q=80&amp;w=1887&amp;auto=format&amp;fit=crop" alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-60">
+
+        <!-- Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20"></div>
+
+        <!-- Status Bar -->
+        <div class="relative z-20 flex justify-between items-center px-6 pt-5 text-white reveal-fade">
+          <span class="text-sm font-semibold">9:41</span>
+          <div class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="signal" class="lucide lucide-signal w-4 h-4">
+              <path d="M2 20h.01"></path>
+              <path d="M7 20v-4"></path>
+              <path d="M12 20v-8"></path>
+              <path d="M17 20V8"></path>
+              <path d="M22 4v16"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="wifi" class="lucide lucide-wifi w-4 h-4">
+              <path d="M12 20h.01"></path>
+              <path d="M2 8.82a15 15 0 0 1 20 0"></path>
+              <path d="M5 12.859a10 10 0 0 1 14 0"></path>
+              <path d="M8.5 16.429a5 5 0 0 1 7 0"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="battery-full" class="lucide lucide-battery-full w-4 h-4">
+              <path d="M10 10v4"></path>
+              <path d="M14 10v4"></path>
+              <path d="M22 14v-4"></path>
+              <path d="M6 10v4"></path>
+              <rect x="2" y="6" width="16" height="12" rx="2"></rect>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="relative z-20 px-6 mt-4">
+          <h1 class="text-3xl text-white font-medium tracking-tight reveal-base">
+            AURA
+          </h1>
+        </div>
+
+        <!-- Interactive Points Overlay -->
+        <div class="flex-1 w-full z-10 relative">
+          <!-- Point 1 -->
+          <div class="absolute top-[20%] left-[30%] reveal-scale delay-300">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-white rounded-full animate-pulse-ring"></div>
+              <div class="bg-white/10 backdrop-blur-md border border-white/10 text-white text-xs py-2 px-3 rounded-full">
+                Biometric Sensing
+              </div>
+            </div>
+            <!-- Connector Line SVG -->
+            <svg class="absolute top-2 left-1 w-[1px] h-20 bg-gradient-to-b from-white to-white/10"></svg>
+          </div>
+
+          <!-- Point 2 -->
+          <div class="absolute top-[45%] right-[10%] reveal-scale delay-500">
+            <div class="flex items-center gap-2 flex-row-reverse">
+              <div class="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] animate-pulse-ring"></div>
+              <div class="bg-white/10 backdrop-blur-md border border-white/10 text-white text-xs py-2 px-3 rounded-full">
+                Seamless Sync
+              </div>
+            </div>
+            <svg class="absolute bottom-2 right-1 w-[100px] h-[1px] bg-gradient-to-l from-white to-transparent opacity-50"></svg>
+          </div>
+        </div>
+
+        <!-- Bottom Content -->
+        <div class="relative z-20 px-6 pb-10 pt-10 bg-gradient-to-t from-black via-black/90 to-transparent">
+          <h2 class="text-3xl text-white font-medium leading-tight tracking-tight mb-3 reveal-base delay-100">
+            Wellness,
+            <span class="font-semibold">Redefined</span>
+          </h2>
+          <p class="text-gray-300 text-sm leading-relaxed mb-8 font-light reveal-base delay-200">
+            Advanced tracking for your sleep, fitness, and recovery journey.
+          </p>
+
+          <div class="space-y-3">
+            <button class="w-full bg-white text-black font-medium py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gray-100 transition reveal-base delay-300">
+              <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"></path>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"></path>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"></path>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"></path>
+              </svg>
+              Get Started
+            </button>
+            <button class="w-full bg-white/10 backdrop-blur-md text-white font-medium py-4 rounded-full hover:bg-white/20 transition reveal-base delay-400">
+              Guest Mode
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: Dashboard -->
+      <div class="overflow-hidden border-[6px] flex flex-col group/screen select-none font-manrope bg-gray-50 w-full h-[840px] max-w-[400px] z-10 border-gray-900/10 rounded-[3rem] mr-auto ml-auto relative shadow-2xl">
+        <!-- Top Dark Section Background with Curved Bottom -->
+        <div class="absolute top-0 left-0 right-0 h-[55%] bg-black rounded-b-[200px] z-0 overflow-hidden">
+          <!-- Added Background Image inside the rounded mask -->
+          <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3e40612e-e827-4f45-b7c3-200ff97bd562_800w.jpg" class="absolute inset-0 w-full h-full object-cover opacity-60 z-0" alt="Abstract Background">
+
+          <!-- Decorative White Arcs behind ring -->
+          <div class="absolute bottom-[-100px] left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full border border-white/10 z-10"></div>
+          <div class="absolute bottom-[-60px] left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full border-[1.5px] border-white/20 z-10"></div>
+          <div class="absolute bottom-[-20px] left-1/2 -translate-x-1/2 w-[340px] h-[340px] rounded-full border border-white/10 z-10"></div>
+
+          <!-- Status Bar -->
+          <div class="relative z-50 flex justify-between items-center px-8 pt-6 text-white">
+            <span class="text-[15px] font-medium tracking-wide">9:41</span>
+            <div class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-signal w-3.5 h-3.5">
+                <path d="M2 20h.01"></path>
+                <path d="M7 20v-4"></path>
+                <path d="M12 20v-8"></path>
+                <path d="M17 20V8"></path>
+                <path d="M22 4v16"></path>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wifi w-3.5 h-3.5">
+                <path d="M12 20h.01"></path>
+                <path d="M2 8.82a15 15 0 0 1 20 0"></path>
+                <path d="M5 12.859a10 10 0 0 1 14 0"></path>
+                <path d="M8.5 16.429a5 5 0 0 1 7 0"></path>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-battery-full w-3.5 h-3.5">
+                <path d="M10 10v4"></path>
+                <path d="M14 10v4"></path>
+                <path d="M22 14v-4"></path>
+                <path d="M6 10v4"></path>
+                <rect x="2" y="6" width="16" height="12" rx="2"></rect>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Header Content -->
+          <div class="relative z-50 px-6 pt-6 flex justify-between items-center reveal-base">
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/74d9f2a2-62ba-4a98-94c1-6918db751221_320w.webp" class="w-12 h-12 rounded-full object-cover border-2 border-white/20">
+              </div>
+              <div>
+                <h2 class="text-white font-semibold text-lg leading-tight">
+                  Sarah Jenkins
+                </h2>
+                <p class="text-gray-400 text-xs font-normal">Good Morning!</p>
+              </div>
+            </div>
+            <button class="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/5 flex items-center justify-center text-white hover:bg-white/20 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell w-5 h-5">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Scrollable Area -->
+        <div class="z-10 flex-1 overflow-y-auto hide-scrollbar pt-[110px] pb-24 relative">
+          <!-- Ring & Stats Visualization -->
+          <div class="flex w-full h-[360px] mb-4 relative items-center justify-center">
+            <!-- Main Ring Image -->
+            <div class="relative z-20 w-56 h-56 flex items-center justify-center transform translate-y-4 reveal-fade delay-100">
+              <!-- Green Sensor Glow Effect -->
+              <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-8 h-8 bg-green-500 rounded-full blur-[20px] opacity-60 animate-pulse"></div>
+            </div>
+
+            <!-- Floating Card: Sleep (Top Left - Dark) -->
+            <div class="absolute top-[10%] left-4 z-20 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-3 w-[110px] shadow-lg animate-float reveal-fade delay-200">
+              <div class="flex items-center gap-2 mb-2 text-white/70">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+                <span class="text-[10px] font-normal">Sleep</span>
+              </div>
+              <div class="text-white font-semibold text-lg leading-none">
+                8h
+                <span class="text-xs font-light text-white/60">15m</span>
+              </div>
+            </div>
+
+            <!-- Floating Card: Stress (Top Right - Dark) -->
+            <div class="absolute top-[15%] right-4 z-20 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-3 w-[120px] shadow-lg animate-float-delayed reveal-fade delay-300">
+              <div class="flex items-center gap-2 mb-2 text-white/70">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-waves">
+                  <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+                  <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+                  <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"></path>
+                </svg>
+                <span class="text-[10px] font-normal">Stress Level</span>
+              </div>
+              <div class="text-white font-semibold text-lg leading-none">
+                Normal
+              </div>
+            </div>
+
+            <!-- Floating Card: Oxygen (Bottom Left - Light) -->
+            <div class="absolute bottom-[10%] left-4 z-20 bg-white border border-gray-100 rounded-2xl p-3 w-[120px] shadow-[0_8px_20px_rgba(0,0,0,0.06)] animate-float-delayed reveal-fade delay-400">
+              <div class="flex items-center gap-2 mb-2 text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wind">
+                  <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"></path>
+                  <path d="M9.6 4.6A2 2 0 1 1 11 8H2"></path>
+                  <path d="M12.6 19.4A2 2 0 1 0 14 16H2"></path>
+                </svg>
+                <span class="text-[10px] font-normal">Oxygen</span>
+              </div>
+              <div class="text-gray-900 font-semibold text-xl leading-none">
+                99%
+              </div>
+            </div>
+
+            <!-- Floating Card: Temperature (Bottom Right - Light) -->
+            <div class="absolute bottom-[5%] right-4 z-20 bg-white border border-gray-100 rounded-2xl p-3 w-[120px] shadow-[0_8px_20px_rgba(0,0,0,0.06)] animate-float reveal-fade delay-500">
+              <div class="flex items-center gap-2 mb-2 text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thermometer">
+                  <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path>
+                </svg>
+                <span class="text-[10px] font-normal">Temperature</span>
+              </div>
+              <div class="text-gray-900 font-semibold text-xl leading-none">
+                97.8°
+              </div>
+            </div>
+          </div>
+
+          <!-- Black Activity Card -->
+          <div class="px-5">
+            <div class="overflow-hidden text-white bg-black w-full rounded-[2rem] pt-6 pr-6 pb-6 pl-6 relative shadow-2xl reveal-base delay-300">
+              <!-- Background decoration -->
+              <div class="absolute right-[-40px] bottom-[-40px] w-48 h-48 opacity-20">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/ceea8c67-3624-4538-97c1-57ae82f7792e_800w.webp" class="w-full h-full object-contain rotate-45 grayscale">
+              </div>
+
+              <!-- Top Stats Row -->
+              <div class="flex z-10 mb-8 relative items-start justify-between">
+                <!-- Steps -->
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-footprints">
+                      <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"></path>
+                      <path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"></path>
+                      <path d="M16 17h4"></path>
+                      <path d="M4 13h4"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-lg leading-none">
+                      8,432 Steps
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Calories -->
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 roundedwww.w3.org/2000/svg" width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                  </div>
+                  <div class="">
+                    <div class="font-semibold text-lg leading-none">
+                      420
+                      <span class="text-sm font-normal text-gray-400">cal</span>
+                    </div>
+                    <div class="text-xs text-gray-400 font-normal mt-0.5">
+                      Burned
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Title Section -->
+              <div class="mb-6 relative z-10">
+                <h3 class="text-xl font-semibold tracking-tight leading-tight mb-1">
+                  Daily Overview
+                </h3>
+                <p class="text-xs text-gray-400">Your progress at a glance</p>
+              </div>
+
+              <!-- Charging Bar -->
+              <div class="bg-white rounded-full p-1.5 pr-4 flex items-center justify-between relative z-10 w-full">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                  </div>
+                  <span class="text-black font-semibold text-xs">
+                    85% Charged
+                  </span>
+                </div>
+                <!-- Small progress bar segment -->
+                <div class="flex gap-1">
+                  <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg bg-gray-200"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Bottom Navigation with Liquid Glass Effect -->
+        <div class="absolute bottom-8 left-0 w-full flex justify-center z-50 pointer-events-none">
+          <div class="pointer-events-auto reveal-fade delay-500 bg-white/90 backdrop-blur-md rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-2 flex items-center gap-1 relative">
+            <div id="nav-blob-2" class="absolute top-2 left-2 w-12 h-12 bg-black rounded-full transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-lg"></div>
+            <button onclick="updateNavBlob(this)" class="relative z-10 w-12 h-12 text-white rounded-full flex items-center justify-center transition-colors duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home w-5 h-5">
+                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              </svg>
+            </button>
+            <button onclick="updateNavBlob(this)" class="relative z-10 w-12 h-12 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors duration-300">
+              <div class="relative w-6 h-6 rounded-full border-2 border-current overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1617042375876-a13e36732a04?w=100&amp;q=80" class="opacity-50 w-full h-full object-cover transition-opacity duration-300" alt="Ring">
+              </div>
+            </button>
+            <button onclick="updateNavBlob(this)" class="relative z-10 w-12 h-12 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity w-5 h-5">
+                <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <script>
+          function updateNavBlob(btn) {
+            const nav = btn.parentElement;
+            const blob = nav.querySelector('div[id^="nav-blob"]');
+            const buttons = Array.from(nav.querySelectorAll('button'));
+            const index = buttons.indexOf(btn);
+
+            // 48px width + 4px gap = 52px stride
+            blob.style.transform = `translateX(${index * 52}px)`;
+
+            buttons.forEach((b, i) => {
+              const isSelected = i === index;
+              // Text color
+              if (isSelected) {
+                b.classList.remove('text-gray-400', 'hover:text-gray-600');
+                b.classList.add('text-white');
+              } else {
+                b.classList.add('text-gray-400', 'hover:text-gray-600');
+                b.classList.remove('text-white');
+              }
+              // Image opacity
+              const img = b.querySelector('img');
+              if (img) {
+                if (isSelected) {
+                  img.classList.remove('opacity-50');
+                  img.classList.add('opacity-100');
+                } else {
+                  img.classList.add('opacity-50');
+                  img.classList.remove('opacity-100');
+                }
+              }
+            });
+          }
+        </script>
+      </div>
+
+      <!-- SCREEN 3: Activity Stats -->
+      <div class="overflow-hidden border-[6px] flex flex-col bg-gray-50 w-full h-[840px] max-w-[400px] border-gray-900/10 rounded-[3rem] mr-auto ml-auto relative shadow-2xl">
+        <!-- Header -->
+        <div class="relative z-20 flex justify-between items-center px-6 pt-5 text-black reveal-fade">
+          <span class="text-sm font-semibold">9:41</span>
+          <div class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="signal" class="lucide lucide-signal w-4 h-4">
+              <path d="M2 20h.01"></path>
+              <path d="M7 20v-4"></path>
+              <path d="M12 20v-8"></path>
+              <path d="M17 20V8"></path>
+              <path d="M22 4v16"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="battery-full" class="lucide lucide-battery-full w-4 h-4">
+              <path d="M10 10v4"></path>
+              <path d="M14 10v4"></path>
+              <path d="M22 14v-4"></path>
+              <path d="M6 10v4"></path>
+              <rect x="2" y="6" width="16" height="12" rx="2"></rect>
+            </svg>
+          </div>
+        </div>
+
+        <div class="pt-6 pr-6 pb-4 pl-6">
+          <h1 class="text-2xl font-semibold tracking-tight text-black mb-6 reveal-base">
+            Health Metrics
+          </h1>
+
+          <!-- Animated Tab Switcher -->
+          <div class="bg-white p-1 rounded-full flex items-center shadow-sm mb-6 relative isolate reveal-base delay-100">
+            <!-- Sliding Background Pill -->
+            <div id="tab-pill" class="absolute top-1 bottom-1 left-1 bg-black rounded-full shadow-md transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]" style="width: calc((100% - 0.5rem) / 3)"></div>
+
+            <button onclick="updateTab(this)" class="flex-1 relative z-10 text-white text-sm font-medium py-2.5 rounded-full transition-colors duration-200 cursor-pointer select-none">
+              Today
+            </button>
+            <button onclick="updateTab(this)" class="flex-1 relative z-10 text-gray-500 hover:text-black text-sm font-medium py-2.5 rounded-full transition-colors duration-200 cursor-pointer select-none">
+              Weekly
+            </button>
+            <button onclick="updateTab(this)" class="flex-1 relative z-10 text-gray-500 hover:text-black text-sm font-medium py-2.5 rounded-full transition-colors duration-200 cursor-pointer select-none">
+              Trends
+            </button>
+          </div>
+
+          <!-- Sleep Graph Card -->
+          <div class="bg-black rounded-[2rem] p-6 text-white mb-4 relative overflow-hidden reveal-base delay-200">
+            <div class="flex justify-between items-start mb-8">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bar-chart-2" class="lucide lucide-bar-chart-2 w-4 h-4 text-white">
+                    <path d="M5 21v-6"></path>
+                    <path d="M12 21V3"></path>
+                    <path d="M19 21V9"></path>
+                  </svg>
+                </div>
+                <span class="font-medium text-sm">Sleep Graph</span>
+              </div>
+              <button class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="more-vertical" class="lucide lucide-more-vertical w-4 h-4 text-gray-400">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="12" cy="5" r="1"></circle>
+                  <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Chart Bars -->
+            <div class="relative h-32 flex items-end justify-between px-2 gap-2">
+              <!-- Y-Axis labels (Absolute left) -->
+              <div class="absolute -left-2 top-0 bottom-0 flex flex-col justify-between text-[9px] text-gray-500 font-medium h-24">
+                <span>Wake</span>
+                <span>Light</span>
+                <span>Deep</span>
+                <span>REM</span>
+              </div>
+
+              <!-- Tooltip -->
+              <div class="absolute top-2 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex flex-col items-center">
+                <span class="text-[9px] text-gray-400 uppercase tracking-wider">
+                  Total
+                </span>
+                <span class="text-sm font-semibold">8h 15m</span>
+              </div>
+
+              <!-- Bars -->
+              <!-- Padding left for labels -->
+              <div class="w-full pl-8 flex items-end justify-between h-full pb-4 border-b border-gray-800">
+                <div class="w-1.5 bg-gray-600 rounded-full h-[30%] animate-grow"></div>
+                <div class="w-1.5 bg-gray-600 rounded-full h-[50%] animate-grow delay-100"></div>
+                <div class="w-1.5 bg-white rounded-full h-[70%] shadow-[0_0_10px_rgba(255,255,255,0.5)] animate-grow delay-200"></div>
+                <div class="w-1.5 bg-gray-600 rounded-full h-[40%] animate-grow delay-300"></div>
+                <div class="w-1.5 bg-gray-600 rounded-full h-[20%] animate-grow delay-100"></div>
+                <div class="w-1.5 bg-white rounded-full h-[60%] shadow-[0_0_10px_rgba(255,255,255,0.5)] animate-grow delay-200"></div>
+                <div class="w-1.5 bg-gray-600 rounded-full h-[45%] animate-grow delay-300"></div>
+                <div class="w-1.5 bg-gray-600 rounded-full h-[35%] animate-grow delay-100"></div>
+                <div class="w-1.5 bg-gray-600 rounded-full h-[55%] animate-grow delay-200"></div>
+                <div class="w-1.5 bg-white rounded-full h-[80%] shadow-[0_0_10px_rgba(255,255,255,0.5)] animate-grow delay-300"></div>
+              </div>
+            </div>
+            <!-- X-Axis -->
+            <div class="flex justify-between pl-8 pt-2 text-[9px] text-gray-500">
+              <span>10 AM</span>
+              <span>12 AM</span>
+              <span>2 AM</span>
+              <span>4 AM</span>
+              <span>6 AM</span>
+              <span>8 AM</span>
+            </div>
+          </div>
+
+          <!-- Bottom Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Steps Card -->
+            <div class="bg-white p-5 rounded-[2rem] shadow-sm flex flex-col items-center justify-center relative reveal-base delay-300">
+              <div class="relative w-24 h-24 mb-3">
+                <svg class="w-full h-full transform -rotate-90">
+                  <circle cx="48" cy="48" r="36" stroke="#f3f4f6" stroke-width="8" fill="none"></circle>
+                  <circle cx="48" cy="48" r="36" stroke="#000" stroke-width="8" fill="none" stroke-dasharray="226" stroke-dashoffset="80" stroke-linecap="round"></circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="footprints" class="lucide lucide-footprints w-4 h-4 mb-1">
+                    <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"></path>
+                    <path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"></path>
+                    <path d="M16 17h4"></path>
+                    <path d="M4 13h4"></path>
+                  </svg>
+                  <span class="text-lg font-bold">8,432</span>
+                  <span class="text-[10px] text-gray-400">Steps</span>
+                </div>
+              </div>
+              <div class="w-full flex justify-between text-[10px] text-gray-500 font-medium">
+                <div class="text-center">
+                  <div class="block text-gray-400 mb-0.5">Goal</div>
+                  <div class="text-black">12,000</div>
+                </div>
+                <div class="text-center">
+                  <div class="block text-gray-400 mb-0.5">Remaining</div>
+                  <div class="text-black">3,568</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Heart Rate Card -->
+            <div class="bg-white p-5 rounded-[2rem] shadow-sm flex flex-col relative reveal-base delay-400">
+              <div class="flex items-baseline gap-1 mb-4">
+                <span class="text-3xl font-semibold tracking-tight">68</span>
+                <span class="text-xs text-gray-500 font-medium">bpm</span>
+              </div>
+
+              <!-- Visual Waveform -->
+              <div class="flex-1 flex items-end justify-between gap-1 h-16 mb-2">
+                <div class="w-3 bg-black rounded-sm h-[40%] animate-eq" style="animation-delay:0ms"></div>
+                <div class="w-3 bg-gray-200 rounded-sm h-[60%] animate-eq" style="animation-delay:150ms"></div>
+                <div class="w-3 bg-black rounded-sm h-[80%] animate-eq" style="animation-delay:300ms"></div>
+                <div class="w-3 bg-gray-200 rounded-sm h-[50%] animate-eq" style="animation-delay:75ms"></div>
+                <div class="w-3 bg-black rounded-sm h-[90%] animate-eq" style="animation-delay:450ms"></div>
+                <div class="w-3 bg-black rounded-sm h-[30%] animate-eq" style="animation-delay:225ms"></div>
+              </div>
+              <p class="text-[10px] text-gray-500 font-medium mt-auto">
+                Resting Heart Rate
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Bottom Navigation -->
+        <div class="absolute bottom-8 left-0 w-full flex justify-center z-50 pointer-events-none">
+          <div class="pointer-events-auto reveal-fade delay-500 bg-white/90 backdrop-blur-md rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-2 flex items-center gap-1 relative">
+            <div id="nav-blob-3" class="absolute top-2 left-2 w-12 h-12 bg-black rounded-full transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-lg" style="transform: translateX(104px)"></div>
+            <button onclick="updateNavBlob(this)" class="relative z-10 w-12 h-12 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home w-5 h-5">
+                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              </svg>
+            </button>
+            <button onclick="updateNavBlob(this)" class="relative z-10 w-12 h-12 text-gray-400 hover:text-gray-600 rounded-full flex items-center justify-center transition-colors duration-300">
+              <div class="relative w-6 h-6 rounded-full border-2 border-current overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1617042375876-a13e36732a04?w=100&amp;q=80" class="opacity-50 w-full h-full object-cover transition-opacity duration-300" alt="Ring">
+              </div>
+            </button>
+            <button onclick="updateNavBlob(this)" class="relative z-10 w-12 h-12 text-white rounded-full flex items-center justify-center transition-colors duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity w-5 h-5">
+                <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <script>
+          function updateTab(btn) {
+            const container = btn.parentElement;
+            const pill = container.querySelector('#tab-pill');
+            const buttons = container.querySelectorAll('button');
+            const index = Array.from(buttons).indexOf(btn);
+
+            // Move pill
+            pill.style.transform = `translateX(${index * 100}%)`;
+
+            // Update Text Colors
+            buttons.forEach(b => {
+              if (b === btn) {
+                b.classList.remove('text-gray-500', 'hover:text-black');
+                b.classList.add('text-white');
+              } else {
+                b.classList.add('text-gray-500', 'hover:text-black');
+                b.classList.remove('text-white');
+              }
+            });
+          }
+        </script>
+      </div>
+    </div>
+
+    <script>
+      lucide.createIcons();
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in-view');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+        document.querySelectorAll('.reveal-base, .reveal-scale, .reveal-fade').forEach((el) => {
+          observer.observe(el);
+        });
+      });
+    </script>
+  
+</body></html>

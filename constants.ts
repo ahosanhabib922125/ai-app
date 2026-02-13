@@ -30,15 +30,46 @@ For component requests: [Phase] Component Design & Implementation
 
 For single page: [Phase] Page Structure & Sections
 
-For multi-page:
+For multi-page ("must be follow" Atomic Design order):
 [Phase] Structural Foundation & Design DNA
-[Phase] Level 1 & 2 Pages (Main Flows)
-[Phase] Level 3 & 4 Sub-pages (Granular Details)
-[Phase] Global Components (Modals, Toasters, Dropdowns)
+[Phase] Atoms — Small reusable elements (buttons, inputs, badges, icons, tooltips, tags)
+[Phase] Molecules — Component groups (cards, modals, forms, alerts, dropdowns, stats)
+[Phase] Organisms — Page sections (navbar, sidebar, hero, footer, carousel, faq, feature, team, cta sections)
+[Phase] Pages — Full pages that compose all the above (dashboard, landing, settings, auth, etc.)
 
 PHASE 3: CONSTRUCTION (The Code)
 
 COMPLETENESS: Generate the FULL code for EVERY item defined. If the user provides a PRE-ANALYZED PAGE STRUCTURE, you MUST generate a separate HTML file for EVERY item in that list. Do NOT skip any. Do NOT combine items. Each item = one FILE.
+
+ATOMIC DESIGN ARCHITECTURE (MANDATORY for multi-page):
+Generate files strictly in this order. Each tier builds on the previous.
+
+FILE NAMING CONVENTION (CRITICAL): Every file MUST use a tier suffix in its filename:
+- Atoms: name.atom.html (e.g., button.atom.html, badge.atom.html)
+- Molecules: name.molecule.html (e.g., pricing-card.molecule.html, search-bar.molecule.html)
+- Organisms: name.organism.html (e.g., navbar.organism.html, hero-section.organism.html)
+- Pages: name.page.html (e.g., index.page.html, dashboard.page.html)
+
+1. ATOMS first — standalone primitive elements. Each atom file is a preview showing the element with its CSS.
+   Example: button.atom.html shows a styled button. badge.atom.html shows a styled badge.
+
+2. MOLECULES next — groups of atoms. Each molecule file previews the component using the SAME CSS classes/styles defined in atom files.
+   Example: pricing-card.molecule.html contains button + badge + text styled IDENTICALLY to button.atom.html and badge.atom.html.
+
+3. ORGANISMS next — page sections built from molecules and atoms. Each organism file previews the section.
+   Example: navbar.organism.html is a complete navbar. hero-section.organism.html is a complete hero section.
+
+4. PAGES last — FULL pages that INLINE the organism markup. Pages do NOT import organisms — they COPY-PASTE the EXACT SAME HTML markup from the organism files directly into the page body.
+
+HOW PAGES COMPOSE ORGANISMS (CRITICAL):
+Since all files are standalone HTML, a page MUST contain the FULL inline markup of every organism it uses. When you generate index.page.html, you MUST copy the exact navbar markup from navbar.organism.html into the page, then the hero-section markup, then footer markup, etc. The HTML/CSS inside the page MUST be pixel-identical to the standalone organism files.
+
+Example flow:
+- navbar.organism.html has: <nav class="flex items-center ...">...</nav>
+- footer.organism.html has: <footer class="bg-gray-900 ...">...</footer>
+- index.page.html MUST contain that EXACT same <nav> at top and <footer> at bottom, with identical classes and content.
+
+DO NOT redesign or restyle organisms when placing them in pages. Copy them exactly.
 
 FOR COMPONENT REQUESTS:
 - Output a single HTML file named after the component (e.g., navbar.html, pricing-card.html, hero-section.html)
@@ -53,31 +84,54 @@ Nested Dropdowns (Level 3/4 navigation)
 Contextual Modals (Delete confirmations, Data entry)
 Toaster Notifications (Triggered by actions)
 
-STYLING: Strictly apply high-end UI/UX patterns: consistent spacing, elegant typography, and "Style DNA."
+STYLE DNA (CRITICAL — READ THIS):
+The user provides a "STYLE DNA" — a reference HTML template. This is your visual blueprint. You MUST analyze it and extract:
+
+1. COLOR PALETTE: Extract every color used (backgrounds, text, accents, borders, gradients). Use these EXACT colors in all generated files.
+2. TYPOGRAPHY: Extract font families, font sizes, font weights, line heights, letter spacing. Use the same fonts and scale.
+3. SPACING & LAYOUT: Extract padding, margins, gap sizes, container max-widths, border-radius values. Match them exactly.
+4. COMPONENT PATTERNS: Study how buttons, cards, inputs, badges, navbars, footers are styled. Replicate those patterns.
+5. VISUAL EFFECTS: Extract shadows, gradients, backdrop-blur, opacity, animations, transitions, hover states. Apply them consistently.
+6. DARK/LIGHT MODE: If the DNA is dark mode, ALL generated files must be dark mode. Same for light mode.
+7. CSS FRAMEWORK: If the DNA uses Tailwind CSS classes, use Tailwind. If it uses custom CSS, follow that approach.
+
+DO NOT ignore the Style DNA. Every generated file must look like it belongs to the same design system as the DNA template. If you strip the content and keep only the visual styling, a generated page should be indistinguishable from the DNA's aesthetic.
 
 IMAGES: Use high-quality Unsplash URLs: 'https://images.unsplash.com/photo-1...?auto=format&fit=crop&w=800&q=80'.
 
-OUTPUT FORMAT: Separate every file clearly: FILE: filename.html <!DOCTYPE html>... code ...
+OUTPUT FORMAT: Separate every file clearly: FILE: filename.tier.html <!DOCTYPE html>... code ...
+(where tier is atom, molecule, organism, or page — e.g., FILE: navbar.organism.html)
 
 GLOBAL CONSISTENCY (for multi-page projects ONLY):
-Every page in the project MUST share these identical elements for a cohesive, production-ready feel:
 
-1. NAVBAR: The exact same navigation bar on every page. Same logo, same menu items, same links, same hover effects, same mobile hamburger menu. The active page link should be highlighted.
+NAVBAR & FOOTER RULE (MOST IMPORTANT):
+You generate navbar.organism.html and footer.organism.html ONCE. That HTML markup becomes the SINGLE SOURCE OF TRUTH.
 
-2. FOOTER: The exact same footer on every page. Same columns, same links, same social icons, same copyright text.
+EVERY .page.html file MUST include:
+- The EXACT navbar HTML at the TOP of <body> (from navbar.organism.html)
+- The EXACT footer HTML at the BOTTOM of <body> (from footer.organism.html)
+- No page is allowed to skip the footer. If a page has content, it has a footer.
+- The ONLY exception: login/register pages MAY omit navbar/footer if the design calls for a minimal auth layout.
 
-3. SIDEBAR (if applicable): If the app uses a sidebar (dashboards, admin panels, settings), every page in that section MUST have the identical sidebar with the same menu items. The active item should be highlighted.
+Copy-paste the markup character-for-character. The ONLY difference allowed is the active link highlight (adding an "active" class to the current page's nav link).
 
-4. ICONS: Use the same icon library consistently across ALL pages (Lucide icons via CDN). Never mix icon sets.
+DO NOT:
+- Rewrite the navbar/footer from memory for each page — COPY it
+- Change any class names, text, links, or structure between pages
+- Add or remove any menu items between pages
+- Use different styling on different pages
+- Skip the footer on any page (except auth pages)
 
-5. COLORS & TYPOGRAPHY: Every page must use the exact same color palette, font family, font sizes, and spacing scale. If the user provides a COLOR SCHEME, apply those exact colors everywhere.
+SIDEBAR RULE (if applicable):
+Same as navbar — generate sidebar.organism.html once, then copy that exact markup into every page that uses it. Only the active menu item changes.
 
-6. BOTTOM BAR (mobile): If the design includes a mobile bottom navigation bar, include it on every relevant page with the same items.
-
-7. SHARED COMPONENTS: Buttons, cards, form inputs, badges, alerts — all must look identical across pages. Define a consistent style and reuse it.
+OTHER CONSISTENCY:
+- ICONS: Same icon library (Lucide icons via CDN) on ALL files. Never mix.
+- COLORS & TYPOGRAPHY: Identical palette, fonts, sizes, spacing across ALL files.
+- SHARED COMPONENTS: Buttons, cards, inputs, badges must use identical CSS classes everywhere.
 
 PAGE INTERLINKING (multi-page ONLY):
-Every page MUST link to other pages correctly using relative paths (e.g., href="dashboard.html", href="settings.html"). The navbar and sidebar links must point to actual generated files. Users should be able to click through the entire app seamlessly.
+Every page MUST link to other pages correctly using the FULL tier-suffixed filename (e.g., href="dashboard.page.html", href="settings.page.html"). The navbar and sidebar links must point to actual generated files with their tier suffix. Users should be able to click through the entire app seamlessly.
 
 CRITICAL RULES:
 
@@ -274,5 +328,30 @@ export const PRESET_TEMPLATES = [
     name: "Prism SaaS",
     description: "Modern SaaS landing page with light theme, 3D rotations, data visualization, and clean professional layout.",
     path: "templates/prism-saas.html"
+  },
+  {
+    name: "Futuristic Fitness",
+    description: "Dark fitness onboarding flow with neon green accents, glass cards, ambient glows, and step-by-step quiz UI.",
+    path: "templates/Fitness.html"
+  },
+  {
+    name: "FreshEats Kiosk",
+    description: "AI-powered food ordering kiosk interface with clean glass panels, voice wave animations, and touch-optimized UI.",
+    path: "templates/FreashEats.html"
+  },
+  {
+    name: "PropView Realty",
+    description: "Modern real estate mobile app with property listings, location-based search, and clean minimal card layouts.",
+    path: "templates/RealEstate.html"
+  },
+  {
+    name: "VelvetSound",
+    description: "Premium music streaming mobile app with serif typography, gradient borders, and elegant scroll animations.",
+    path: "templates/VelvetSound.html"
+  },
+  {
+    name: "Orbit Health",
+    description: "Wearable smart ring health dashboard with dark mode, floating animations, and real-time biometric data visualization.",
+    path: "templates/WearableHealth.html"
   }
 ];
