@@ -4,10 +4,10 @@ import {
   Sparkles, Layout, Activity, Loader,
   Monitor, Smartphone, Wand2, Image as ImageIcon, FileText,
   Play, Check, FileCode, X, Paperclip, LayoutTemplate, Upload,
-  ArrowRight, ChevronLeft, MessageSquare, Bot, User, BrainCircuit,
+  ChevronLeft, MessageSquare, Bot, User, BrainCircuit,
   Download, Package, Terminal, AlertTriangle,
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
-  PanelTop, Workflow, PanelTopOpen, Maximize, Undo2, Redo2
+  PanelTop, Workflow, PanelTopOpen, Maximize, Undo2, Redo2, Eye
 } from 'lucide-react';
 import { generateArchitectureStream, analyzePRD } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
@@ -80,6 +80,7 @@ const App: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState('Ready to build');
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<DesignTemplate | null>(null);
 
   const [roadmap, setRoadmap] = useState<RoadmapItem[]>([]);
   const [files, setFiles] = useState<Record<string, GeneratedFile>>({});
@@ -985,31 +986,86 @@ navigateTo('${activeFile}');
               {PRESET_TEMPLATES.map((tmpl, idx) => (
                 <div
                   key={idx}
-                  onClick={() => handleTemplateSelect(tmpl)}
-                  className="group relative cursor-pointer h-64 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-300"
+                  className="group relative cursor-default h-64 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-300"
                 >
                   <div className="absolute top-0 left-0 right-0 h-32 bg-slate-100 border-b border-slate-100 flex items-center justify-center group-hover:bg-indigo-50/50 transition-colors">
-                    {/* Live Preview of Template */}
                     <div className="w-full h-full relative overflow-hidden">
                       <TemplateThumbnail template={tmpl} />
+                    </div>
+                    {/* Hover overlay with buttons */}
+                    <div className="absolute inset-0 z-30 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
+                      {tmpl.path && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setPreviewTemplate(tmpl); }}
+                          className="px-4 py-2 bg-white text-slate-700 rounded-xl text-xs font-bold shadow-lg hover:bg-slate-50 transition-colors flex items-center gap-1.5"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> Preview
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleTemplateSelect(tmpl); }}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
+                      >
+                        {isLoadingTemplate && selectedTemplate.name === tmpl.name ? (
+                          <><Loader className="w-3.5 h-3.5 animate-spin" /> Loading</>
+                        ) : (
+                          <><Play className="w-3.5 h-3.5 fill-current" /> Use This</>
+                        )}
+                      </button>
                     </div>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-6 z-20 bg-white/95 backdrop-blur-sm border-t border-slate-50">
                     <h3 className="text-lg font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">{tmpl.name}</h3>
                     <p className="text-sm text-slate-500 mt-2 line-clamp-2">{tmpl.description}</p>
-                    <div className="mt-4 flex items-center text-indigo-600 font-semibold text-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
-                      {isLoadingTemplate && selectedTemplate.name === tmpl.name ? (
-                        <span className="flex items-center gap-2"><Loader className="w-4 h-4 animate-spin" /> Loading...</span>
-                      ) : (
-                        <span className="flex items-center gap-1">Select Template <ArrowRight className="w-4 h-4 ml-1" /></span>
-                      )}
-                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </main>
+
+        {/* Template Preview Modal */}
+        {previewTemplate && (
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">{previewTemplate.name}</h3>
+                  <p className="text-sm text-slate-500">{previewTemplate.description}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => { handleTemplateSelect(previewTemplate); setPreviewTemplate(null); }}
+                    className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4 fill-current" /> Use This Template
+                  </button>
+                  <button
+                    onClick={() => setPreviewTemplate(null)}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              {/* Modal Body — Full iframe preview */}
+              <div className="flex-1 min-h-0 bg-slate-50">
+                {previewTemplate.path ? (
+                  <iframe
+                    src={previewTemplate.path}
+                    className="w-full h-full border-none"
+                    title={`Preview: ${previewTemplate.name}`}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-slate-400">
+                    <p className="text-sm">No preview available for custom templates</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
