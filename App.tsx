@@ -100,7 +100,11 @@ const App: React.FC = () => {
   // Undo/Redo State
   const [filesHistory, setFilesHistory] = useState<Record<string, GeneratedFile>[]>([]);
   const [filesHistoryIndex, setFilesHistoryIndex] = useState(-1);
+  const filesHistoryIndexRef = useRef(-1);
   const isUndoRedoRef = useRef(false);
+
+  // Abort controller for stopping generation
+  const abortRef = useRef(false);
 
   // Derived State (memoized)
   const currentTask = useMemo(() => roadmap.find(r => r.status === 'active'), [roadmap]);
@@ -180,22 +184,6 @@ const App: React.FC = () => {
     }
   }, [chatHistory, activeTab]);
 
-  // Keyboard shortcuts for undo/redo
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) {
-          handleRedo();
-        } else {
-          handleUndo();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleUndo, handleRedo]);
-
   // --- Actions ---
 
   const handleNewChat = () => {
@@ -212,27 +200,34 @@ const App: React.FC = () => {
     setActiveTab('chat');
     setFilesHistory([]);
     setFilesHistoryIndex(-1);
+    filesHistoryIndexRef.current = -1;
   };
 
   // Push a snapshot to undo/redo history
   const pushFilesSnapshot = useCallback((snapshot: Record<string, GeneratedFile>) => {
-    if (Object.keys(snapshot).length === 0) return;
+    const currentIndex = filesHistoryIndexRef.current;
     setFilesHistory(prev => {
-      const newHistory = prev.slice(0, filesHistoryIndex + 1);
-      newHistory.push(snapshot);
+      const newHistory = prev.slice(0, currentIndex + 1);
+      newHistory.push({ ...snapshot });
       return newHistory;
     });
-    setFilesHistoryIndex(prev => prev + 1);
-  }, [filesHistoryIndex]);
+    const newIndex = currentIndex + 1;
+    setFilesHistoryIndex(newIndex);
+    filesHistoryIndexRef.current = newIndex;
+  }, []);
 
   const handleUndo = useCallback(() => {
     if (!canUndo) return;
     const newIndex = filesHistoryIndex - 1;
     isUndoRedoRef.current = true;
     setFilesHistoryIndex(newIndex);
-    setFiles(filesHistory[newIndex]);
-    const fileKeys = Object.keys(filesHistory[newIndex]);
-    if (fileKeys.length > 0 && (!activeFile || !filesHistory[newIndex][activeFile])) {
+    filesHistoryIndexRef.current = newIndex;
+    const snapshot = filesHistory[newIndex];
+    setFiles(snapshot);
+    const fileKeys = Object.keys(snapshot);
+    if (fileKeys.length === 0) {
+      setActiveFile(null);
+    } else if (!activeFile || !snapshot[activeFile]) {
       setActiveFile(fileKeys[0]);
     }
   }, [canUndo, filesHistoryIndex, filesHistory, activeFile]);
@@ -242,12 +237,36 @@ const App: React.FC = () => {
     const newIndex = filesHistoryIndex + 1;
     isUndoRedoRef.current = true;
     setFilesHistoryIndex(newIndex);
-    setFiles(filesHistory[newIndex]);
-    const fileKeys = Object.keys(filesHistory[newIndex]);
-    if (fileKeys.length > 0 && (!activeFile || !filesHistory[newIndex][activeFile])) {
+    filesHistoryIndexRef.current = newIndex;
+    const snapshot = filesHistory[newIndex];
+    setFiles(snapshot);
+    const fileKeys = Object.keys(snapshot);
+    if (fileKeys.length === 0) {
+      setActiveFile(null);
+    } else if (!activeFile || !snapshot[activeFile]) {
       setActiveFile(fileKeys[0]);
     }
   }, [canRedo, filesHistoryIndex, filesHistory, activeFile]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
+  const handleStop = useCallback(() => {
+    abortRef.current = true;
+  }, []);
 
   const handleLoadSession = (session: ProjectSession) => {
     setSessionId(session.id);
@@ -340,9 +359,13 @@ const App: React.FC = () => {
 
   const startBuild = async () => {
     if (!prompt.trim()) return;
+    abortRef.current = false;
 
     // Determine if this is a fresh build or a modification
     const isModification = Object.keys(files).length > 0;
+
+    // Push pre-build snapshot for undo support
+    pushFilesSnapshot({ ...files });
     const currentTimestamp = Date.now();
 
     // 1. Add USER message
@@ -429,7 +452,7 @@ const App: React.FC = () => {
       const pageListText = pageAnalysis
         .map(p => `- ${p.name} (${p.type}): ${p.description}`)
         .join('\n');
-      enhancedPrompt = `${capturedPrompt}\n\nPRE-ANALYZED PAGE STRUCTURE (build ALL of these):\n${pageListText}`;
+      enhancedPrompt = `${capturedPrompt}\n\nPRE-ANALYZED PAGE STRUCTURE — You MUST generate a separate FILE for EVERY item below (${pageAnalysis.length} files total). Each page must have the same navbar, footer, sidebar, and icons. All pages must link to each other:\n${pageListText}`;
     }
     if (prdColors) {
       const colorEntries = Object.entries(prdColors).filter(([, v]) => v);
@@ -439,24 +462,55 @@ const App: React.FC = () => {
       }
     }
 
-    let currentPhase = 'planning';
-    let fullBuffer = "";
-    let lastFileCount = 0;
     // Pass existing files if modification, or empty object if fresh
     const currentFilesSnapshot = { ...files };
+    // Local accumulator — mirrors React state but readable synchronously
+    let buildFiles: Record<string, GeneratedFile> = { ...currentFilesSnapshot };
     // Ensure we have template content
     const dnaContent = selectedTemplate.content || "";
 
-    try {
+    // Helper: collect all generated file names from the full buffer
+    const getGeneratedFileNames = (buffer: string): string[] => {
+      if (!buffer.includes("FILE:")) return [];
+      return buffer.split("FILE:").slice(1).map(p => p.trim().split("\n")[0].trim()).filter(Boolean);
+    };
+
+    // Helper: update page analysis checkmarks based on actual generated files
+    const updatePageAnalysisStatus = (generatedFileNames: string[], latestFileName: string) => {
+      if (pageAnalysis.length === 0) return;
+      const updatedPageAnalysis = pageAnalysis.map((item) => {
+        const itemWords = item.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
+        const isGenerated = generatedFileNames.some(fn => {
+          const fnClean = fn.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+          return itemWords.some(w => w.length > 2 && fnClean.includes(w));
+        });
+        const isActive = !isGenerated && latestFileName && (() => {
+          const fnClean = latestFileName.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+          return itemWords.some(w => w.length > 2 && fnClean.includes(w));
+        })();
+        if (isGenerated) return { ...item, status: 'completed' as const };
+        if (isActive) return { ...item, status: 'active' as const };
+        return { ...item, status: 'pending' as const };
+      });
+      updateAiMessage({ pageAnalysis: updatedPageAnalysis });
+    };
+
+    // Helper: run one streaming generation pass
+    const runStreamPass = async (streamPrompt: string, existingFiles: Record<string, GeneratedFile>) => {
+      let currentPhase = Object.keys(existingFiles).length > 0 ? 'coding' : 'planning';
+      let fullBuffer = "";
+      let lastFileCount = 0;
+
       const stream = generateArchitectureStream(
-        enhancedPrompt,
+        streamPrompt,
         dnaContent,
         capturedFiles,
-        currentFilesSnapshot,
+        existingFiles,
         chatHistory
       );
 
       for await (const chunk of stream) {
+        if (abortRef.current) break;
         fullBuffer += chunk;
 
         // 1. Live Roadmap Parsing
@@ -473,14 +527,12 @@ const App: React.FC = () => {
               status: (idx === 0 ? 'active' : 'pending') as RoadmapItem['status']
             } as RoadmapItem));
 
-            // Update Global State
             setRoadmap(newRoadmap);
             setStatus('coding');
             setStatusMessage('Blueprint Created. Starting Design...');
             setProgress(15);
             currentPhase = 'coding';
 
-            // Update Chat Message to show Roadmap
             updateAiMessage({
               text: "I've created a plan. Starting implementation:",
               statusPhase: 'coding',
@@ -494,101 +546,139 @@ const App: React.FC = () => {
           const parts = fullBuffer.split("FILE:");
           const currentFileCount = parts.length - 1;
 
-          // Always update the latest file content (streaming in)
           for (let i = 1; i < parts.length; i++) {
             const fileBlock = parts[i];
             const lines = fileBlock.trim().split("\n");
             const fileName = lines[0].trim();
 
-            // Capture content even if partial
             let content = lines.slice(1).join("\n")
               .replace(/^```html/, '')
               .replace(/^```/, '')
               .replace(/```$/, '');
 
             if (fileName) {
-              setFiles(prev => ({
-                ...prev,
-                [fileName]: { name: fileName, language: 'html', content: content }
-              }));
-
-              // Set active file immediately so user sees it building
+              const fileData = { name: fileName, language: 'html', content: content };
+              buildFiles = { ...buildFiles, [fileName]: fileData };
+              setFiles(prev => ({ ...prev, [fileName]: fileData }));
               setActiveFile(prev => prev || fileName);
-
               if (i === parts.length - 1) {
                 setStatusMessage(`Designing ${fileName}...`);
               }
             }
           }
 
-          // Only update progress & roadmap when a NEW file is discovered
           if (currentFileCount > lastFileCount) {
             lastFileCount = currentFileCount;
-
-            // Collect all generated file names so far
             const generatedFileNames = parts.slice(1).map(p => p.trim().split("\n")[0].trim()).filter(Boolean);
+            const latestFileName = generatedFileNames[generatedFileNames.length - 1] || '';
+            updatePageAnalysisStatus(generatedFileNames, latestFileName);
 
-            // Update page analysis items status based on generated files
-            if (pageAnalysis.length > 0) {
-              const updatedPageAnalysis = pageAnalysis.map((item, idx) => {
-                const itemNameLower = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                const isGenerated = generatedFileNames.some(fn => {
-                  const fnLower = fn.toLowerCase().replace(/\.html$/, '').replace(/[^a-z0-9]/g, '');
-                  return fnLower.includes(itemNameLower) || itemNameLower.includes(fnLower);
-                });
-                // Mark sequentially: items up to current file count as completed, next as active
-                if (idx < currentFileCount - 1 || isGenerated) return { ...item, status: 'completed' as const };
-                if (idx === currentFileCount - 1) return { ...item, status: 'active' as const };
-                return { ...item, status: 'pending' as const };
-              });
-              updateAiMessage({ pageAnalysis: updatedPageAnalysis });
-            }
-
-            // Mark completed files and set the current one as active
             setRoadmap(prevRoadmap => {
-              const completedIdx = currentFileCount - 1; // files are 0-based, last completed
+              const completedIdx = currentFileCount - 1;
               const updatedRoadmap = prevRoadmap.map((item, idx) =>
                 idx < completedIdx ? { ...item, status: 'completed' as const } :
                 (idx === completedIdx ? { ...item, status: 'active' as const } : item)
               );
-
               updateAiMessage({ roadmap: updatedRoadmap });
-
               const roadmapCount = prevRoadmap.length || 5;
               const calcProgress = 15 + Math.min(75, (completedIdx / roadmapCount) * 75);
               setProgress(Math.floor(calcProgress));
-
               return updatedRoadmap as RoadmapItem[];
             });
           }
         }
       }
 
+      return fullBuffer;
+    };
+
+    try {
+      // --- FIRST PASS ---
+      let fullBuffer = await runStreamPass(enhancedPrompt, currentFilesSnapshot);
+
+      // --- AUTO-CONTINUE: keep generating until all pages are built ---
+      const MAX_CONTINUATIONS = 5;
+      let continuationCount = 0;
+
+      while (pageAnalysis.length > 0 && continuationCount < MAX_CONTINUATIONS && !abortRef.current) {
+        // Use local accumulator (always in sync, no React batching issues)
+        const allFileNames = Object.keys(buildFiles);
+
+        // Check which pages from analysis are still missing
+        const missingPages = pageAnalysis.filter(item => {
+          const itemWords = item.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
+          return !allFileNames.some(fn => {
+            const fnClean = fn.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+            return itemWords.some(w => w.length > 2 && fnClean.includes(w));
+          });
+        });
+
+        if (missingPages.length === 0) break; // All pages built!
+
+        continuationCount++;
+        const missingList = missingPages.map(p => `- ${p.name} (${p.type}): ${p.description}`).join('\n');
+
+        updateAiMessage({
+          text: `Building remaining ${missingPages.length} pages... (continuation ${continuationCount})`,
+          statusPhase: 'coding',
+        });
+        setStatusMessage(`Continuation ${continuationCount}: ${missingPages.length} pages remaining...`);
+
+        const continuePrompt = `CONTINUE BUILDING. You already generated these files: ${allFileNames.join(', ')}
+
+The following pages are STILL MISSING and MUST be generated now. Generate a separate FILE for each one. Use the EXACT SAME navbar, footer, sidebar, color scheme, and styling as the files already built. All links must work with the existing files.
+
+MISSING PAGES (generate ALL of these NOW):\n${missingList}
+
+IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing ones listed above. Start directly with FILE: blocks, no ROADMAP needed.`;
+
+        fullBuffer = await runStreamPass(continuePrompt, { ...buildFiles });
+      }
+
+      // --- BUILD COMPLETE (or stopped) ---
+      const wasStopped = abortRef.current;
       setStatus('completed');
-      setStatusMessage('Build Finished');
+      setStatusMessage(wasStopped ? 'Build Stopped' : 'Build Finished');
       setProgress(100);
 
       const finalRoadmap = roadmap.map(item => ({ ...item, status: 'completed' as const } as RoadmapItem));
-      setRoadmap(finalRoadmap);
+      if (!wasStopped) setRoadmap(finalRoadmap);
+
+      // Use local accumulator for reliable file reading (avoids React batching issues)
+      const finalFiles = { ...buildFiles };
+      const finalFileNames = Object.keys(finalFiles);
 
       // Push completed files to undo/redo history
-      setFiles(prev => {
-        pushFilesSnapshot({ ...prev });
-        return prev;
-      });
+      pushFilesSnapshot(finalFiles);
 
-      // Mark all page analysis items as completed
-      const finalPageAnalysis = pageAnalysis.length > 0
-        ? pageAnalysis.map(item => ({ ...item, status: 'completed' as const }))
-        : undefined;
-
-      updateAiMessage({
-        text: "Build complete! I've generated the files based on the roadmap.",
-        isStreaming: false,
-        statusPhase: 'done',
-        roadmap: finalRoadmap,
-        ...(finalPageAnalysis ? { pageAnalysis: finalPageAnalysis } : {})
-      });
+      if (pageAnalysis.length > 0) {
+        const finalPageAnalysis = pageAnalysis.map(item => {
+          const itemWords = item.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/);
+          const isGenerated = finalFileNames.some(fn => {
+            const fnClean = fn.toLowerCase().replace(/\.html$/, '').replace(/[-_]/g, ' ');
+            return itemWords.some(w => w.length > 2 && fnClean.includes(w));
+          });
+          return { ...item, status: isGenerated ? 'completed' as const : 'pending' as const };
+        });
+        const completedCount = finalPageAnalysis.filter(p => p.status === 'completed').length;
+        const statusText = wasStopped
+          ? `Build stopped. Generated ${finalFileNames.length} files so far (${completedCount}/${pageAnalysis.length} pages).`
+          : `Build complete! Generated ${finalFileNames.length} files (${completedCount}/${pageAnalysis.length} pages matched).`;
+        updateAiMessage({
+          text: statusText,
+          isStreaming: false,
+          statusPhase: 'done',
+          roadmap: wasStopped ? undefined : finalRoadmap,
+          pageAnalysis: finalPageAnalysis
+        });
+      } else {
+        updateAiMessage({
+          text: wasStopped ? `Build stopped. Generated ${finalFileNames.length} files so far.` : "Build complete! I've generated the files based on the roadmap.",
+          isStreaming: false,
+          statusPhase: 'done',
+          roadmap: wasStopped ? undefined : finalRoadmap
+        });
+      }
 
     } catch (e: any) {
       console.error(e);
@@ -812,20 +902,24 @@ navigateTo('${activeFile}');
           disabled={status === 'planning' || status === 'coding'}
         />
 
-        <button
-          onClick={startBuild}
-          disabled={status === 'planning' || status === 'coding' || !prompt}
-          className={`flex items-center gap-2 bg-gradient-to-r from-indigo-400 to-indigo-600 hover:from-indigo-500 hover:to-indigo-700 text-white font-bold shadow-xl shadow-indigo-200 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${isCompact ? 'p-2 rounded-xl' : 'px-6 py-3 rounded-2xl text-sm'}`}
-        >
-          {status === 'planning' || status === 'coding' ? (
-            <Loader className="w-4 h-4 animate-spin" />
-          ) : (
-            <>
-              {(!isCompact || Object.keys(files).length > 0) && <span className={isCompact ? 'hidden' : ''}>{Object.keys(files).length > 0 ? "Update" : "Build"}</span>}
-              <Play className="w-4 h-4 fill-current" />
-            </>
-          )}
-        </button>
+        {status === 'planning' || status === 'coding' ? (
+          <button
+            onClick={handleStop}
+            className={`flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold shadow-xl shadow-red-200 transition-all transform hover:scale-105 ${isCompact ? 'p-2 rounded-xl' : 'px-6 py-3 rounded-2xl text-sm'}`}
+          >
+            {!isCompact && <span>Stop</span>}
+            <X className="w-4 h-4" />
+          </button>
+        ) : (
+          <button
+            onClick={startBuild}
+            disabled={!prompt}
+            className={`flex items-center gap-2 bg-gradient-to-r from-indigo-400 to-indigo-600 hover:from-indigo-500 hover:to-indigo-700 text-white font-bold shadow-xl shadow-indigo-200 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${isCompact ? 'p-2 rounded-xl' : 'px-6 py-3 rounded-2xl text-sm'}`}
+          >
+            {(!isCompact || Object.keys(files).length > 0) && <span className={isCompact ? 'hidden' : ''}>{Object.keys(files).length > 0 ? "Update" : "Build"}</span>}
+            <Play className="w-4 h-4 fill-current" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -1001,6 +1095,13 @@ navigateTo('${activeFile}');
                       {currentTask ? currentTask.title : statusMessage}
                     </p>
                   </div>
+                  <button
+                    onClick={handleStop}
+                    className="px-2.5 py-1 bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold rounded-md transition-colors shrink-0 flex items-center gap-1"
+                    title="Stop generation"
+                  >
+                    <X className="w-3 h-3" /> Stop
+                  </button>
                 </div>
               </div>
             )}
@@ -1295,14 +1396,14 @@ navigateTo('${activeFile}');
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative  bg-white">
+      <main className="flex-1 flex flex-col relative bg-white min-w-0">
 
         {/* Header - PERSISTENT TOP BAR */}
         <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6 z-10 shadow-sm">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <div
               onClick={() => setStep('selection')}
-              className="group flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors"
+              className="group flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors shrink-0"
             >
               <Layout className="w-3 h-3" />
               <span className="text-[10px] font-bold uppercase tracking-tight truncate max-w-[150px]">{selectedTemplate.name}</span>
@@ -1325,7 +1426,7 @@ navigateTo('${activeFile}');
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {/* Undo/Redo */}
             <div className="flex items-center bg-slate-100 p-1 rounded-xl mr-2">
               <button
@@ -1362,6 +1463,15 @@ navigateTo('${activeFile}');
             </div>
 
             {Object.keys(files).length > 0 && (
+              <>
+              <button
+                onClick={handleFullView}
+                className="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5"
+                title="Open in Full View"
+              >
+                <Maximize className="w-4 h-4" />
+                <span className="hidden lg:inline">Full View</span>
+              </button>
               <div className="relative">
                 <button
                   onClick={() => setIsExportOpen(!isExportOpen)}
@@ -1411,6 +1521,7 @@ navigateTo('${activeFile}');
                   </div>
                 )}
               </div>
+              </>
             )}
           </div>
         </header>
@@ -1471,14 +1582,14 @@ navigateTo('${activeFile}');
 
             {/* 3. ACTIVE PREVIEW STATE */}
             {activeFile && files[activeFile] && (
-              <div className="flex-1 min-h-0 w-full flex flex-col bg-white">
+              <div className="flex-1 min-h-0 w-full flex flex-col bg-white overflow-hidden">
                 {/* File Tabs */}
-                <div className="bg-slate-50 border-b border-slate-100 px-2 pt-2 flex gap-1 overflow-x-auto shrink-0">
+                <div className="bg-slate-50 border-b border-slate-100 px-2 pt-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-thin" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
                   {Object.values(files).map((f) => (
                     <button
                       key={f.name}
                       onClick={() => setActiveFile(f.name)}
-                      className={`px-4 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${activeFile === f.name ? 'bg-white text-indigo-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
+                      className={`px-4 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? 'bg-white text-indigo-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
                     >
                       <FileCode className="w-3.5 h-3.5" />
                       {f.name}
@@ -1491,15 +1602,7 @@ navigateTo('${activeFile}');
                       <span>Generating...</span>
                     </div>
                   )}
-                  {/* Full View Button */}
-                  <button
-                    onClick={handleFullView}
-                    className="ml-auto px-3 py-1.5 my-0.5 mr-1 rounded-lg text-xs font-bold flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-                    title="Open in Full View"
-                  >
-                    <Maximize className="w-3.5 h-3.5" />
-                    Full View
-                  </button>
+                  <div className="ml-auto" />
                 </div>
                 {/* Iframe Preview */}
                 <div className="flex-1 min-h-0 relative">

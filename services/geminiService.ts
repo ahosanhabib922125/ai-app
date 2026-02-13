@@ -3,7 +3,8 @@ import { GoogleGenAI } from "@google/genai";
 import { SYSTEM_INSTRUCTION, PRD_ANALYSIS_INSTRUCTION } from "../constants";
 import { GeneratedFile, ChatMessage, PageAnalysisItem, PRDAnalysisResult } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || '';
+const ai = new GoogleGenAI({ apiKey });
 
 export interface StreamUpdate {
   text: string;
