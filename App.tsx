@@ -91,7 +91,7 @@ const App: React.FC = () => {
   const [designSections, setDesignSections] = useState<Record<string, boolean>>({typography: true, colors: true, border: false, spacing: false, size: false, layout: false, flexbox: false, effects: false});
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
   const [designSrcDoc, setDesignSrcDoc] = useState<string | null>(null);
-  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({ pages: true, components: true });
+  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({ atoms: true, molecules: true, organisms: true, pages: true });
   const designAutoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const designDirtyRef = useRef(false);
 
@@ -131,21 +131,24 @@ const App: React.FC = () => {
   const canUndo = filesHistoryIndex > 0;
   const canRedo = filesHistoryIndex < filesHistory.length - 1;
 
-  const COMPONENT_KEYWORDS = ['navbar','nav','sidebar','footer','header','modal','card','widget','menu','breadcrumb','pagination','tab','accordion','alert','badge','tooltip','dropdown','carousel','slider','testimonial','faq','cta','hero','banner','form','table','list','search','filter','chart','stat','feature','team','pricing-card','comment','review','notification','avatar','progress','spinner','loader','dialog','drawer','popover','toast','steps','timeline'];
+  const ATOM_KEYWORDS = ['button','input','label','badge','avatar','icon','spinner','loader','progress','tooltip','divider','tag','chip','toggle','switch','checkbox','radio','link','image','logo','indicator','dot','separator','skeleton'];
+  const MOLECULE_KEYWORDS = ['card','alert','modal','dialog','dropdown','popover','toast','notification','form','search','filter','pagination','breadcrumb','tab','accordion','steps','timeline','review','comment','stat','chart','rating','select','datepicker','upload','counter','price','testimonial-card','feature-card','pricing-card','social','share'];
+  const ORGANISM_KEYWORDS = ['navbar','nav','sidebar','footer','header','hero','banner','cta','carousel','slider','testimonial','faq','feature','team','table','list','menu','drawer','widget','section','panel','dashboard','toolbar','gallery','grid','contact','pricing','newsletter','blog-list','product-list'];
   const groupedFiles = useMemo(() => {
     const allFiles = Object.values(files) as GeneratedFile[];
+    const atoms: GeneratedFile[] = [];
+    const molecules: GeneratedFile[] = [];
+    const organisms: GeneratedFile[] = [];
     const pages: GeneratedFile[] = [];
-    const components: GeneratedFile[] = [];
+    const matchKeywords = (base: string, keywords: string[]) => keywords.some(k => base === k || base.startsWith(k + '-') || base.endsWith('-' + k));
     for (const f of allFiles) {
       const base = f.name.replace(/\.[^.]+$/, '').toLowerCase();
-      const isComponent = COMPONENT_KEYWORDS.some(k => base === k || base.startsWith(k + '-') || base.endsWith('-' + k));
-      if (isComponent) {
-        components.push(f);
-      } else {
-        pages.push(f);
-      }
+      if (matchKeywords(base, ATOM_KEYWORDS)) { atoms.push(f); }
+      else if (matchKeywords(base, MOLECULE_KEYWORDS)) { molecules.push(f); }
+      else if (matchKeywords(base, ORGANISM_KEYWORDS)) { organisms.push(f); }
+      else { pages.push(f); }
     }
-    return { pages, components };
+    return { atoms, molecules, organisms, pages };
   }, [files]);
 
   // --- Persistence Logic ---
@@ -1893,60 +1896,39 @@ navigateTo('${activeFile}');
             {/* 3. ACTIVE PREVIEW STATE */}
             {activeFile && files[activeFile] && (
               <div className="flex-1 min-h-0 w-full flex flex-col bg-white overflow-hidden">
-                {/* File Tabs - Grouped */}
+                {/* File Tabs - Atomic Design */}
                 <div className="bg-slate-50 border-b border-slate-100 px-2 pt-1.5 pb-0 flex gap-0.5 overflow-x-auto shrink-0 scrollbar-thin items-end" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
-                  {/* Pages Folder */}
-                  {groupedFiles.pages.length > 0 && (
-                    <div className="flex items-end gap-0.5 shrink-0">
-                      <button
-                        onClick={() => setOpenFolders(p => ({ ...p, pages: !p.pages }))}
-                        className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider shrink-0"
-                      >
-                        <ChevronRight className={`w-3 h-3 transition-transform ${openFolders.pages ? 'rotate-90' : ''}`} />
-                        <FolderOpen className="w-3 h-3" />
-                        Pages
-                        <span className="text-[9px] font-normal text-slate-300">({groupedFiles.pages.length})</span>
-                      </button>
-                      {openFolders.pages && groupedFiles.pages.map((f) => (
+                  {[
+                    { key: 'atoms', label: 'Atoms', items: groupedFiles.atoms, btnClass: 'text-emerald-500 hover:text-emerald-600', countClass: 'text-emerald-300', activeTab: 'bg-white text-emerald-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-emerald-400', icon: <Component className="w-3 h-3" /> },
+                    { key: 'molecules', label: 'Molecules', items: groupedFiles.molecules, btnClass: 'text-amber-500 hover:text-amber-600', countClass: 'text-amber-300', activeTab: 'bg-white text-amber-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-amber-400', icon: <Component className="w-3 h-3" /> },
+                    { key: 'organisms', label: 'Organisms', items: groupedFiles.organisms, btnClass: 'text-violet-500 hover:text-violet-600', countClass: 'text-violet-300', activeTab: 'bg-white text-violet-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-violet-400', icon: <Component className="w-3 h-3" /> },
+                    { key: 'pages', label: 'Pages', items: groupedFiles.pages, btnClass: 'text-indigo-500 hover:text-indigo-600', countClass: 'text-indigo-300', activeTab: 'bg-white text-indigo-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-indigo-400', icon: <FolderOpen className="w-3 h-3" /> },
+                  ].filter(g => g.items.length > 0).map((group, idx) => (
+                    <React.Fragment key={group.key}>
+                      {idx > 0 && <div className="w-px h-5 bg-slate-200 mx-1 shrink-0 self-center" />}
+                      <div className="flex items-end gap-0.5 shrink-0">
                         <button
-                          key={f.name}
-                          onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
-                          className={`px-3 py-1.5 rounded-t-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? 'bg-white text-indigo-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-indigo-400' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
+                          onClick={() => setOpenFolders(p => ({ ...p, [group.key]: !p[group.key] }))}
+                          className={`flex items-center gap-1 px-2 py-1 text-[10px] font-bold ${group.btnClass} transition-colors uppercase tracking-wider shrink-0`}
                         >
-                          <FileCode className="w-3 h-3" />
-                          {f.name}
+                          <ChevronRight className={`w-3 h-3 transition-transform ${openFolders[group.key] ? 'rotate-90' : ''}`} />
+                          {group.icon}
+                          {group.label}
+                          <span className={`text-[9px] font-normal ${group.countClass}`}>({group.items.length})</span>
                         </button>
-                      ))}
-                    </div>
-                  )}
-                  {/* Divider */}
-                  {groupedFiles.pages.length > 0 && groupedFiles.components.length > 0 && (
-                    <div className="w-px h-5 bg-slate-200 mx-1 shrink-0 self-center" />
-                  )}
-                  {/* Components Folder */}
-                  {groupedFiles.components.length > 0 && (
-                    <div className="flex items-end gap-0.5 shrink-0">
-                      <button
-                        onClick={() => setOpenFolders(p => ({ ...p, components: !p.components }))}
-                        className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-amber-500 hover:text-amber-600 transition-colors uppercase tracking-wider shrink-0"
-                      >
-                        <ChevronRight className={`w-3 h-3 transition-transform ${openFolders.components ? 'rotate-90' : ''}`} />
-                        <Component className="w-3 h-3" />
-                        Components
-                        <span className="text-[9px] font-normal text-amber-300">({groupedFiles.components.length})</span>
-                      </button>
-                      {openFolders.components && groupedFiles.components.map((f) => (
-                        <button
-                          key={f.name}
-                          onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
-                          className={`px-3 py-1.5 rounded-t-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? 'bg-white text-amber-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-amber-400' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
-                        >
-                          <Component className="w-3 h-3" />
-                          {f.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                        {openFolders[group.key] && group.items.map((f) => (
+                          <button
+                            key={f.name}
+                            onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
+                            className={`px-3 py-1.5 rounded-t-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? group.activeTab : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
+                          >
+                            {group.key === 'pages' ? <FileCode className="w-3 h-3" /> : <Component className="w-3 h-3" />}
+                            {f.name}
+                          </button>
+                        ))}
+                      </div>
+                    </React.Fragment>
+                  ))}
                   {(status === 'coding') && (
                     <div className="px-3 py-1.5 flex items-center gap-2 text-xs text-indigo-400 animate-pulse shrink-0">
                       <Terminal className="w-3 h-3" />
