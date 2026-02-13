@@ -131,18 +131,38 @@ SIDEBAR RULE (if applicable):
 Same as navbar — generate sidebar.organism.html once, then copy that exact markup into every page that uses it. Only the active menu item changes.
 
 OTHER CONSISTENCY:
-- ICONS: Same icon library (Lucide icons via CDN) on ALL files. Never mix.
+- ICONS: Use Iconify web components for ALL icons. Include this script in every file's <head>:
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+  Use <iconify-icon icon="lucide:icon-name" width="24" height="24"></iconify-icon> format.
+  NEVER use inline <svg> for icons. NEVER use <i class="..."> for icons. ONLY use <iconify-icon>.
+  Default prefix is "lucide". Use kebab-case icon names: lucide:home, lucide:search, lucide:user, lucide:settings, lucide:arrow-right, lucide:chevron-down, etc.
+  Same icon prefix on ALL files. Never mix icon prefixes across a project.
 - COLORS & TYPOGRAPHY: Identical palette, fonts, sizes, spacing across ALL files.
 - SHARED COMPONENTS: Buttons, cards, inputs, badges must use identical CSS classes everywhere.
 
-PAGE INTERLINKING (multi-page ONLY):
-Every page MUST link to other pages correctly using the FULL tier-suffixed filename (e.g., href="dashboard.page.html", href="settings.page.html"). The navbar and sidebar links must point to actual generated files with their tier suffix. Users should be able to click through the entire app seamlessly.
+PAGE ROUTING & INTERLINKING (MOST CRITICAL FOR NAVIGATION):
+Every page MUST be fully routable. Users must click through the ENTIRE app without dead links.
+
+ROUTING RULES:
+1. ALL <a href="..."> links in navbar, sidebar, footer, buttons, cards, CTAs, breadcrumbs — EVERY clickable element that navigates to another page — MUST use the EXACT full tier-suffixed filename: href="dashboard.page.html", href="settings.page.html", href="pricing.page.html"
+2. NAVBAR LINKS: Every navbar menu item MUST have a working href pointing to an actual generated .page.html file. No href="#", no href="javascript:void(0)", no empty hrefs. If the navbar has "Home", "About", "Pricing", "Contact" — then index.page.html, about.page.html, pricing.page.html, contact.page.html MUST all exist and be linked.
+3. SIDEBAR LINKS: Same rule — every sidebar menu item must href to a real .page.html file.
+4. FOOTER LINKS: Footer navigation links must also point to real .page.html files.
+5. CTA BUTTONS & CARDS: "Learn More", "View Details", "Get Started", "Sign Up" buttons MUST link to the appropriate .page.html file, not "#".
+6. BREADCRUMBS: If a page has breadcrumbs, each breadcrumb level must link to its parent .page.html file.
+7. NEVER USE: href="#", href="javascript:void(0)", href="", or any placeholder links. Every link must go to an actual generated file.
+8. CROSS-CHECK: Before finishing, verify that every href="something.page.html" in your output corresponds to a FILE you actually generated. No broken links.
+
+LINK FORMAT: Always use flat relative paths (same directory): href="filename.page.html" — never use folders like href="/pages/filename.html".
+
+PAGE FLOW & TRANSITIONS:
+If the app has a splash screen, onboarding, or welcome flow, link them sequentially: splash.page.html → onboarding.page.html → index.page.html. Use "Get Started" / "Next" / "Continue" buttons with href to the next page. The system adds slide transitions automatically between pages — just make sure every flow step links to the next step via <a href="next-step.page.html">.
 
 CRITICAL RULES:
 
 NO PARTIAL UPDATES: Always provide the full, standalone HTML for every file.
 
-DEEP LINKS: Ensure all sub-pages and 4th-level depth pages are interlinked correctly.
+DEEP LINKS: Ensure all sub-pages and 4th-level depth pages are interlinked correctly. Every link on every page must point to a real generated file.
 
 EVERY PAGE FROM THE LIST: If a PRE-ANALYZED PAGE STRUCTURE is provided, generate ALL of them. No exceptions. No shortcuts.
 
