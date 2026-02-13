@@ -597,10 +597,13 @@ const App: React.FC = () => {
       let fullBuffer = await runStreamPass(enhancedPrompt, currentFilesSnapshot);
 
       // --- AUTO-CONTINUE: keep generating until all pages are built ---
+      // Only auto-continue for multi-page projects (4+ pages). For single pages,
+      // components, or small requests, the first pass is enough.
+      const MIN_PAGES_FOR_AUTOCONTINUE = 4;
       const MAX_CONTINUATIONS = 5;
       let continuationCount = 0;
 
-      while (pageAnalysis.length > 0 && continuationCount < MAX_CONTINUATIONS && !abortRef.current) {
+      while (pageAnalysis.length >= MIN_PAGES_FOR_AUTOCONTINUE && continuationCount < MAX_CONTINUATIONS && !abortRef.current) {
         // Use local accumulator (always in sync, no React batching issues)
         const allFileNames = Object.keys(buildFiles);
 
@@ -614,6 +617,9 @@ const App: React.FC = () => {
         });
 
         if (missingPages.length === 0) break; // All pages built!
+
+        // If more than half the pages are built, stop — the rest likely have naming mismatches
+        if (missingPages.length < pageAnalysis.length * 0.3) break;
 
         continuationCount++;
         const missingList = missingPages.map(p => `- ${p.name} (${p.type}): ${p.description}`).join('\n');
