@@ -7,7 +7,7 @@ import {
   ChevronLeft, MessageSquare, Bot, User, BrainCircuit,
   Download, Package, Terminal, AlertTriangle,
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
-  PanelTop, Workflow, PanelTopOpen, Maximize, Undo2, Redo2, Eye
+  PanelTop, Workflow, PanelTopOpen, Maximize, Minimize2, Undo2, Redo2, Eye, PenTool, Search, ExternalLink
 } from 'lucide-react';
 import { generateArchitectureStream, analyzePRD } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
@@ -81,10 +81,24 @@ const App: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState('Ready to build');
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<DesignTemplate | null>(null);
+  const [designMode, setDesignMode] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<{tag: string; classes: string; text: string; canEditText: boolean; styles: Record<string, string>; attrs?: Record<string, string>} | null>(null);
+  const [unsplashQuery, setUnsplashQuery] = useState('');
+  const [unsplashResults, setUnsplashResults] = useState<Array<{id: string; thumb: string; regular: string; alt: string; user: string}>>([]);
+  const [unsplashLoading, setUnsplashLoading] = useState(false);
+  const [designSections, setDesignSections] = useState<Record<string, boolean>>({typography: true, colors: true, border: false, spacing: false, size: false, layout: false, flexbox: false, effects: false});
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const [designSrcDoc, setDesignSrcDoc] = useState<string | null>(null);
+  const designAutoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const designDirtyRef = useRef(false);
 
   const [roadmap, setRoadmap] = useState<RoadmapItem[]>([]);
   const [files, setFiles] = useState<Record<string, GeneratedFile>>({});
   const [activeFile, setActiveFile] = useState<string | null>(null);
+  const filesRef = useRef<Record<string, GeneratedFile>>({});
+  filesRef.current = files;
+  const activeFileRef = useRef<string | null>(null);
+  activeFileRef.current = activeFile;
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isChatExportOpen, setIsChatExportOpen] = useState(false);
@@ -164,15 +178,26 @@ const App: React.FC = () => {
     };
   }, [chatHistory, roadmap, files, sessionId, selectedTemplate]);
 
-  // Listen for navigation messages from preview iframe
+  // Listen for navigation + design mode messages from preview iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'navigate' && event.data?.file) {
         const targetFile = event.data.file;
-        // Check if the file exists in our generated files
         if (files[targetFile]) {
           setActiveFile(targetFile);
         }
+      }
+      if (event.data?.type === 'dm-select') {
+        setSelectedElement({
+          tag: event.data.tag,
+          classes: event.data.classes,
+          text: event.data.text,
+          canEditText: event.data.canEditText ?? false,
+          attrs: event.data.attrs || {},
+          styles: event.data.styles
+        });
+        setUnsplashResults([]);
+        setUnsplashQuery('');
       }
     };
     window.addEventListener('message', handleMessage);
@@ -232,7 +257,15 @@ const App: React.FC = () => {
     } else if (!activeFile || !snapshot[activeFile]) {
       setActiveFile(fileKeys[0]);
     }
-  }, [canUndo, filesHistoryIndex, filesHistory, activeFile]);
+    if (designMode) {
+      const targetFile = activeFile && snapshot[activeFile] ? activeFile : fileKeys[0];
+      if (targetFile && snapshot[targetFile]) {
+        setDesignSrcDoc(snapshot[targetFile].content);
+      }
+      setSelectedElement(null);
+      designDirtyRef.current = false;
+    }
+  }, [canUndo, filesHistoryIndex, filesHistory, activeFile, designMode]);
 
   const handleRedo = useCallback(() => {
     if (!canRedo) return;
@@ -248,7 +281,15 @@ const App: React.FC = () => {
     } else if (!activeFile || !snapshot[activeFile]) {
       setActiveFile(fileKeys[0]);
     }
-  }, [canRedo, filesHistoryIndex, filesHistory, activeFile]);
+    if (designMode) {
+      const targetFile = activeFile && snapshot[activeFile] ? activeFile : fileKeys[0];
+      if (targetFile && snapshot[targetFile]) {
+        setDesignSrcDoc(snapshot[targetFile].content);
+      }
+      setSelectedElement(null);
+      designDirtyRef.current = false;
+    }
+  }, [canRedo, filesHistoryIndex, filesHistory, activeFile, designMode]);
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -265,6 +306,11 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, handleRedo]);
+
+  // Clear design mode selection when switching files
+  useEffect(() => {
+    setSelectedElement(null);
+  }, [activeFile]);
 
   const handleStop = useCallback(() => {
     abortRef.current = true;
@@ -845,6 +891,136 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
     }
   };
 
+  // --- DESIGN MODE ---
+  const rgbToHex = (rgb: string): string => {
+    if (rgb.startsWith('#')) return rgb;
+    const m = rgb.match(/\d+/g);
+    if (!m || m.length < 3) return '#000000';
+    return '#' + m.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+  };
+
+  const parseNum = (val: string): string => {
+    const n = parseFloat(val);
+    return isNaN(n) ? '0' : String(Math.round(n * 10) / 10);
+  };
+
+  const designModeScript = `<style id="__dm-css__">.__dm-sel__{outline:2px solid #4f46e5!important;outline-offset:2px!important}.__dm-hov__:not(.__dm-sel__){outline:1px dashed #818cf8!important;outline-offset:1px!important}*{cursor:default!important}img,svg,video,canvas,iframe,input,select,textarea,button,a,span,i,em,strong,b,label,hr,br{pointer-events:auto!important}</style><scr` + `ipt id="__dm-js__">(function(){var sel=null;function getEl(e){var t=e.target;if(!t||t===document.body||t===document.documentElement||t.id==='__dm-css__'||t.id==='__dm-js__')return null;return t;}function getOwnText(el){var t='';for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===3)t+=el.childNodes[i].textContent;}return t.trim();}function isTextEl(el){var tag=el.tagName.toLowerCase();if(['img','svg','video','canvas','iframe','hr','br','input','select','textarea'].indexOf(tag)>=0)return false;var hasElChild=false;for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===1){hasElChild=true;break;}}if(!hasElChild)return true;if(getOwnText(el).length>0)return true;return false;}function getAttrs(el){var a={};if(el.src)a.src=el.src;if(el.getAttribute('alt')!==null)a.alt=el.getAttribute('alt')||'';if(el.href)a.href=el.href;return a;}document.addEventListener('mouseover',function(e){var t=getEl(e);if(t)t.classList.add('__dm-hov__');},true);document.addEventListener('mouseout',function(e){var t=getEl(e);if(t)t.classList.remove('__dm-hov__');},true);document.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();var t=getEl(e);if(!t)return;if(sel)sel.classList.remove('__dm-sel__');sel=t;sel.classList.add('__dm-sel__');var cs=getComputedStyle(sel);var cn=typeof sel.className==='string'?sel.className:'';var canEdit=isTextEl(sel);var txt=canEdit?(sel.innerText||sel.textContent||''):(sel.alt||sel.src||sel.textContent||'').substring(0,80);window.parent.postMessage({type:'dm-select',tag:sel.tagName.toLowerCase(),classes:cn.replace(/__dm-(sel|hov)__/g,'').trim(),text:txt,canEditText:canEdit,attrs:getAttrs(sel),styles:{fontFamily:cs.fontFamily,fontSize:cs.fontSize,fontWeight:cs.fontWeight,fontStyle:cs.fontStyle,textDecorationLine:cs.textDecorationLine||cs.textDecoration,textTransform:cs.textTransform,lineHeight:cs.lineHeight,letterSpacing:cs.letterSpacing,color:cs.color,backgroundColor:cs.backgroundColor,borderTopWidth:cs.borderTopWidth,borderTopStyle:cs.borderTopStyle,borderTopColor:cs.borderTopColor,borderRadius:cs.borderRadius,paddingTop:cs.paddingTop,paddingRight:cs.paddingRight,paddingBottom:cs.paddingBottom,paddingLeft:cs.paddingLeft,marginTop:cs.marginTop,marginRight:cs.marginRight,marginBottom:cs.marginBottom,marginLeft:cs.marginLeft,width:cs.width,height:cs.height,minWidth:cs.minWidth,maxWidth:cs.maxWidth,minHeight:cs.minHeight,maxHeight:cs.maxHeight,display:cs.display,position:cs.position,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,zIndex:cs.zIndex,overflow:cs.overflow,visibility:cs.visibility,flexDirection:cs.flexDirection,flexWrap:cs.flexWrap,justifyContent:cs.justifyContent,alignItems:cs.alignItems,alignSelf:cs.alignSelf,gap:cs.gap,flexGrow:cs.flexGrow,flexShrink:cs.flexShrink,flexBasis:cs.flexBasis,order:cs.order,gridTemplateColumns:cs.gridTemplateColumns,gridTemplateRows:cs.gridTemplateRows,opacity:cs.opacity,boxShadow:cs.boxShadow,transform:cs.transform,cursor:cs.cursor,transition:cs.transition,objectFit:cs.objectFit}},'*');},true);window.addEventListener('message',function(e){if(!e.data||!sel)return;if(e.data.type==='dm-set-style'){sel.style[e.data.prop]=e.data.val;var cs2=getComputedStyle(sel);window.parent.postMessage({type:'dm-style-updated',prop:e.data.prop,computed:cs2[e.data.prop]},'*');}if(e.data.type==='dm-set-text'){sel.innerText=e.data.val;}if(e.data.type==='dm-set-attr'){sel.setAttribute(e.data.attr,e.data.val);if(e.data.attr==='src'&&sel.tagName==='IMG')sel.src=e.data.val;}});})();</scr` + `ipt>`;
+
+  const navScript = `<script>document.addEventListener('click', function(e) {
+  var anchor = e.target.closest('a');
+  if (anchor && anchor.getAttribute('href')) {
+    var href = anchor.getAttribute('href');
+    if (href && !href.startsWith('http') && !href.startsWith('#') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+      e.preventDefault();
+      var fileName = href.split('/').pop().split('?')[0].split('#')[0];
+      window.parent.postMessage({ type: 'navigate', file: fileName }, '*');
+    }
+  }
+});</script>`;
+
+  const extractIframeHtml = (): string | null => {
+    const iframe = previewIframeRef.current;
+    if (!iframe?.contentDocument) return null;
+    const doc = iframe.contentDocument;
+    const clone = doc.documentElement.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll('#__dm-css__, #__dm-js__').forEach(el => el.remove());
+    clone.querySelectorAll('.__dm-sel__, .__dm-hov__').forEach(el => {
+      el.classList.remove('__dm-sel__', '__dm-hov__');
+      if (el.getAttribute('class') === '') el.removeAttribute('class');
+    });
+    return '<!DOCTYPE html>\n' + clone.outerHTML;
+  };
+
+  const triggerDesignAutoSave = () => {
+    designDirtyRef.current = true;
+    if (designAutoSaveRef.current) clearTimeout(designAutoSaveRef.current);
+    designAutoSaveRef.current = setTimeout(() => {
+      designAutoSaveRef.current = null;
+      const currentFile = activeFileRef.current;
+      if (!currentFile || !designDirtyRef.current) return;
+      const html = extractIframeHtml();
+      if (!html) return;
+      designDirtyRef.current = false;
+      pushFilesSnapshot({ ...filesRef.current });
+      setFiles(prev => ({ ...prev, [currentFile]: { ...prev[currentFile], content: html } }));
+    }, 600);
+  };
+
+  const updateElementStyle = (property: string, value: string) => {
+    const iframe = previewIframeRef.current;
+    if (!iframe?.contentWindow) return;
+    iframe.contentWindow.postMessage({ type: 'dm-set-style', prop: property, val: value }, '*');
+    setSelectedElement(prev => prev ? { ...prev, styles: { ...prev.styles, [property]: value } } : null);
+    triggerDesignAutoSave();
+  };
+
+  const updateElementText = (value: string) => {
+    const iframe = previewIframeRef.current;
+    if (!iframe?.contentWindow) return;
+    iframe.contentWindow.postMessage({ type: 'dm-set-text', val: value }, '*');
+    setSelectedElement(prev => prev ? { ...prev, text: value } : null);
+    triggerDesignAutoSave();
+  };
+
+  const updateElementAttr = (attr: string, value: string) => {
+    const iframe = previewIframeRef.current;
+    if (!iframe?.contentWindow) return;
+    iframe.contentWindow.postMessage({ type: 'dm-set-attr', attr, val: value }, '*');
+    setSelectedElement(prev => prev ? { ...prev, attrs: { ...prev.attrs, [attr]: value } } : null);
+    triggerDesignAutoSave();
+  };
+
+  const getUnsplashKey = () => localStorage.getItem('unsplash_access_key') || process.env.UNSPLASH_ACCESS_KEY || '';
+
+  const searchUnsplash = async (query: string) => {
+    if (!query.trim()) return;
+    const key = getUnsplashKey();
+    if (!key) return;
+    setUnsplashLoading(true);
+    try {
+      const res = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=12&client_id=${key}`);
+      if (!res.ok) throw new Error('Unsplash API error');
+      const data = await res.json();
+      setUnsplashResults((data.results || []).map((r: any) => ({
+        id: r.id,
+        thumb: r.urls?.thumb || r.urls?.small,
+        regular: r.urls?.regular || r.urls?.small,
+        alt: r.alt_description || r.description || query,
+        user: r.user?.name || 'Unknown'
+      })));
+    } catch (err) {
+      console.warn('Unsplash search failed:', err);
+      setUnsplashResults([]);
+    } finally {
+      setUnsplashLoading(false);
+    }
+  };
+
+  const saveDesignChanges = () => {
+    if (designAutoSaveRef.current) {
+      clearTimeout(designAutoSaveRef.current);
+      designAutoSaveRef.current = null;
+    }
+    if (!designDirtyRef.current || !activeFile) return;
+    const html = extractIframeHtml();
+    if (!html) return;
+    designDirtyRef.current = false;
+    pushFilesSnapshot({ ...files });
+    setFiles(prev => ({ ...prev, [activeFile]: { ...prev[activeFile], content: html } }));
+  };
+
+  const exitDesignMode = () => {
+    if (designMode) saveDesignChanges();
+    if (designAutoSaveRef.current) {
+      clearTimeout(designAutoSaveRef.current);
+      designAutoSaveRef.current = null;
+    }
+    setDesignMode(false);
+    setDesignSrcDoc(null);
+    setSelectedElement(null);
+    designDirtyRef.current = false;
+  };
+
   const handleFullView = () => {
     if (!activeFile || !files[activeFile]) return;
     const newWindow = window.open('', '_blank');
@@ -1064,7 +1240,7 @@ navigateTo('${activeFile}');
 
         {/* Template Preview — Full Page */}
         {previewTemplate && (
-          <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-in fade-in duration-200">
+          <div className="fixed inset-0 z-[100] bg-white flex flex-col overflow-hidden animate-in fade-in duration-200">
             {/* Slim Top Bar */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0 bg-white">
               <div className="flex items-center gap-3 min-w-0">
@@ -1095,15 +1271,15 @@ navigateTo('${activeFile}');
               </div>
             </div>
             {/* Full Page iframe */}
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 relative">
               {previewTemplate.path ? (
                 <iframe
                   src={previewTemplate.path}
-                  className="w-full h-full border-none"
+                  className="absolute inset-0 w-full h-full border-none"
                   title={`Preview: ${previewTemplate.name}`}
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
+                <div className="absolute inset-0 flex items-center justify-center text-slate-400">
                   <p className="text-sm">No preview available for custom templates</p>
                 </div>
               )}
@@ -1571,6 +1747,14 @@ navigateTo('${activeFile}');
             {Object.keys(files).length > 0 && (
               <>
               <button
+                onClick={() => { if (designMode) { exitDesignMode(); } else { setDesignMode(true); setDesignSrcDoc(activeFile && files[activeFile] ? files[activeFile].content : null); setSelectedElement(null); } }}
+                className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5 ${designMode ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                title={designMode ? "Exit Design Mode" : "Enter Design Mode"}
+              >
+                <PenTool className="w-4 h-4" />
+                <span className="hidden lg:inline">{designMode ? 'Exit Design' : 'Design'}</span>
+              </button>
+              <button
                 onClick={handleFullView}
                 className="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5"
                 title="Open in Full View"
@@ -1694,14 +1878,13 @@ navigateTo('${activeFile}');
                   {Object.values(files).map((f) => (
                     <button
                       key={f.name}
-                      onClick={() => setActiveFile(f.name)}
+                      onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
                       className={`px-4 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? 'bg-white text-indigo-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
                     >
                       <FileCode className="w-3.5 h-3.5" />
                       {f.name}
                     </button>
                   ))}
-                  {/* Streaming indicator tab */}
                   {(status === 'coding') && (
                     <div className="px-3 py-2 flex items-center gap-2 text-xs text-indigo-400 animate-pulse">
                       <Terminal className="w-3 h-3" />
@@ -1710,26 +1893,648 @@ navigateTo('${activeFile}');
                   )}
                   <div className="ml-auto" />
                 </div>
-                {/* Iframe Preview */}
-                <div className="flex-1 min-h-0 relative">
-                  <iframe
-                    title="preview"
-                    srcDoc={files[activeFile].content + `<script>
-document.addEventListener('click', function(e) {
-  var anchor = e.target.closest('a');
-  if (anchor && anchor.getAttribute('href')) {
-    var href = anchor.getAttribute('href');
-    if (href && !href.startsWith('http') && !href.startsWith('#') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
-      e.preventDefault();
-      var fileName = href.split('/').pop().split('?')[0].split('#')[0];
-      window.parent.postMessage({ type: 'navigate', file: fileName }, '*');
-    }
-  }
-});
-</script>`}
-                    className="absolute inset-0 w-full h-full border-none bg-white"
-                    sandbox="allow-scripts allow-same-origin"
-                  />
+                {/* Iframe Preview + Properties Panel */}
+                <div className="flex-1 min-h-0 flex">
+                  <div className="flex-1 min-h-0 relative">
+                    <iframe
+                      ref={previewIframeRef}
+                      title="preview"
+                      srcDoc={(designMode && designSrcDoc !== null ? designSrcDoc : files[activeFile].content) + (designMode ? designModeScript : navScript)}
+                      className="absolute inset-0 w-full h-full border-none bg-white"
+                      sandbox="allow-scripts allow-same-origin"
+                    />
+                  </div>
+
+                  {/* Design Mode Properties Panel */}
+                  {designMode && (
+                    <div className="w-72 border-l border-slate-200 bg-white overflow-y-auto shrink-0 flex flex-col text-slate-700">
+                      {/* Panel Header */}
+                      <div className="p-4 border-b border-slate-100 shrink-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Properties</h3>
+                          <button onClick={exitDesignMode} className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-slate-600 transition-colors">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {selectedElement ? (
+                          <>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-indigo-600">◆</span>
+                              <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono truncate">
+                                &lt;{selectedElement.tag}{selectedElement.classes ? `.${selectedElement.classes.split(' ')[0]}` : ''}&gt;
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 mt-1.5 truncate">{selectedElement.text.substring(0, 60)}</p>
+                          </>
+                        ) : (
+                          <p className="text-xs text-slate-400 mt-1">Click an element to inspect it</p>
+                        )}
+                      </div>
+
+                      {selectedElement && (
+                        <div className="flex-1 overflow-y-auto">
+                          {/* CONTENT (Text Editing) */}
+                          {selectedElement.canEditText && (
+                            <div className="border-b border-slate-100">
+                              <div className="px-4 py-3">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Content</label>
+                                <textarea
+                                  value={selectedElement.text}
+                                  onChange={e => updateElementText(e.target.value)}
+                                  rows={Math.min(6, Math.max(2, Math.ceil(selectedElement.text.length / 35)))}
+                                  className="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 resize-y leading-relaxed"
+                                  placeholder="Enter text content..."
+                                />
+                              </div>
+                            </div>
+                          )}
+                          {/* IMAGE */}
+                          {selectedElement.tag === 'img' && selectedElement.attrs && (
+                            <div className="border-b border-slate-100">
+                              <div className="px-4 py-3 space-y-3">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Image</label>
+                                {/* Preview */}
+                                {selectedElement.attrs.src && (
+                                  <div className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                                    <img src={selectedElement.attrs.src} alt={selectedElement.attrs.alt || ''} className="w-full h-28 object-cover" />
+                                  </div>
+                                )}
+                                {/* Source URL */}
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Source URL</label>
+                                  <input
+                                    type="text"
+                                    value={selectedElement.attrs.src || ''}
+                                    onChange={e => updateElementAttr('src', e.target.value)}
+                                    placeholder="https://..."
+                                    className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400 font-mono"
+                                  />
+                                </div>
+                                {/* Alt Text */}
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Alt Text</label>
+                                  <input
+                                    type="text"
+                                    value={selectedElement.attrs.alt || ''}
+                                    onChange={e => updateElementAttr('alt', e.target.value)}
+                                    placeholder="Image description..."
+                                    className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400"
+                                  />
+                                </div>
+                                {/* Unsplash Search */}
+                                <div className="pt-1">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <label className="text-[10px] text-slate-400 flex items-center gap-1">
+                                      <ImageIcon className="w-3 h-3" /> Unsplash
+                                    </label>
+                                    {!getUnsplashKey() && (
+                                      <button
+                                        onClick={() => {
+                                          const key = window.prompt('Enter your Unsplash Access Key:\n(Get one free at unsplash.com/developers)');
+                                          if (key?.trim()) {
+                                            localStorage.setItem('unsplash_access_key', key.trim());
+                                          }
+                                        }}
+                                        className="text-[9px] text-indigo-500 hover:text-indigo-700 flex items-center gap-0.5"
+                                      >
+                                        <ExternalLink className="w-2.5 h-2.5" /> Set API Key
+                                      </button>
+                                    )}
+                                    {localStorage.getItem('unsplash_access_key') && (
+                                      <button
+                                        onClick={() => { localStorage.removeItem('unsplash_access_key'); setUnsplashResults([]); }}
+                                        className="text-[9px] text-slate-400 hover:text-red-500"
+                                      >
+                                        Reset Key
+                                      </button>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-1.5">
+                                    <div className="flex-1 relative">
+                                      <Search className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+                                      <input
+                                        type="text"
+                                        value={unsplashQuery}
+                                        onChange={e => setUnsplashQuery(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter') searchUnsplash(unsplashQuery); }}
+                                        placeholder="Search photos..."
+                                        className="w-full text-xs border border-slate-200 rounded-lg pl-7 pr-2 py-1.5 outline-none focus:border-indigo-400"
+                                      />
+                                    </div>
+                                    <button
+                                      onClick={() => searchUnsplash(unsplashQuery)}
+                                      disabled={unsplashLoading || !unsplashQuery.trim()}
+                                      className="px-2.5 py-1.5 text-xs bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 disabled:opacity-40 transition-colors shrink-0 font-medium"
+                                    >
+                                      {unsplashLoading ? <Loader className="w-3 h-3 animate-spin" /> : 'Go'}
+                                    </button>
+                                  </div>
+                                  {!getUnsplashKey() && (
+                                    <p className="text-[9px] text-slate-400 mt-1.5 leading-relaxed">
+                                      Add your free Unsplash API key to search millions of photos.
+                                    </p>
+                                  )}
+                                  {/* Results Grid */}
+                                  {unsplashResults.length > 0 && (
+                                    <div className="mt-2 grid grid-cols-3 gap-1.5 max-h-48 overflow-y-auto">
+                                      {unsplashResults.map(img => (
+                                        <button
+                                          key={img.id}
+                                          onClick={() => {
+                                            updateElementAttr('src', img.regular);
+                                            updateElementAttr('alt', img.alt);
+                                          }}
+                                          className="relative group rounded-md overflow-hidden border border-slate-200 hover:border-indigo-400 transition-colors aspect-square"
+                                          title={`Photo by ${img.user}`}
+                                        >
+                                          <img src={img.thumb} alt={img.alt} className="w-full h-full object-cover" />
+                                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                            <Check className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 drop-shadow transition-opacity" />
+                                          </div>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {unsplashResults.length > 0 && (
+                                    <p className="text-[8px] text-slate-400 mt-1.5 text-center">Photos by Unsplash</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          {/* TYPOGRAPHY */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, typography: !p.typography}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">✎ Typography</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.typography ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.typography && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Font Family</label>
+                                  <select value={selectedElement.styles.fontFamily?.split(',')[0]?.replace(/"/g,'').trim() || 'inherit'} onChange={e => updateElementStyle('fontFamily', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 outline-none">
+                                    <option value="inherit">Default (inherit)</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="Georgia, serif">Georgia</option>
+                                    <option value="monospace">Monospace</option>
+                                  </select>
+                                </div>
+                                <div className="flex gap-2">
+                                  <div className="flex-1">
+                                    <label className="text-[10px] text-slate-400 block mb-1">Size</label>
+                                    <div className="flex">
+                                      <input type="number" value={parseNum(selectedElement.styles.fontSize)} onChange={e => updateElementStyle('fontSize', e.target.value + 'px')} className="w-full text-xs border border-slate-200 rounded-l-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                      <span className="text-[10px] text-slate-400 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg px-2 py-1.5 shrink-0">px</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Weight</label>
+                                    <select value={selectedElement.styles.fontWeight || 'inherit'} onChange={e => updateElementStyle('fontWeight', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="inherit">Inherit</option>
+                                      <option value="300">Light</option>
+                                      <option value="400">Normal</option>
+                                      <option value="500">Medium</option>
+                                      <option value="600">Semibold</option>
+                                      <option value="700">Bold</option>
+                                      <option value="800">Extrabold</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Style</label>
+                                    <select value={selectedElement.styles.fontStyle || 'inherit'} onChange={e => updateElementStyle('fontStyle', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="inherit">Inherit</option>
+                                      <option value="normal">Normal</option>
+                                      <option value="italic">Italic</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Decoration</label>
+                                    <select value={selectedElement.styles.textDecorationLine || 'none'} onChange={e => updateElementStyle('textDecorationLine', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="none">None</option>
+                                      <option value="underline">Underline</option>
+                                      <option value="line-through">Line-through</option>
+                                      <option value="overline">Overline</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Transform</label>
+                                    <select value={selectedElement.styles.textTransform || 'none'} onChange={e => updateElementStyle('textTransform', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="none">None</option>
+                                      <option value="uppercase">Uppercase</option>
+                                      <option value="lowercase">Lowercase</option>
+                                      <option value="capitalize">Capitalize</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Line Height</label>
+                                    <input type="text" value={parseNum(selectedElement.styles.lineHeight)} onChange={e => updateElementStyle('lineHeight', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Letter Spacing</label>
+                                    <div className="flex">
+                                      <input type="number" step="0.5" value={parseNum(selectedElement.styles.letterSpacing)} onChange={e => updateElementStyle('letterSpacing', e.target.value + 'px')} className="w-full text-xs border border-slate-200 rounded-l-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                      <span className="text-[10px] text-slate-400 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg px-1.5 py-1.5 shrink-0">px</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* COLORS */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, colors: !p.colors}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">⚙ Colors</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.colors ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.colors && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Text Color</label>
+                                  <div className="flex gap-2">
+                                    <input type="color" value={rgbToHex(selectedElement.styles.color)} onChange={e => updateElementStyle('color', e.target.value)} className="w-8 h-8 rounded border border-slate-200 cursor-pointer shrink-0 p-0.5" />
+                                    <input type="text" value={rgbToHex(selectedElement.styles.color)} onChange={e => updateElementStyle('color', e.target.value)} className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 font-mono outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Background</label>
+                                  <div className="flex gap-2">
+                                    <input type="color" value={rgbToHex(selectedElement.styles.backgroundColor)} onChange={e => updateElementStyle('backgroundColor', e.target.value)} className="w-8 h-8 rounded border border-slate-200 cursor-pointer shrink-0 p-0.5" />
+                                    <input type="text" value={rgbToHex(selectedElement.styles.backgroundColor)} onChange={e => updateElementStyle('backgroundColor', e.target.value)} className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 font-mono outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* BORDER */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, border: !p.border}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">☐ Border</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.border ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.border && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Width</label>
+                                    <div className="flex">
+                                      <input type="number" min="0" value={parseNum(selectedElement.styles.borderTopWidth)} onChange={e => updateElementStyle('borderWidth', e.target.value + 'px')} className="w-full text-xs border border-slate-200 rounded-l-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                      <span className="text-[10px] text-slate-400 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg px-1.5 py-1.5 shrink-0">px</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Style</label>
+                                    <select value={selectedElement.styles.borderTopStyle || 'none'} onChange={e => updateElementStyle('borderStyle', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="none">None</option>
+                                      <option value="solid">Solid</option>
+                                      <option value="dashed">Dashed</option>
+                                      <option value="dotted">Dotted</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Color</label>
+                                  <div className="flex gap-2">
+                                    <input type="color" value={rgbToHex(selectedElement.styles.borderTopColor)} onChange={e => updateElementStyle('borderColor', e.target.value)} className="w-8 h-8 rounded border border-slate-200 cursor-pointer shrink-0 p-0.5" />
+                                    <input type="text" value={rgbToHex(selectedElement.styles.borderTopColor)} onChange={e => updateElementStyle('borderColor', e.target.value)} className="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 font-mono outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Radius</label>
+                                  <div className="flex">
+                                    <input type="number" min="0" value={parseNum(selectedElement.styles.borderRadius)} onChange={e => updateElementStyle('borderRadius', e.target.value + 'px')} className="w-full text-xs border border-slate-200 rounded-l-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                    <span className="text-[10px] text-slate-400 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg px-1.5 py-1.5 shrink-0">px</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* SPACING */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, spacing: !p.spacing}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">⊡ Spacing</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.spacing ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.spacing && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1.5">Padding</label>
+                                  <div className="grid grid-cols-4 gap-1.5">
+                                    {(['Top','Right','Bottom','Left'] as const).map(side => (
+                                      <div key={side} className="text-center">
+                                        <span className="text-[9px] text-slate-300 block mb-0.5">{side[0]}</span>
+                                        <input type="number" min="0" value={parseNum(selectedElement.styles[`padding${side}` as keyof typeof selectedElement.styles])} onChange={e => updateElementStyle(`padding${side}`, e.target.value + 'px')} className="w-full text-xs border border-slate-200 rounded px-1 py-1 text-center outline-none focus:border-indigo-400" />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1.5">Margin</label>
+                                  <div className="grid grid-cols-4 gap-1.5">
+                                    {(['Top','Right','Bottom','Left'] as const).map(side => (
+                                      <div key={side} className="text-center">
+                                        <span className="text-[9px] text-slate-300 block mb-0.5">{side[0]}</span>
+                                        <input type="number" value={parseNum(selectedElement.styles[`margin${side}` as keyof typeof selectedElement.styles])} onChange={e => updateElementStyle(`margin${side}`, e.target.value + 'px')} className="w-full text-xs border border-slate-200 rounded px-1 py-1 text-center outline-none focus:border-indigo-400" />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* SIZE */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, size: !p.size}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">↗ Size</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.size ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.size && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Width</label>
+                                    <input type="text" value={selectedElement.styles.width || 'auto'} onChange={e => updateElementStyle('width', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Height</label>
+                                    <input type="text" value={selectedElement.styles.height || 'auto'} onChange={e => updateElementStyle('height', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Min W</label>
+                                    <input type="text" value={selectedElement.styles.minWidth || 'auto'} onChange={e => updateElementStyle('minWidth', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Max W</label>
+                                    <input type="text" value={selectedElement.styles.maxWidth || 'none'} onChange={e => updateElementStyle('maxWidth', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Min H</label>
+                                    <input type="text" value={selectedElement.styles.minHeight || 'auto'} onChange={e => updateElementStyle('minHeight', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Max H</label>
+                                    <input type="text" value={selectedElement.styles.maxHeight || 'none'} onChange={e => updateElementStyle('maxHeight', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                                {selectedElement.tag === 'img' && (
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Object Fit</label>
+                                    <select value={selectedElement.styles.objectFit || 'fill'} onChange={e => updateElementStyle('objectFit', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="fill">Fill</option>
+                                      <option value="contain">Contain</option>
+                                      <option value="cover">Cover</option>
+                                      <option value="none">None</option>
+                                      <option value="scale-down">Scale Down</option>
+                                    </select>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* LAYOUT */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, layout: !p.layout}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">⊞ Layout</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.layout ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.layout && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Display</label>
+                                    <select value={selectedElement.styles.display || 'block'} onChange={e => updateElementStyle('display', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="block">Block</option>
+                                      <option value="inline">Inline</option>
+                                      <option value="inline-block">Inline Block</option>
+                                      <option value="flex">Flex</option>
+                                      <option value="inline-flex">Inline Flex</option>
+                                      <option value="grid">Grid</option>
+                                      <option value="inline-grid">Inline Grid</option>
+                                      <option value="none">None</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Position</label>
+                                    <select value={selectedElement.styles.position || 'static'} onChange={e => updateElementStyle('position', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="static">Static</option>
+                                      <option value="relative">Relative</option>
+                                      <option value="absolute">Absolute</option>
+                                      <option value="fixed">Fixed</option>
+                                      <option value="sticky">Sticky</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                {selectedElement.styles.position && selectedElement.styles.position !== 'static' && (
+                                  <div className="grid grid-cols-4 gap-1.5">
+                                    {(['top','right','bottom','left'] as const).map(side => (
+                                      <div key={side} className="text-center">
+                                        <span className="text-[9px] text-slate-300 block mb-0.5 uppercase">{side[0]}</span>
+                                        <input type="text" value={selectedElement.styles[side] || 'auto'} onChange={e => updateElementStyle(side, e.target.value)} className="w-full text-xs border border-slate-200 rounded px-1 py-1 text-center outline-none focus:border-indigo-400" />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Z-Index</label>
+                                    <input type="text" value={selectedElement.styles.zIndex || 'auto'} onChange={e => updateElementStyle('zIndex', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Overflow</label>
+                                    <select value={selectedElement.styles.overflow || 'visible'} onChange={e => updateElementStyle('overflow', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="visible">Visible</option>
+                                      <option value="hidden">Hidden</option>
+                                      <option value="scroll">Scroll</option>
+                                      <option value="auto">Auto</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Visibility</label>
+                                  <select value={selectedElement.styles.visibility || 'visible'} onChange={e => updateElementStyle('visibility', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                    <option value="visible">Visible</option>
+                                    <option value="hidden">Hidden</option>
+                                    <option value="collapse">Collapse</option>
+                                  </select>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* FLEXBOX */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, flexbox: !p.flexbox}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">⬡ Flexbox</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.flexbox ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.flexbox && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <p className="text-[10px] text-slate-400 italic">Container props (apply when display is flex/grid)</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Direction</label>
+                                    <select value={selectedElement.styles.flexDirection || 'row'} onChange={e => updateElementStyle('flexDirection', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="row">Row</option>
+                                      <option value="row-reverse">Row Reverse</option>
+                                      <option value="column">Column</option>
+                                      <option value="column-reverse">Col Reverse</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Wrap</label>
+                                    <select value={selectedElement.styles.flexWrap || 'nowrap'} onChange={e => updateElementStyle('flexWrap', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="nowrap">No Wrap</option>
+                                      <option value="wrap">Wrap</option>
+                                      <option value="wrap-reverse">Wrap Reverse</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Justify</label>
+                                    <select value={selectedElement.styles.justifyContent || 'flex-start'} onChange={e => updateElementStyle('justifyContent', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="flex-start">Start</option>
+                                      <option value="flex-end">End</option>
+                                      <option value="center">Center</option>
+                                      <option value="space-between">Space Between</option>
+                                      <option value="space-around">Space Around</option>
+                                      <option value="space-evenly">Space Evenly</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Align Items</label>
+                                    <select value={selectedElement.styles.alignItems || 'stretch'} onChange={e => updateElementStyle('alignItems', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="stretch">Stretch</option>
+                                      <option value="flex-start">Start</option>
+                                      <option value="flex-end">End</option>
+                                      <option value="center">Center</option>
+                                      <option value="baseline">Baseline</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Gap</label>
+                                  <input type="text" value={selectedElement.styles.gap || '0px'} onChange={e => updateElementStyle('gap', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                </div>
+                                <hr className="border-slate-100" />
+                                <p className="text-[10px] text-slate-400 italic">Child props (this element as flex child)</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Grow</label>
+                                    <input type="number" min="0" value={selectedElement.styles.flexGrow || '0'} onChange={e => updateElementStyle('flexGrow', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Shrink</label>
+                                    <input type="number" min="0" value={selectedElement.styles.flexShrink || '1'} onChange={e => updateElementStyle('flexShrink', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Basis</label>
+                                    <input type="text" value={selectedElement.styles.flexBasis || 'auto'} onChange={e => updateElementStyle('flexBasis', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Align Self</label>
+                                    <select value={selectedElement.styles.alignSelf || 'auto'} onChange={e => updateElementStyle('alignSelf', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                      <option value="auto">Auto</option>
+                                      <option value="flex-start">Start</option>
+                                      <option value="flex-end">End</option>
+                                      <option value="center">Center</option>
+                                      <option value="stretch">Stretch</option>
+                                      <option value="baseline">Baseline</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] text-slate-400 block mb-1">Order</label>
+                                    <input type="number" value={selectedElement.styles.order || '0'} onChange={e => updateElementStyle('order', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* EFFECTS */}
+                          <div className="border-b border-slate-100">
+                            <button onClick={() => setDesignSections(p => ({...p, effects: !p.effects}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">✦ Effects</span>
+                              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${designSections.effects ? 'rotate-180' : ''}`} />
+                            </button>
+                            {designSections.effects && (
+                              <div className="px-4 pb-4 space-y-3">
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Opacity</label>
+                                  <div className="flex items-center gap-2">
+                                    <input type="range" min="0" max="1" step="0.05" value={selectedElement.styles.opacity || '1'} onChange={e => updateElementStyle('opacity', e.target.value)} className="flex-1 h-1.5 accent-indigo-500" />
+                                    <span className="text-xs text-slate-500 w-8 text-right">{Math.round(parseFloat(selectedElement.styles.opacity || '1') * 100)}%</span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Box Shadow</label>
+                                  <input type="text" value={selectedElement.styles.boxShadow || 'none'} onChange={e => updateElementStyle('boxShadow', e.target.value)} placeholder="0px 4px 6px rgba(0,0,0,0.1)" className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                                    <button onClick={() => updateElementStyle('boxShadow', 'none')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">None</button>
+                                    <button onClick={() => updateElementStyle('boxShadow', '0 1px 3px rgba(0,0,0,0.12)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">SM</button>
+                                    <button onClick={() => updateElementStyle('boxShadow', '0 4px 6px -1px rgba(0,0,0,0.1)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">MD</button>
+                                    <button onClick={() => updateElementStyle('boxShadow', '0 10px 15px -3px rgba(0,0,0,0.1)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">LG</button>
+                                    <button onClick={() => updateElementStyle('boxShadow', '0 20px 25px -5px rgba(0,0,0,0.1)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">XL</button>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Transform</label>
+                                  <input type="text" value={selectedElement.styles.transform || 'none'} onChange={e => updateElementStyle('transform', e.target.value)} placeholder="rotate(0deg) scale(1)" className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                                    <button onClick={() => updateElementStyle('transform', 'none')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">None</button>
+                                    <button onClick={() => updateElementStyle('transform', 'rotate(45deg)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">45°</button>
+                                    <button onClick={() => updateElementStyle('transform', 'rotate(90deg)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">90°</button>
+                                    <button onClick={() => updateElementStyle('transform', 'scale(1.1)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">Scale+</button>
+                                    <button onClick={() => updateElementStyle('transform', 'scale(0.9)')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">Scale-</button>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Cursor</label>
+                                  <select value={selectedElement.styles.cursor || 'auto'} onChange={e => updateElementStyle('cursor', e.target.value)} className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white outline-none focus:border-indigo-400">
+                                    <option value="auto">Auto</option>
+                                    <option value="default">Default</option>
+                                    <option value="pointer">Pointer</option>
+                                    <option value="text">Text</option>
+                                    <option value="move">Move</option>
+                                    <option value="grab">Grab</option>
+                                    <option value="not-allowed">Not Allowed</option>
+                                    <option value="crosshair">Crosshair</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Transition</label>
+                                  <input type="text" value={selectedElement.styles.transition || 'none'} onChange={e => updateElementStyle('transition', e.target.value)} placeholder="all 0.3s ease" className="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
+                                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                                    <button onClick={() => updateElementStyle('transition', 'none')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">None</button>
+                                    <button onClick={() => updateElementStyle('transition', 'all 0.2s ease')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">Fast</button>
+                                    <button onClick={() => updateElementStyle('transition', 'all 0.3s ease')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">Normal</button>
+                                    <button onClick={() => updateElementStyle('transition', 'all 0.5s ease-in-out')} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">Slow</button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
