@@ -16,6 +16,30 @@ import { PRESET_TEMPLATES } from './constants';
 import { RoadmapItem, GeneratedFile, DesignTemplate, ChatMessage, ProjectSession, PageAnalysisItem, PRDColors } from './types';
 // JSZip and domToFigmaScript are lazy-loaded when needed
 
+// --- Session sharing: compress/decompress via gzip + base64url ---
+async function compressSession(data: object): Promise<string> {
+  const json = JSON.stringify(data);
+  const blob = new Blob([json]);
+  const stream = blob.stream().pipeThrough(new CompressionStream('gzip'));
+  const compressed = await new Response(stream).arrayBuffer();
+  const bytes = new Uint8Array(compressed);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function decompressSession(encoded: string): Promise<any> {
+  let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) base64 += '=';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const blob = new Blob([bytes]);
+  const stream = blob.stream().pipeThrough(new DecompressionStream('gzip'));
+  const text = await new Response(stream).text();
+  return JSON.parse(text);
+}
+
 // --- Sub-components ---
 
 const TemplateThumbnail: React.FC<{ template: DesignTemplate }> = React.memo(({ template }) => {
@@ -171,7 +195,23 @@ const App: React.FC = () => {
 
   // --- Persistence Logic ---
 
-  // Load sessions from local storage on mount, then auto-load session from URL hash
+  // Helper to load a session object into state
+  const loadSessionIntoState = useCallback((data: any) => {
+    setSessionId(data.id || Date.now().toString());
+    if (data.template) setSelectedTemplate(data.template);
+    setChatHistory(data.chatHistory || []);
+    setRoadmap(data.roadmap || []);
+    setFiles(data.files || {});
+    const fileKeys = Object.keys(data.files || {});
+    setActiveFile(fileKeys.length > 0 ? fileKeys[0] : null);
+    setStep('studio');
+    setActiveTab('chat');
+    setStatus((data.roadmap || []).length > 0 ? 'completed' : 'idle');
+    setStatusMessage('Session Loaded');
+    setProgress(100);
+  }, []);
+
+  // Load sessions from local storage on mount, then auto-load from URL hash
   useEffect(() => {
     const saved = localStorage.getItem('ai_architect_sessions');
     let loadedSessions: ProjectSession[] = [];
@@ -183,25 +223,43 @@ const App: React.FC = () => {
         console.error("Failed to parse sessions", e);
       }
     }
-    // Auto-load session from URL hash
+
     const hash = window.location.hash;
-    const match = hash.match(/^#\/chat\/(.+)$/);
-    if (match && loadedSessions.length > 0) {
-      const target = loadedSessions.find(s => s.id === match[1]);
-      if (target) {
-        setSessionId(target.id);
-        setSelectedTemplate(target.template);
-        setChatHistory(target.chatHistory);
-        setRoadmap(target.roadmap);
-        setFiles(target.files);
-        const fileKeys = Object.keys(target.files);
-        setActiveFile(fileKeys.length > 0 ? fileKeys[0] : null);
-        setStep('studio');
-        setActiveTab('chat');
-        setStatus(target.roadmap.length > 0 ? 'completed' : 'idle');
-        setStatusMessage('Session Loaded');
-        setProgress(100);
-      }
+
+    // Shared link: #/share/{compressed_data} — self-contained, works across devices
+    const shareMatch = hash.match(/^#\/share\/(.+)$/);
+    if (shareMatch) {
+      decompressSession(shareMatch[1]).then(data => {
+        loadSessionIntoState(data);
+        // Also save it to local sessions so it persists
+        const newSession: ProjectSession = {
+          id: data.id || Date.now().toString(),
+          title: data.title || data.chatHistory?.[0]?.text?.slice(0, 50) || 'Shared Project',
+          lastModified: Date.now(),
+          template: data.template || { name: 'Custom', description: '' },
+          chatHistory: data.chatHistory || [],
+          roadmap: data.roadmap || [],
+          files: data.files || {}
+        };
+        setSessions(prev => {
+          if (prev.find(s => s.id === newSession.id)) return prev;
+          const updated = [newSession, ...prev];
+          localStorage.setItem('ai_architect_sessions', JSON.stringify(updated));
+          return updated;
+        });
+        // Clean up URL to local format
+        window.history.replaceState(null, '', `#/chat/${newSession.id}`);
+      }).catch(err => {
+        console.error('Failed to load shared session:', err);
+      });
+      return;
+    }
+
+    // Local link: #/chat/{session_id} — same browser only
+    const chatMatch = hash.match(/^#\/chat\/(.+)$/);
+    if (chatMatch && loadedSessions.length > 0) {
+      const target = loadedSessions.find(s => s.id === chatMatch[1]);
+      if (target) loadSessionIntoState(target);
     }
   }, []);
 
@@ -216,29 +274,27 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      const match = hash.match(/^#\/chat\/(.+)$/);
-      if (match) {
-        const target = sessions.find(s => s.id === match[1]);
-        if (target && target.id !== sessionId) {
-          setSessionId(target.id);
-          setSelectedTemplate(target.template);
-          setChatHistory(target.chatHistory);
-          setRoadmap(target.roadmap);
-          setFiles(target.files);
-          const fileKeys = Object.keys(target.files);
-          setActiveFile(fileKeys.length > 0 ? fileKeys[0] : null);
-          setStep('studio');
-          setActiveTab('chat');
-          setStatus(target.roadmap.length > 0 ? 'completed' : 'idle');
-          setProgress(100);
-        }
+      // Handle shared links
+      const shareMatch = hash.match(/^#\/share\/(.+)$/);
+      if (shareMatch) {
+        decompressSession(shareMatch[1]).then(data => {
+          loadSessionIntoState(data);
+          window.history.replaceState(null, '', `#/chat/${data.id || sessionId}`);
+        }).catch(() => {});
+        return;
+      }
+      // Handle local session links
+      const chatMatch = hash.match(/^#\/chat\/(.+)$/);
+      if (chatMatch) {
+        const target = sessions.find(s => s.id === chatMatch[1]);
+        if (target && target.id !== sessionId) loadSessionIntoState(target);
       } else {
         setStep('selection');
       }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [sessions, sessionId]);
+  }, [sessions, sessionId, loadSessionIntoState]);
 
   // Save current session state whenever it changes (debounced to avoid lag during streaming)
   useEffect(() => {
@@ -1168,59 +1224,69 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
     const newWindow = window.open('', '_blank');
     if (!newWindow) return;
 
-    // Encode all file contents as base64 to avoid script tag breaking
-    const encodedFiles: Record<string, string> = {};
-    Object.values(files).forEach(f => {
-      encodedFiles[f.name] = btoa(unescape(encodeURIComponent(f.content)));
+    // Encode ALL file contents (needed for in-page link navigation to organisms etc.)
+    const allEncodedFiles: Record<string, string> = {};
+    (Object.values(files) as GeneratedFile[]).forEach(f => {
+      allEncodedFiles[f.name] = btoa(unescape(encodeURIComponent(f.content)));
     });
 
-    const fileNames = Object.keys(encodedFiles);
+    // Only show .page.html files in the nav bar (prototype view)
+    const pageFileNames = Object.keys(allEncodedFiles).filter(n => n.endsWith('.page.html'));
+    // If no .page.html files exist, fall back to showing all files
+    const navFileNames = pageFileNames.length > 0 ? pageFileNames : Object.keys(allEncodedFiles);
+    // Default to a page file if current activeFile isn't a page
+    const initialFile = (pageFileNames.length > 0 && !activeFile.endsWith('.page.html'))
+      ? pageFileNames[0] : activeFile;
 
     const navScript = `
 function decode(b64) {
   return decodeURIComponent(escape(atob(b64)));
 }
-var pages = ${JSON.stringify(encodedFiles)};
+var pages = ${JSON.stringify(allEncodedFiles)};
 var navInterceptor = '<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.getAttribute("href")){var h=a.getAttribute("href");if(h&&!h.startsWith("http")&&!h.startsWith("#")&&!h.startsWith("mailto:")&&!h.startsWith("tel:")){e.preventDefault();var f=h.split("/").pop().split("?")[0].split("#")[0];window.parent.navigateTo(f);}}});</scr'+'ipt>';
 function navigateTo(fileName) {
   if (!pages[fileName]) return;
   var iframe = document.getElementById('viewer');
   iframe.srcdoc = decode(pages[fileName]) + navInterceptor;
-  document.title = fileName.replace(/\.(atom|molecule|organism|page)\.html$/, '.html') + ' - Full View';
-  document.querySelectorAll('.nav-bar button').forEach(function(btn) {
+  document.title = fileName.replace(/\\.(atom|molecule|organism|page)\\.html$/, '') + ' — Prototype';
+  document.querySelectorAll('.nav-bar button[data-file]').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.file === fileName);
   });
 }
-navigateTo('${activeFile}');
+navigateTo('${initialFile}');
 `;
 
     newWindow.document.open();
     newWindow.document.write(`<!DOCTYPE html>
 <html><head>
-<title>${activeFile} - Full View</title>
+<title>${initialFile.replace(/\.(atom|molecule|organism|page)\.html$/, '')} — Prototype</title>
 <style>
   *{margin:0;padding:0}
   html,body{width:100%;height:100%;overflow:hidden}
   iframe{width:100%;height:100%;border:none}
-  .nav-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-bottom:1px solid #e2e8f0;padding:8px 16px;display:flex;align-items:center;gap:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:auto}
+  .nav-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);border-bottom:1px solid #e2e8f0;padding:8px 16px;display:flex;align-items:center;gap:8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:auto}
   .nav-bar button{padding:6px 14px;border-radius:8px;border:1px solid #e2e8f0;background:white;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap}
   .nav-bar button:hover{background:#f1f5f9}
   .nav-bar button.active{background:#4f46e5;color:white;border-color:#4f46e5}
-  .nav-bar .title{font-size:13px;font-weight:700;color:#1e293b;margin-right:12px}
+  .nav-bar .logo{display:flex;align-items:center;gap:6px;margin-right:8px;padding-right:12px;border-right:1px solid #e2e8f0}
+  .nav-bar .logo svg{width:16px;height:16px;color:#6366f1}
+  .nav-bar .logo span{font-size:12px;font-weight:700;color:#1e293b}
   iframe{margin-top:44px;height:calc(100% - 44px)}
 </style>
 </head><body>
 <div class="nav-bar">
-  <span class="title">Full View</span>
-  ${fileNames.map(name =>
-    `<button data-file="${name}" class="${name === activeFile ? 'active' : ''}" onclick="navigateTo('${name}')">${name.replace(/\.(atom|molecule|organism|page)\.html$/, '.html')}</button>`
+  <div class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+    <span>Prototype</span>
+  </div>
+  ${navFileNames.map(name =>
+    `<button data-file="${name}" class="${name === initialFile ? 'active' : ''}" onclick="navigateTo('${name}')">${name.replace(/\.(atom|molecule|organism|page)\.html$/, '').replace(/[-_]/g, ' ')}</button>`
   ).join('')}
 </div>
 <iframe id="viewer" sandbox="allow-scripts allow-same-origin"></iframe>
 </body></html>`);
     newWindow.document.close();
 
-    // Inject script after document is written to avoid parsing issues
     const scriptEl = newWindow.document.createElement('script');
     scriptEl.textContent = navScript;
     newWindow.document.body.appendChild(scriptEl);
@@ -1820,13 +1886,26 @@ navigateTo('${activeFile}');
                       <h4 className="text-sm font-bold text-slate-800 line-clamp-1 flex-1 min-w-0">{session.title}</h4>
                       <div className="flex items-center gap-0.5 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            const url = `${window.location.origin}${window.location.pathname}#/chat/${session.id}`;
-                            navigator.clipboard.writeText(url);
+                            try {
+                              const compressed = await compressSession({
+                                id: session.id,
+                                title: session.title,
+                                template: session.template,
+                                chatHistory: session.chatHistory,
+                                roadmap: session.roadmap,
+                                files: session.files
+                              });
+                              const url = `${window.location.origin}${window.location.pathname}#/share/${compressed}`;
+                              await navigator.clipboard.writeText(url);
+                            } catch {
+                              const url = `${window.location.origin}${window.location.pathname}#/chat/${session.id}`;
+                              navigator.clipboard.writeText(url);
+                            }
                           }}
                           className="text-slate-300 hover:text-indigo-500 p-1"
-                          title="Copy link"
+                          title="Copy shareable link"
                         >
                           <Link2 className="w-3.5 h-3.5" />
                         </button>
@@ -2006,14 +2085,30 @@ navigateTo('${activeFile}');
             {/* Share Link Button */}
             {chatHistory.length > 0 && (
               <button
-                onClick={() => {
-                  const url = `${window.location.origin}${window.location.pathname}#/chat/${sessionId}`;
-                  navigator.clipboard.writeText(url);
+                onClick={async () => {
                   setLinkCopied(true);
-                  setTimeout(() => setLinkCopied(false), 2000);
+                  try {
+                    const sessionData = {
+                      id: sessionId,
+                      title: chatHistory[0]?.text.slice(0, 50) || 'Shared Project',
+                      template: selectedTemplate,
+                      chatHistory,
+                      roadmap,
+                      files
+                    };
+                    const compressed = await compressSession(sessionData);
+                    const url = `${window.location.origin}${window.location.pathname}#/share/${compressed}`;
+                    await navigator.clipboard.writeText(url);
+                    setTimeout(() => setLinkCopied(false), 2000);
+                  } catch {
+                    // Fallback: copy local-only link
+                    const url = `${window.location.origin}${window.location.pathname}#/chat/${sessionId}`;
+                    await navigator.clipboard.writeText(url);
+                    setTimeout(() => setLinkCopied(false), 2000);
+                  }
                 }}
                 className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
-                title="Copy chat link"
+                title="Copy shareable link"
               >
                 {linkCopied ? <CheckCheck className="w-4 h-4 text-emerald-500" /> : <Link2 className="w-4 h-4" />}
               </button>
