@@ -7,7 +7,9 @@ import {
   ChevronLeft, MessageSquare, Bot, User, BrainCircuit,
   Download, Package, Terminal, AlertTriangle,
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
-  PanelTop, Workflow, PanelTopOpen, Maximize, Minimize2, Undo2, Redo2, Eye, PenTool, Search, ExternalLink
+  PanelTop, Workflow, PanelTopOpen, Maximize, Minimize2, Undo2, Redo2, Eye, PenTool, Search, ExternalLink,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify, ArrowUpFromLine, ArrowDownFromLine,
+  FolderOpen, ChevronRight, Component
 } from 'lucide-react';
 import { generateArchitectureStream, analyzePRD } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
@@ -89,6 +91,7 @@ const App: React.FC = () => {
   const [designSections, setDesignSections] = useState<Record<string, boolean>>({typography: true, colors: true, border: false, spacing: false, size: false, layout: false, flexbox: false, effects: false});
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
   const [designSrcDoc, setDesignSrcDoc] = useState<string | null>(null);
+  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({ pages: true, components: true });
   const designAutoSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const designDirtyRef = useRef(false);
 
@@ -127,6 +130,23 @@ const App: React.FC = () => {
   const hasStarted = chatHistory.length > 0;
   const canUndo = filesHistoryIndex > 0;
   const canRedo = filesHistoryIndex < filesHistory.length - 1;
+
+  const COMPONENT_KEYWORDS = ['navbar','nav','sidebar','footer','header','modal','card','widget','menu','breadcrumb','pagination','tab','accordion','alert','badge','tooltip','dropdown','carousel','slider','testimonial','faq','cta','hero','banner','form','table','list','search','filter','chart','stat','feature','team','pricing-card','comment','review','notification','avatar','progress','spinner','loader','dialog','drawer','popover','toast','steps','timeline'];
+  const groupedFiles = useMemo(() => {
+    const allFiles = Object.values(files) as GeneratedFile[];
+    const pages: GeneratedFile[] = [];
+    const components: GeneratedFile[] = [];
+    for (const f of allFiles) {
+      const base = f.name.replace(/\.[^.]+$/, '').toLowerCase();
+      const isComponent = COMPONENT_KEYWORDS.some(k => base === k || base.startsWith(k + '-') || base.endsWith('-' + k));
+      if (isComponent) {
+        components.push(f);
+      } else {
+        pages.push(f);
+      }
+    }
+    return { pages, components };
+  }, [files]);
 
   // --- Persistence Logic ---
 
@@ -904,7 +924,7 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
     return isNaN(n) ? '0' : String(Math.round(n * 10) / 10);
   };
 
-  const designModeScript = `<style id="__dm-css__">.__dm-sel__{outline:2px solid #4f46e5!important;outline-offset:2px!important}.__dm-hov__:not(.__dm-sel__){outline:1px dashed #818cf8!important;outline-offset:1px!important}*{cursor:default!important}img,svg,video,canvas,iframe,input,select,textarea,button,a,span,i,em,strong,b,label,hr,br{pointer-events:auto!important}</style><scr` + `ipt id="__dm-js__">(function(){var sel=null;function getEl(e){var t=e.target;if(!t||t===document.body||t===document.documentElement||t.id==='__dm-css__'||t.id==='__dm-js__')return null;return t;}function getOwnText(el){var t='';for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===3)t+=el.childNodes[i].textContent;}return t.trim();}function isTextEl(el){var tag=el.tagName.toLowerCase();if(['img','svg','video','canvas','iframe','hr','br','input','select','textarea'].indexOf(tag)>=0)return false;var hasElChild=false;for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===1){hasElChild=true;break;}}if(!hasElChild)return true;if(getOwnText(el).length>0)return true;return false;}function getAttrs(el){var a={};if(el.src)a.src=el.src;if(el.getAttribute('alt')!==null)a.alt=el.getAttribute('alt')||'';if(el.href)a.href=el.href;return a;}document.addEventListener('mouseover',function(e){var t=getEl(e);if(t)t.classList.add('__dm-hov__');},true);document.addEventListener('mouseout',function(e){var t=getEl(e);if(t)t.classList.remove('__dm-hov__');},true);document.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();var t=getEl(e);if(!t)return;if(sel)sel.classList.remove('__dm-sel__');sel=t;sel.classList.add('__dm-sel__');var cs=getComputedStyle(sel);var cn=typeof sel.className==='string'?sel.className:'';var canEdit=isTextEl(sel);var txt=canEdit?(sel.innerText||sel.textContent||''):(sel.alt||sel.src||sel.textContent||'').substring(0,80);window.parent.postMessage({type:'dm-select',tag:sel.tagName.toLowerCase(),classes:cn.replace(/__dm-(sel|hov)__/g,'').trim(),text:txt,canEditText:canEdit,attrs:getAttrs(sel),styles:{fontFamily:cs.fontFamily,fontSize:cs.fontSize,fontWeight:cs.fontWeight,fontStyle:cs.fontStyle,textDecorationLine:cs.textDecorationLine||cs.textDecoration,textTransform:cs.textTransform,lineHeight:cs.lineHeight,letterSpacing:cs.letterSpacing,color:cs.color,backgroundColor:cs.backgroundColor,borderTopWidth:cs.borderTopWidth,borderTopStyle:cs.borderTopStyle,borderTopColor:cs.borderTopColor,borderRadius:cs.borderRadius,paddingTop:cs.paddingTop,paddingRight:cs.paddingRight,paddingBottom:cs.paddingBottom,paddingLeft:cs.paddingLeft,marginTop:cs.marginTop,marginRight:cs.marginRight,marginBottom:cs.marginBottom,marginLeft:cs.marginLeft,width:cs.width,height:cs.height,minWidth:cs.minWidth,maxWidth:cs.maxWidth,minHeight:cs.minHeight,maxHeight:cs.maxHeight,display:cs.display,position:cs.position,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,zIndex:cs.zIndex,overflow:cs.overflow,visibility:cs.visibility,flexDirection:cs.flexDirection,flexWrap:cs.flexWrap,justifyContent:cs.justifyContent,alignItems:cs.alignItems,alignSelf:cs.alignSelf,gap:cs.gap,flexGrow:cs.flexGrow,flexShrink:cs.flexShrink,flexBasis:cs.flexBasis,order:cs.order,gridTemplateColumns:cs.gridTemplateColumns,gridTemplateRows:cs.gridTemplateRows,opacity:cs.opacity,boxShadow:cs.boxShadow,transform:cs.transform,cursor:cs.cursor,transition:cs.transition,objectFit:cs.objectFit}},'*');},true);window.addEventListener('message',function(e){if(!e.data||!sel)return;if(e.data.type==='dm-set-style'){sel.style[e.data.prop]=e.data.val;var cs2=getComputedStyle(sel);window.parent.postMessage({type:'dm-style-updated',prop:e.data.prop,computed:cs2[e.data.prop]},'*');}if(e.data.type==='dm-set-text'){sel.innerText=e.data.val;}if(e.data.type==='dm-set-attr'){sel.setAttribute(e.data.attr,e.data.val);if(e.data.attr==='src'&&sel.tagName==='IMG')sel.src=e.data.val;}});})();</scr` + `ipt>`;
+  const designModeScript = `<style id="__dm-css__">.__dm-sel__{outline:2px solid #4f46e5!important;outline-offset:2px!important}.__dm-hov__:not(.__dm-sel__){outline:1px dashed #818cf8!important;outline-offset:1px!important}*{cursor:default!important}img,svg,video,canvas,iframe,input,select,textarea,button,a,span,i,em,strong,b,label,hr,br{pointer-events:auto!important}</style><scr` + `ipt id="__dm-js__">(function(){var sel=null;function getEl(e){var t=e.target;if(!t||t===document.body||t===document.documentElement||t.id==='__dm-css__'||t.id==='__dm-js__')return null;return t;}function getOwnText(el){var t='';for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===3)t+=el.childNodes[i].textContent;}return t.trim();}function isTextEl(el){var tag=el.tagName.toLowerCase();if(['img','svg','video','canvas','iframe','hr','br','input','select','textarea'].indexOf(tag)>=0)return false;var hasElChild=false;for(var i=0;i<el.childNodes.length;i++){if(el.childNodes[i].nodeType===1){hasElChild=true;break;}}if(!hasElChild)return true;if(getOwnText(el).length>0)return true;return false;}function getAttrs(el){var a={};if(el.src)a.src=el.src;if(el.getAttribute('alt')!==null)a.alt=el.getAttribute('alt')||'';if(el.href)a.href=el.href;return a;}document.addEventListener('mouseover',function(e){var t=getEl(e);if(t)t.classList.add('__dm-hov__');},true);document.addEventListener('mouseout',function(e){var t=getEl(e);if(t)t.classList.remove('__dm-hov__');},true);document.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();var t=getEl(e);if(!t)return;if(sel)sel.classList.remove('__dm-sel__');sel=t;sel.classList.add('__dm-sel__');var cs=getComputedStyle(sel);var cn=typeof sel.className==='string'?sel.className:'';var canEdit=isTextEl(sel);var txt=canEdit?(sel.innerText||sel.textContent||''):(sel.alt||sel.src||sel.textContent||'').substring(0,80);window.parent.postMessage({type:'dm-select',tag:sel.tagName.toLowerCase(),classes:cn.replace(/__dm-(sel|hov)__/g,'').trim(),text:txt,canEditText:canEdit,attrs:getAttrs(sel),styles:{fontFamily:cs.fontFamily,fontSize:cs.fontSize,fontWeight:cs.fontWeight,fontStyle:cs.fontStyle,textDecorationLine:cs.textDecorationLine||cs.textDecoration,textTransform:cs.textTransform,lineHeight:cs.lineHeight,letterSpacing:cs.letterSpacing,color:cs.color,backgroundColor:cs.backgroundColor,borderTopWidth:cs.borderTopWidth,borderTopStyle:cs.borderTopStyle,borderTopColor:cs.borderTopColor,borderRadius:cs.borderRadius,paddingTop:cs.paddingTop,paddingRight:cs.paddingRight,paddingBottom:cs.paddingBottom,paddingLeft:cs.paddingLeft,marginTop:cs.marginTop,marginRight:cs.marginRight,marginBottom:cs.marginBottom,marginLeft:cs.marginLeft,width:cs.width,height:cs.height,minWidth:cs.minWidth,maxWidth:cs.maxWidth,minHeight:cs.minHeight,maxHeight:cs.maxHeight,display:cs.display,position:cs.position,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,zIndex:cs.zIndex,overflow:cs.overflow,visibility:cs.visibility,flexDirection:cs.flexDirection,flexWrap:cs.flexWrap,justifyContent:cs.justifyContent,alignItems:cs.alignItems,alignSelf:cs.alignSelf,gap:cs.gap,flexGrow:cs.flexGrow,flexShrink:cs.flexShrink,flexBasis:cs.flexBasis,order:cs.order,gridTemplateColumns:cs.gridTemplateColumns,gridTemplateRows:cs.gridTemplateRows,opacity:cs.opacity,boxShadow:cs.boxShadow,transform:cs.transform,cursor:cs.cursor,transition:cs.transition,objectFit:cs.objectFit,textAlign:cs.textAlign,verticalAlign:cs.verticalAlign}},'*');},true);window.addEventListener('message',function(e){if(!e.data||!sel)return;if(e.data.type==='dm-set-style'){sel.style[e.data.prop]=e.data.val;var cs2=getComputedStyle(sel);window.parent.postMessage({type:'dm-style-updated',prop:e.data.prop,computed:cs2[e.data.prop]},'*');}if(e.data.type==='dm-set-text'){sel.innerText=e.data.val;}if(e.data.type==='dm-set-attr'){sel.setAttribute(e.data.attr,e.data.val);if(e.data.attr==='src'&&sel.tagName==='IMG')sel.src=e.data.val;}});})();</scr` + `ipt>`;
 
   const navScript = `<script>document.addEventListener('click', function(e) {
   var anchor = e.target.closest('a');
@@ -1873,20 +1893,62 @@ navigateTo('${activeFile}');
             {/* 3. ACTIVE PREVIEW STATE */}
             {activeFile && files[activeFile] && (
               <div className="flex-1 min-h-0 w-full flex flex-col bg-white overflow-hidden">
-                {/* File Tabs */}
-                <div className="bg-slate-50 border-b border-slate-100 px-2 pt-2 flex gap-1 overflow-x-auto shrink-0 scrollbar-thin" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
-                  {Object.values(files).map((f) => (
-                    <button
-                      key={f.name}
-                      onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
-                      className={`px-4 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? 'bg-white text-indigo-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
-                    >
-                      <FileCode className="w-3.5 h-3.5" />
-                      {f.name}
-                    </button>
-                  ))}
+                {/* File Tabs - Grouped */}
+                <div className="bg-slate-50 border-b border-slate-100 px-2 pt-1.5 pb-0 flex gap-0.5 overflow-x-auto shrink-0 scrollbar-thin items-end" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
+                  {/* Pages Folder */}
+                  {groupedFiles.pages.length > 0 && (
+                    <div className="flex items-end gap-0.5 shrink-0">
+                      <button
+                        onClick={() => setOpenFolders(p => ({ ...p, pages: !p.pages }))}
+                        className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider shrink-0"
+                      >
+                        <ChevronRight className={`w-3 h-3 transition-transform ${openFolders.pages ? 'rotate-90' : ''}`} />
+                        <FolderOpen className="w-3 h-3" />
+                        Pages
+                        <span className="text-[9px] font-normal text-slate-300">({groupedFiles.pages.length})</span>
+                      </button>
+                      {openFolders.pages && groupedFiles.pages.map((f) => (
+                        <button
+                          key={f.name}
+                          onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
+                          className={`px-3 py-1.5 rounded-t-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? 'bg-white text-indigo-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-indigo-400' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
+                        >
+                          <FileCode className="w-3 h-3" />
+                          {f.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {/* Divider */}
+                  {groupedFiles.pages.length > 0 && groupedFiles.components.length > 0 && (
+                    <div className="w-px h-5 bg-slate-200 mx-1 shrink-0 self-center" />
+                  )}
+                  {/* Components Folder */}
+                  {groupedFiles.components.length > 0 && (
+                    <div className="flex items-end gap-0.5 shrink-0">
+                      <button
+                        onClick={() => setOpenFolders(p => ({ ...p, components: !p.components }))}
+                        className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-amber-500 hover:text-amber-600 transition-colors uppercase tracking-wider shrink-0"
+                      >
+                        <ChevronRight className={`w-3 h-3 transition-transform ${openFolders.components ? 'rotate-90' : ''}`} />
+                        <Component className="w-3 h-3" />
+                        Components
+                        <span className="text-[9px] font-normal text-amber-300">({groupedFiles.components.length})</span>
+                      </button>
+                      {openFolders.components && groupedFiles.components.map((f) => (
+                        <button
+                          key={f.name}
+                          onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
+                          className={`px-3 py-1.5 rounded-t-lg text-xs font-bold flex items-center gap-1.5 whitespace-nowrap transition-all shrink-0 ${activeFile === f.name ? 'bg-white text-amber-600 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] border-t-2 border-amber-400' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
+                        >
+                          <Component className="w-3 h-3" />
+                          {f.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {(status === 'coding') && (
-                    <div className="px-3 py-2 flex items-center gap-2 text-xs text-indigo-400 animate-pulse">
+                    <div className="px-3 py-1.5 flex items-center gap-2 text-xs text-indigo-400 animate-pulse shrink-0">
                       <Terminal className="w-3 h-3" />
                       <span>Generating...</span>
                     </div>
@@ -2087,6 +2149,48 @@ navigateTo('${activeFile}');
                                       <input type="number" value={parseNum(selectedElement.styles.fontSize)} onChange={e => updateElementStyle('fontSize', e.target.value + 'px')} className="w-full text-xs border border-slate-200 rounded-l-lg px-2 py-1.5 outline-none focus:border-indigo-400" />
                                       <span className="text-[10px] text-slate-400 bg-slate-50 border border-l-0 border-slate-200 rounded-r-lg px-2 py-1.5 shrink-0">px</span>
                                     </div>
+                                  </div>
+                                </div>
+                                {/* Text Alignment */}
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Alignment</label>
+                                  <div className="flex gap-1">
+                                    {([
+                                      { val: 'left', icon: AlignLeft, label: 'Left' },
+                                      { val: 'center', icon: AlignCenter, label: 'Center' },
+                                      { val: 'right', icon: AlignRight, label: 'Right' },
+                                      { val: 'justify', icon: AlignJustify, label: 'Justify' },
+                                    ] as const).map(({ val, icon: Icon, label }) => (
+                                      <button
+                                        key={val}
+                                        onClick={() => updateElementStyle('textAlign', val)}
+                                        title={label}
+                                        className={`flex-1 flex items-center justify-center py-1.5 rounded-lg border transition-colors ${selectedElement.styles.textAlign === val ? 'bg-indigo-50 border-indigo-300 text-indigo-600' : 'border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300'}`}
+                                      >
+                                        <Icon className="w-3.5 h-3.5" />
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                                {/* Vertical Alignment */}
+                                <div>
+                                  <label className="text-[10px] text-slate-400 block mb-1">Vertical Align</label>
+                                  <div className="flex gap-1">
+                                    {([
+                                      { val: 'top', icon: ArrowUpFromLine, label: 'Top' },
+                                      { val: 'middle', label: 'Middle' },
+                                      { val: 'bottom', icon: ArrowDownFromLine, label: 'Bottom' },
+                                      { val: 'baseline', label: 'Baseline' },
+                                    ] as const).map(item => (
+                                      <button
+                                        key={item.val}
+                                        onClick={() => updateElementStyle('verticalAlign', item.val)}
+                                        title={item.label}
+                                        className={`flex-1 flex items-center justify-center py-1.5 rounded-lg border text-[9px] font-medium transition-colors ${selectedElement.styles.verticalAlign === item.val ? 'bg-indigo-50 border-indigo-300 text-indigo-600' : 'border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300'}`}
+                                      >
+                                        {'icon' in item && item.icon ? <item.icon className="w-3.5 h-3.5" /> : item.val.charAt(0).toUpperCase()}
+                                      </button>
+                                    ))}
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
