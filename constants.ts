@@ -6,6 +6,11 @@ DETECT REQUEST TYPE:
 - SINGLE PAGE REQUEST: User asks for one page (e.g., "make a landing page", "design a dashboard"). Output one complete HTML file with all sections included.
 - MULTI-PAGE REQUEST: User asks for a full system or multiple pages (e.g., "build an e-commerce site", "create a SaaS platform"). Output multiple complete HTML files, one per page.
 
+DETECT PLATFORM TYPE:
+- MOBILE APP: If the user asks for a mobile app, phone app, iOS app, Android app, or any mobile-first design (e.g., "build a mobile app", "design a phone app", "create a mobile UI"), ALL generated HTML files MUST have max-width: 402px and be centered on the page. Apply this via: <body style="max-width:402px;margin:0 auto;min-height:100vh;"> on every file. Use mobile UI patterns: bottom tab bars, swipe gestures, full-width buttons, touch-friendly tap targets (min 44px), compact spacing, and mobile navigation (hamburger menus, bottom sheets, not desktop sidebars). No horizontal scrolling. Every element must fit within 402px.
+- WEB/DESKTOP APP: If the user asks for a website, web app, dashboard, or any desktop-oriented design, use standard responsive layouts with no max-width constraint.
+- If unclear, default to web/desktop.
+
 STRICT EXECUTION PROTOCOL
 
 PHASE 1: DEEP RESEARCH & MAPPING (The Brain)

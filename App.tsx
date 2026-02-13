@@ -9,7 +9,7 @@ import {
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
   PanelTop, Workflow, PanelTopOpen, Maximize, Minimize2, Undo2, Redo2, Eye, PenTool, Search, ExternalLink,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, ArrowUpFromLine, ArrowDownFromLine,
-  FolderOpen, ChevronRight, Component
+  FolderOpen, ChevronRight, Component, Menu
 } from 'lucide-react';
 import { generateArchitectureStream, analyzePRD } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
@@ -73,6 +73,7 @@ const App: React.FC = () => {
   const [step, setStep] = useState<'selection' | 'studio'>('selection');
 
   // App State
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'templates' | 'history'>('chat');
   const [prompt, setPrompt] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -1226,12 +1227,12 @@ navigateTo('${activeFile}');
   if (step === 'selection') {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-        <header className="h-20 bg-white border-b border-slate-100 flex items-center px-8 md:px-12 justify-between">
+        <header className="h-16 md:h-20 bg-white border-b border-slate-100 flex items-center px-4 md:px-8 lg:px-12 justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
               <Sparkles className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight">AI Architect Studio</h1>
+            <h1 className="text-base md:text-xl font-bold tracking-tight">AI Architect Studio</h1>
           </div>
           {/* History Button on Selection Page */}
           <button
@@ -1242,12 +1243,12 @@ navigateTo('${activeFile}');
           </button>
         </header>
 
-        <main className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-500">
+        <main className="flex-1 flex flex-col items-center justify-start md:justify-center p-4 md:p-8 overflow-y-auto animate-in fade-in duration-500">
           <div className="max-w-6xl w-full">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Choose Your Foundation</h2>
-              <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-                Select a Design DNA to guide the AI's architectural decisions. This determines the visual language, spacing, and component behavior.
+            <div className="text-center mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-slate-900 mb-2 md:mb-4">Choose Your Foundation</h2>
+              <p className="text-slate-500 text-sm md:text-lg max-w-2xl mx-auto">
+                Select a Design DNA to guide the AI's architectural decisions.
               </p>
               <div className="mt-6 max-w-md mx-auto relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 pointer-events-none" />
@@ -1266,18 +1267,18 @@ navigateTo('${activeFile}');
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
               {/* Upload Card */}
               <div
                 onClick={() => document.getElementById('template-upload-landing')?.click()}
-                className="group relative cursor-pointer h-64 rounded-2xl border-2 border-dashed border-slate-300 bg-white hover:border-indigo-500 hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center text-center gap-4 shadow-sm hover:shadow-md"
+                className="group relative cursor-pointer h-44 md:h-64 rounded-2xl border-2 border-dashed border-slate-300 bg-white hover:border-indigo-500 hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center text-center gap-2 md:gap-4 shadow-sm hover:shadow-md"
               >
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-                  <Upload className="w-8 h-8" />
+                <div className="w-10 h-10 md:w-16 md:h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                  <Upload className="w-5 h-5 md:w-8 md:h-8" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">Upload Custom DNA</h3>
-                  <p className="text-sm text-slate-400 mt-1 px-4">Import your own HTML/CSS structure</p>
+                  <h3 className="text-sm md:text-lg font-bold text-slate-800">Upload Custom DNA</h3>
+                  <p className="text-xs md:text-sm text-slate-400 mt-1 px-2 md:px-4 hidden sm:block">Import your own HTML/CSS structure</p>
                 </div>
                 <input
                   type="file"
@@ -1292,9 +1293,9 @@ navigateTo('${activeFile}');
               {PRESET_TEMPLATES.filter(t => !templateSearch || t.name.toLowerCase().includes(templateSearch.toLowerCase()) || t.description.toLowerCase().includes(templateSearch.toLowerCase())).map((tmpl, idx) => (
                 <div
                   key={idx}
-                  className="group relative cursor-default h-64 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-300"
+                  className="group relative cursor-default h-44 md:h-64 rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-indigo-500/50 hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className="absolute top-0 left-0 right-0 h-32 bg-slate-100 border-b border-slate-100 flex items-center justify-center group-hover:bg-indigo-50/50 transition-colors">
+                  <div className="absolute top-0 left-0 right-0 h-20 md:h-32 bg-slate-100 border-b border-slate-100 flex items-center justify-center group-hover:bg-indigo-50/50 transition-colors">
                     <div className="w-full h-full relative overflow-hidden">
                       <TemplateThumbnail template={tmpl} />
                     </div>
@@ -1320,9 +1321,9 @@ navigateTo('${activeFile}');
                       </button>
                     </div>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 z-20 bg-white/95 backdrop-blur-sm border-t border-slate-50">
-                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">{tmpl.name}</h3>
-                    <p className="text-sm text-slate-500 mt-2 line-clamp-2">{tmpl.description}</p>
+                  <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 z-20 bg-white/95 backdrop-blur-sm border-t border-slate-50">
+                    <h3 className="text-xs md:text-lg font-bold text-slate-800 group-hover:text-indigo-700 transition-colors truncate">{tmpl.name}</h3>
+                    <p className="text-[10px] md:text-sm text-slate-500 mt-0.5 md:mt-2 line-clamp-1 md:line-clamp-2">{tmpl.description}</p>
                   </div>
                 </div>
               ))}
@@ -1334,8 +1335,8 @@ navigateTo('${activeFile}');
         {previewTemplate && (
           <div className="fixed inset-0 z-[100] bg-white flex flex-col overflow-hidden animate-in fade-in duration-200">
             {/* Slim Top Bar */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0 bg-white">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center justify-between px-3 md:px-5 py-3 border-b border-slate-200 shrink-0 bg-white">
+              <div className="flex items-center gap-2 md:gap-3 min-w-0">
                 <button
                   onClick={() => setPreviewTemplate(null)}
                   className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors shrink-0"
@@ -1387,7 +1388,7 @@ navigateTo('${activeFile}');
     <div className="flex h-screen w-full bg-white text-slate-900 overflow-hidden font-sans">
 
       {/* Sidebar: Primary Navigation */}
-      <aside className="w-20 bg-white border-r border-slate-100 flex flex-col items-center py-6 gap-8 z-50">
+      <aside className="hidden md:flex w-20 bg-white border-r border-slate-100 flex-col items-center py-6 gap-8 z-50">
         <div
           onClick={() => setStep('selection')}
           className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:border-indigo-600 cursor-pointer transition-all"
@@ -1439,20 +1440,27 @@ navigateTo('${activeFile}');
         </div>
       </aside>
 
+      {/* Mobile Sidebar Overlay */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setMobileSidebarOpen(false)} />
+      )}
+
       {/* Sidebar: Secondary (Contextual) */}
-      <aside className="w-80 bg-white border-r border-slate-100 flex flex-col z-40 transition-all duration-300">
+      <aside className={`${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative inset-y-0 left-0 w-[85vw] max-w-[360px] md:w-80 bg-white border-r border-slate-100 flex flex-col z-50 md:z-40 transition-transform duration-300 ease-in-out`}>
 
         {/* Chat Tab (NOW PRIMARY) */}
         {activeTab === 'chat' && (
           <div className="flex flex-col h-full animate-in slide-in-from-left-4 fade-in duration-300">
-            <div className="p-6 border-b border-slate-50 bg-white z-10 sticky top-0 flex justify-between items-center">
+            <div className="p-4 md:p-6 border-b border-slate-50 bg-white z-10 sticky top-0 flex justify-between items-center">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
                 <Bot className="w-4 h-4 text-indigo-500" /> Architect Chat
               </h3>
               <div className="flex items-center gap-2">
-
                 <button onClick={handleNewChat} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
                   <Plus className="w-3 h-3" /> New
+                </button>
+                <button onClick={() => setMobileSidebarOpen(false)} className="md:hidden p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1675,10 +1683,13 @@ navigateTo('${activeFile}');
         {/* Templates Tab */}
         {activeTab === 'templates' && (
           <div className="flex flex-col h-full animate-in slide-in-from-left-4 fade-in duration-300">
-            <div className="p-6 border-b border-slate-50">
+            <div className="p-4 md:p-6 border-b border-slate-50 flex justify-between items-center">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
                 <Layout className="w-4 h-4 text-indigo-500" /> Template Gallery
               </h3>
+              <button onClick={() => setMobileSidebarOpen(false)} className="md:hidden p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <div
@@ -1721,10 +1732,13 @@ navigateTo('${activeFile}');
         {/* History Tab */}
         {activeTab === 'history' && (
           <div className="flex flex-col h-full animate-in slide-in-from-left-4 fade-in duration-300">
-            <div className="p-6 border-b border-slate-50">
+            <div className="p-4 md:p-6 border-b border-slate-50 flex justify-between items-center">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
                 <History className="w-4 h-4 text-indigo-500" /> Project History
               </h3>
+              <button onClick={() => setMobileSidebarOpen(false)} className="md:hidden p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {sessions.length === 0 ? (
@@ -1773,21 +1787,26 @@ navigateTo('${activeFile}');
       <main className="flex-1 flex flex-col relative bg-white min-w-0">
 
         {/* Header - PERSISTENT TOP BAR */}
-        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-6 z-10 shadow-sm">
-          <div className="flex items-center gap-4 min-w-0">
+        <header className="h-14 md:h-16 bg-white border-b border-slate-100 flex items-center justify-between px-3 md:px-6 z-10 shadow-sm">
+          <div className="flex items-center gap-2 md:gap-4 min-w-0">
+            {/* Mobile hamburger */}
+            <button onClick={() => setMobileSidebarOpen(true)} className="md:hidden p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors shrink-0">
+              <Menu className="w-5 h-5" />
+            </button>
+
             <div
               onClick={() => setStep('selection')}
-              className="group flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors shrink-0"
+              className="group flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors shrink-0"
             >
               <Layout className="w-3 h-3" />
-              <span className="text-[10px] font-bold uppercase tracking-tight truncate max-w-[150px]">{selectedTemplate.name}</span>
+              <span className="text-[10px] font-bold uppercase tracking-tight truncate max-w-[80px] md:max-w-[150px]">{selectedTemplate.name}</span>
               <span className="hidden group-hover:inline text-[10px] text-indigo-400 ml-1">Change</span>
             </div>
 
             {/* Enhanced Active Task Indicator */}
-            <div className="h-8 w-[1px] bg-slate-200 mx-2"></div>
+            <div className="h-8 w-[1px] bg-slate-200 mx-1 md:mx-2 hidden sm:block"></div>
 
-            <div className="flex flex-col">
+            <div className="flex-col hidden sm:flex">
               <div className="flex items-center gap-2">
                 {(status === 'planning' || status === 'coding') && <Loader className="w-3 h-3 text-indigo-500 animate-spin" />}
                 <span className={`text-xs font-bold ${status === 'completed' ? 'text-emerald-600' : 'text-slate-800'}`}>
@@ -1800,9 +1819,9 @@ navigateTo('${activeFile}');
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
             {/* Undo/Redo */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl mr-2">
+            <div className="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl mr-1 md:mr-2">
               <button
                 onClick={handleUndo}
                 disabled={!canUndo}
@@ -1821,7 +1840,7 @@ navigateTo('${activeFile}');
               </button>
             </div>
 
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl mr-4">
+            <div className="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl mr-1 md:mr-4">
               <button
                 onClick={() => setViewMode('desktop')}
                 className={`p-1.5 rounded-lg shadow-sm transition-all ${viewMode === 'desktop' ? 'bg-white text-indigo-600' : 'text-slate-400'}`}
@@ -1840,7 +1859,7 @@ navigateTo('${activeFile}');
               <>
               <button
                 onClick={() => { if (designMode) { exitDesignMode(); } else { setDesignMode(true); setDesignSrcDoc(activeFile && files[activeFile] ? files[activeFile].content : null); setSelectedElement(null); } }}
-                className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5 ${designMode ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
+                className={`p-2 md:px-3 md:py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5 ${designMode ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
                 title={designMode ? "Exit Design Mode" : "Enter Design Mode"}
               >
                 <PenTool className="w-4 h-4" />
@@ -1848,7 +1867,7 @@ navigateTo('${activeFile}');
               </button>
               <button
                 onClick={handleFullView}
-                className="px-3 py-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5"
+                className="p-2 md:px-3 md:py-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5"
                 title="Open in Full View"
               >
                 <Maximize className="w-4 h-4" />
@@ -1857,10 +1876,11 @@ navigateTo('${activeFile}');
               <div className="relative">
                 <button
                   onClick={() => setIsExportOpen(!isExportOpen)}
-                  className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-2"
+                  className="px-2.5 py-2 md:px-4 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-1.5 md:gap-2"
                 >
-                  <span>Export</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <span className="hidden sm:inline">Export</span>
+                  <Download className="w-4 h-4 sm:hidden" />
+                  <ChevronDown className="w-4 h-4 hidden sm:block" />
                 </button>
 
                 {isExportOpen && (
@@ -1918,22 +1938,22 @@ navigateTo('${activeFile}');
 
             {/* 1. IDLE STATE */}
             {!activeFile && status === 'idle' && (
-              <div className="flex flex-col items-center justify-center flex-1 text-center p-20">
-                <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mb-8 animate-pulse">
-                  <Wand2 className="w-10 h-10 text-indigo-500" />
+              <div className="flex flex-col items-center justify-center flex-1 text-center p-6 md:p-20">
+                <div className="w-14 h-14 md:w-20 md:h-20 bg-indigo-50 rounded-2xl md:rounded-3xl flex items-center justify-center mb-4 md:mb-8 animate-pulse">
+                  <Wand2 className="w-7 h-7 md:w-10 md:h-10 text-indigo-500" />
                 </div>
-                <h2 className="text-3xl font-extrabold text-slate-800">Mission Control</h2>
-                <p className="text-slate-500 mt-3 max-w-md">
+                <h2 className="text-xl md:text-3xl font-extrabold text-slate-800">Mission Control</h2>
+                <p className="text-slate-500 mt-2 md:mt-3 max-w-md text-sm md:text-base">
                   DNA: <span className="font-semibold text-indigo-600">{selectedTemplate.name}</span> selected.
                   <br />
-                  Enter your prompt below to start building.
+                  Enter your prompt to start building.
                 </p>
               </div>
             )}
 
             {/* 2. LOADING / ARCHITECTING STATE (Before first file) */}
             {(status === 'planning' || (status === 'coding' && !activeFile)) && (
-              <div className="flex flex-col items-center justify-center flex-1 p-10 space-y-6">
+              <div className="flex flex-col items-center justify-center flex-1 p-6 md:p-10 space-y-4 md:space-y-6">
                 <div className="relative">
                   <div className="absolute inset-0 bg-indigo-100 rounded-full animate-ping opacity-75"></div>
                   <div className="relative bg-white p-4 rounded-full shadow-xl border border-indigo-100">
@@ -2020,7 +2040,7 @@ navigateTo('${activeFile}');
 
                   {/* Design Mode Properties Panel */}
                   {designMode && (
-                    <div className="w-72 border-l border-slate-200 bg-white overflow-y-auto shrink-0 flex flex-col text-slate-700">
+                    <div className="absolute right-0 top-0 bottom-0 w-[280px] md:w-72 md:relative border-l border-slate-200 bg-white overflow-y-auto shrink-0 flex flex-col text-slate-700 z-20 shadow-xl md:shadow-none">
                       {/* Panel Header */}
                       <div className="p-4 border-b border-slate-100 shrink-0">
                         <div className="flex items-center justify-between mb-2">
@@ -2739,14 +2759,34 @@ navigateTo('${activeFile}');
 
         {/* AI Command Center (The Smart Input) - Hidden after start */}
         {!hasStarted && (
-          <div className="absolute bottom-8 left-0 right-0 px-8 pointer-events-none z-50">
-            <div className="max-w-4xl mx-auto backdrop-blur-xl bg-white/80 p-3 rounded-3xl shadow-2xl pointer-events-auto border border-slate-200 ring-1 ring-slate-100">
+          <div className="absolute bottom-16 md:bottom-8 left-0 right-0 px-3 md:px-8 pointer-events-none z-50">
+            <div className="max-w-4xl mx-auto backdrop-blur-xl bg-white/80 p-2 md:p-3 rounded-2xl md:rounded-3xl shadow-2xl pointer-events-auto border border-slate-200 ring-1 ring-slate-100">
               {renderInputForm(false)}
             </div>
           </div>
         )}
 
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around py-2 z-30 safe-area-bottom">
+        <button onClick={() => { setActiveTab('chat'); setMobileSidebarOpen(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${activeTab === 'chat' ? 'text-indigo-600' : 'text-slate-400'}`}>
+          <MessageSquare className="w-5 h-5" />
+          <span className="text-[10px] font-medium">Chat</span>
+        </button>
+        <button onClick={() => { setActiveTab('templates'); setMobileSidebarOpen(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${activeTab === 'templates' ? 'text-indigo-600' : 'text-slate-400'}`}>
+          <Layout className="w-5 h-5" />
+          <span className="text-[10px] font-medium">DNA</span>
+        </button>
+        <button onClick={() => { setActiveTab('history'); setMobileSidebarOpen(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${activeTab === 'history' ? 'text-indigo-600' : 'text-slate-400'}`}>
+          <History className="w-5 h-5" />
+          <span className="text-[10px] font-medium">History</span>
+        </button>
+        <button onClick={() => setStep('selection')} className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-slate-400 transition-colors">
+          <LayoutTemplate className="w-5 h-5" />
+          <span className="text-[10px] font-medium">Templates</span>
+        </button>
+      </nav>
     </div>
   );
 };

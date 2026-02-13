@@ -40,3 +40,15 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Safe area for mobile bottom nav */
+.safe-area-bottom {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+/* Ensure main content doesn't hide behind mobile bottom nav */
+@media (max-width: 767px) {
+  .pb-mobile-nav {
+    padding-bottom: 70px;
+  }
+}
