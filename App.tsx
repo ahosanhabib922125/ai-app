@@ -9,7 +9,7 @@ import {
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
   PanelTop, Workflow, PanelTopOpen, Maximize, Minimize2, Undo2, Redo2, Eye, PenTool, Search, ExternalLink,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, ArrowUpFromLine, ArrowDownFromLine,
-  FolderOpen, ChevronRight, Component, Menu
+  FolderOpen, ChevronRight, Component, Menu, Link2, CheckCheck
 } from 'lucide-react';
 import { generateArchitectureStream, analyzePRD } from './services/geminiService';
 import { PRESET_TEMPLATES } from './constants';
@@ -112,8 +112,13 @@ const App: React.FC = () => {
   const [isChatExportOpen, setIsChatExportOpen] = useState(false);
 
   // Session State
-  const [sessionId, setSessionId] = useState<string>(() => Date.now().toString());
+  const [sessionId, setSessionId] = useState<string>(() => {
+    const hash = window.location.hash;
+    const match = hash.match(/^#\/chat\/(.+)$/);
+    return match ? match[1] : Date.now().toString();
+  });
   const [sessions, setSessions] = useState<ProjectSession[]>([]);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Chat History
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -166,17 +171,74 @@ const App: React.FC = () => {
 
   // --- Persistence Logic ---
 
-  // Load sessions from local storage on mount
+  // Load sessions from local storage on mount, then auto-load session from URL hash
   useEffect(() => {
     const saved = localStorage.getItem('ai_architect_sessions');
+    let loadedSessions: ProjectSession[] = [];
     if (saved) {
       try {
-        setSessions(JSON.parse(saved));
+        loadedSessions = JSON.parse(saved);
+        setSessions(loadedSessions);
       } catch (e) {
         console.error("Failed to parse sessions", e);
       }
     }
+    // Auto-load session from URL hash
+    const hash = window.location.hash;
+    const match = hash.match(/^#\/chat\/(.+)$/);
+    if (match && loadedSessions.length > 0) {
+      const target = loadedSessions.find(s => s.id === match[1]);
+      if (target) {
+        setSessionId(target.id);
+        setSelectedTemplate(target.template);
+        setChatHistory(target.chatHistory);
+        setRoadmap(target.roadmap);
+        setFiles(target.files);
+        const fileKeys = Object.keys(target.files);
+        setActiveFile(fileKeys.length > 0 ? fileKeys[0] : null);
+        setStep('studio');
+        setActiveTab('chat');
+        setStatus(target.roadmap.length > 0 ? 'completed' : 'idle');
+        setStatusMessage('Session Loaded');
+        setProgress(100);
+      }
+    }
   }, []);
+
+  // Update URL hash when sessionId changes
+  useEffect(() => {
+    if (step === 'studio' && chatHistory.length > 0) {
+      window.history.replaceState(null, '', `#/chat/${sessionId}`);
+    }
+  }, [sessionId, step, chatHistory.length]);
+
+  // Listen for browser back/forward navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      const match = hash.match(/^#\/chat\/(.+)$/);
+      if (match) {
+        const target = sessions.find(s => s.id === match[1]);
+        if (target && target.id !== sessionId) {
+          setSessionId(target.id);
+          setSelectedTemplate(target.template);
+          setChatHistory(target.chatHistory);
+          setRoadmap(target.roadmap);
+          setFiles(target.files);
+          const fileKeys = Object.keys(target.files);
+          setActiveFile(fileKeys.length > 0 ? fileKeys[0] : null);
+          setStep('studio');
+          setActiveTab('chat');
+          setStatus(target.roadmap.length > 0 ? 'completed' : 'idle');
+          setProgress(100);
+        }
+      } else {
+        setStep('selection');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [sessions, sessionId]);
 
   // Save current session state whenever it changes (debounced to avoid lag during streaming)
   useEffect(() => {
@@ -259,11 +321,12 @@ const App: React.FC = () => {
     setStatus('idle');
     setProgress(0);
     setStatusMessage('Ready to build');
-    setStep('selection'); // Go back to selection for a fresh start
+    setStep('selection');
     setActiveTab('chat');
     setFilesHistory([]);
     setFilesHistoryIndex(-1);
     filesHistoryIndexRef.current = -1;
+    window.history.replaceState(null, '', window.location.pathname);
   };
 
   // Push a snapshot to undo/redo history
@@ -359,6 +422,7 @@ const App: React.FC = () => {
     setChatHistory(session.chatHistory);
     setRoadmap(session.roadmap);
     setFiles(session.files);
+    window.history.pushState(null, '', `#/chat/${session.id}`);
 
     // Set active file if exists
     const fileKeys = Object.keys(session.files);
@@ -1753,14 +1817,27 @@ navigateTo('${activeFile}');
                     className={`group cursor-pointer p-3 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-sm transition-all bg-white relative ${sessionId === session.id ? 'ring-2 ring-indigo-100 border-indigo-500' : ''}`}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{session.title}</h4>
-                      <button
-                        onClick={(e) => handleDeleteSession(e, session.id)}
-                        className="text-slate-300 hover:text-red-500 p-1 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Delete Session"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <h4 className="text-sm font-bold text-slate-800 line-clamp-1 flex-1 min-w-0">{session.title}</h4>
+                      <div className="flex items-center gap-0.5 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const url = `${window.location.origin}${window.location.pathname}#/chat/${session.id}`;
+                            navigator.clipboard.writeText(url);
+                          }}
+                          className="text-slate-300 hover:text-indigo-500 p-1"
+                          title="Copy link"
+                        >
+                          <Link2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteSession(e, session.id)}
+                          className="text-slate-300 hover:text-red-500 p-1"
+                          title="Delete Session"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-slate-500 mb-2">
                       <Layout className="w-3 h-3" /> {session.template.name}
@@ -1925,6 +2002,22 @@ navigateTo('${activeFile}');
               </div>
               </>
             )}
+
+            {/* Share Link Button */}
+            {chatHistory.length > 0 && (
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}${window.location.pathname}#/chat/${sessionId}`;
+                  navigator.clipboard.writeText(url);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                title="Copy chat link"
+              >
+                {linkCopied ? <CheckCheck className="w-4 h-4 text-emerald-500" /> : <Link2 className="w-4 h-4" />}
+              </button>
+            )}
           </div>
         </header>
 
@@ -2026,6 +2119,36 @@ navigateTo('${activeFile}');
                   )}
                   <div className="ml-auto" />
                 </div>
+                {/* Browser-like URL Bar */}
+                <div className="bg-slate-50 border-b border-slate-100 px-3 py-1.5 flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-300"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-300"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-300"></div>
+                  </div>
+                  <div className="flex-1 flex items-center bg-white border border-slate-200 rounded-lg px-3 py-1 gap-2 min-w-0">
+                    <span className="text-[10px] text-emerald-600 font-medium shrink-0">
+                      {activeFile?.endsWith('.page.html') ? '/' : activeFile?.endsWith('.organism.html') ? '/components/' : activeFile?.endsWith('.molecule.html') ? '/molecules/' : '/atoms/'}
+                    </span>
+                    <span className="text-xs text-slate-700 font-medium truncate">
+                      {activeFile?.replace(/\.(atom|molecule|organism|page)\.html$/, '').replace(/[-_]/g, ' ')}
+                    </span>
+                  </div>
+                  {/* Quick page navigation dots */}
+                  {groupedFiles.pages.length > 1 && (
+                    <div className="hidden sm:flex items-center gap-1 shrink-0">
+                      {groupedFiles.pages.map((f) => (
+                        <button
+                          key={f.name}
+                          onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
+                          className={`w-2 h-2 rounded-full transition-all ${activeFile === f.name ? 'bg-indigo-500 scale-125' : 'bg-slate-300 hover:bg-indigo-300'}`}
+                          title={f.name.replace(/\.(atom|molecule|organism|page)\.html$/, '')}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* Iframe Preview + Properties Panel */}
                 <div className="flex-1 min-h-0 flex">
                   <div className="flex-1 min-h-0 relative">
