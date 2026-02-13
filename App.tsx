@@ -1024,45 +1024,51 @@ navigateTo('${activeFile}');
           </div>
         </main>
 
-        {/* Template Preview Modal */}
+        {/* Template Preview — Full Page */}
         {previewTemplate && (
-          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800">{previewTemplate.name}</h3>
-                  <p className="text-sm text-slate-500">{previewTemplate.description}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => { handleTemplateSelect(previewTemplate); setPreviewTemplate(null); }}
-                    className="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
-                  >
-                    <Play className="w-4 h-4 fill-current" /> Use This Template
-                  </button>
-                  <button
-                    onClick={() => setPreviewTemplate(null)}
-                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+          <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-in fade-in duration-200">
+            {/* Slim Top Bar */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0 bg-white">
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  onClick={() => setPreviewTemplate(null)}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors shrink-0"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-slate-800 truncate">{previewTemplate.name}</h3>
+                  <p className="text-xs text-slate-500 truncate">{previewTemplate.description}</p>
                 </div>
               </div>
-              {/* Modal Body — Full iframe preview */}
-              <div className="flex-1 min-h-0 bg-slate-50">
-                {previewTemplate.path ? (
-                  <iframe
-                    src={previewTemplate.path}
-                    className="w-full h-full border-none"
-                    title={`Preview: ${previewTemplate.name}`}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-slate-400">
-                    <p className="text-sm">No preview available for custom templates</p>
-                  </div>
-                )}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => { handleTemplateSelect(previewTemplate); setPreviewTemplate(null); }}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" /> Use This Template
+                </button>
+                <button
+                  onClick={() => setPreviewTemplate(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
+            </div>
+            {/* Full Page iframe */}
+            <div className="flex-1 min-h-0">
+              {previewTemplate.path ? (
+                <iframe
+                  src={previewTemplate.path}
+                  className="w-full h-full border-none"
+                  title={`Preview: ${previewTemplate.name}`}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  <p className="text-sm">No preview available for custom templates</p>
+                </div>
+              )}
             </div>
           </div>
         )}
