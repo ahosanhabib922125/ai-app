@@ -106,6 +106,7 @@ const App: React.FC = () => {
 
   // Abort controller for stopping generation
   const abortRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Derived State (memoized)
   const currentTask = useMemo(() => roadmap.find(r => r.status === 'active'), [roadmap]);
@@ -267,6 +268,7 @@ const App: React.FC = () => {
 
   const handleStop = useCallback(() => {
     abortRef.current = true;
+    abortControllerRef.current?.abort();
   }, []);
 
   const handleLoadSession = (session: ProjectSession) => {
@@ -361,6 +363,9 @@ const App: React.FC = () => {
   const startBuild = async () => {
     if (!prompt.trim()) return;
     abortRef.current = false;
+    abortControllerRef.current?.abort(); // Cancel any previous build
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     // Determine if this is a fresh build or a modification
     const isModification = Object.keys(files).length > 0;
@@ -440,11 +445,27 @@ const App: React.FC = () => {
           setProgress(10);
           setStatusMessage('Page analysis complete. Starting generation...');
 
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise((resolve) => {
+            const timer = setTimeout(resolve, 1500);
+            abortController.signal.addEventListener('abort', () => { clearTimeout(timer); resolve(undefined); }, { once: true });
+          });
         }
       } catch (analysisError) {
-        console.warn("PRD analysis step failed, proceeding with generation:", analysisError);
+        if (analysisError instanceof DOMException && analysisError.name === 'AbortError') {
+          // User stopped during analysis — fall through to completion handler
+        } else {
+          console.warn("PRD analysis step failed, proceeding with generation:", analysisError);
+        }
       }
+    }
+
+    // Check abort after analysis phase
+    if (abortRef.current) {
+      setStatus('completed');
+      setStatusMessage('Build Stopped');
+      setProgress(0);
+      updateAiMessage({ text: 'Build stopped.', isStreaming: false, statusPhase: 'done' });
+      return;
     }
 
     // Build enhanced prompt with page analysis context and colors
@@ -507,7 +528,8 @@ const App: React.FC = () => {
         dnaContent,
         capturedFiles,
         existingFiles,
-        chatHistory
+        chatHistory,
+        abortController.signal
       );
 
       for await (const chunk of stream) {
@@ -688,6 +710,22 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
       }
 
     } catch (e: any) {
+      // If user stopped, handle gracefully (not an error)
+      if (abortRef.current || (e instanceof DOMException && e.name === 'AbortError')) {
+        setStatus('completed');
+        setStatusMessage('Build Stopped');
+        setProgress(100);
+        const finalFiles = { ...buildFiles };
+        const finalFileNames = Object.keys(finalFiles);
+        if (finalFileNames.length > 0) pushFilesSnapshot(finalFiles);
+        updateAiMessage({
+          text: `Build stopped. Generated ${finalFileNames.length} file${finalFileNames.length !== 1 ? 's' : ''} so far.`,
+          isStreaming: false,
+          statusPhase: 'done'
+        });
+        return;
+      }
+
       console.error(e);
       setStatusMessage("Generation Failed");
       setStatus('idle');

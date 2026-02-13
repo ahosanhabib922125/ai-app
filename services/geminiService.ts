@@ -17,7 +17,8 @@ export const generateArchitectureStream = async function* (
   dna: string,
   attachmentFiles: File[],
   currentProjectFiles: Record<string, GeneratedFile> = {},
-  chatHistory: ChatMessage[] = []
+  chatHistory: ChatMessage[] = [],
+  signal?: AbortSignal
 ): AsyncGenerator<string, void, unknown> {
   
   // 1. Prepare Context from Attachments
@@ -64,16 +65,19 @@ export const generateArchitectureStream = async function* (
   
   for (const model of modelsToTry) {
     try {
+      if (signal?.aborted) return;
+
       const responseStream = await ai.models.generateContentStream({
         model: model,
         contents: fullPrompt,
         config: {
           systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.7, 
+          temperature: 0.7,
         }
       });
 
       for await (const chunk of responseStream) {
+        if (signal?.aborted) return;
         if (chunk.text) {
           yield chunk.text;
         }
