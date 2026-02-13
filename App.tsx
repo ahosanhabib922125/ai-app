@@ -2214,35 +2214,6 @@ navigateTo('${initialFile}');
                   )}
                   <div className="ml-auto" />
                 </div>
-                {/* Browser-like URL Bar */}
-                <div className="bg-slate-50 border-b border-slate-100 px-3 py-1.5 flex items-center gap-2 shrink-0">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-300"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-300"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-300"></div>
-                  </div>
-                  <div className="flex-1 flex items-center bg-white border border-slate-200 rounded-lg px-3 py-1 gap-2 min-w-0">
-                    <span className="text-[10px] text-emerald-600 font-medium shrink-0">
-                      {activeFile?.endsWith('.page.html') ? '/' : activeFile?.endsWith('.organism.html') ? '/components/' : activeFile?.endsWith('.molecule.html') ? '/molecules/' : '/atoms/'}
-                    </span>
-                    <span className="text-xs text-slate-700 font-medium truncate">
-                      {activeFile?.replace(/\.(atom|molecule|organism|page)\.html$/, '').replace(/[-_]/g, ' ')}
-                    </span>
-                  </div>
-                  {/* Quick page navigation dots */}
-                  {groupedFiles.pages.length > 1 && (
-                    <div className="hidden sm:flex items-center gap-1 shrink-0">
-                      {groupedFiles.pages.map((f) => (
-                        <button
-                          key={f.name}
-                          onClick={() => { if (designMode) { saveDesignChanges(); setDesignSrcDoc(files[f.name]?.content || null); } setActiveFile(f.name); }}
-                          className={`w-2 h-2 rounded-full transition-all ${activeFile === f.name ? 'bg-indigo-500 scale-125' : 'bg-slate-300 hover:bg-indigo-300'}`}
-                          title={f.name.replace(/\.(atom|molecule|organism|page)\.html$/, '')}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
 
                 {/* Iframe Preview + Properties Panel */}
                 <div className="flex-1 min-h-0 flex">
