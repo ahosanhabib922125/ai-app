@@ -245,47 +245,29 @@ const App: React.FC = () => {
 
     const hash = window.location.hash;
 
-    // Local full view: #/fullview/{storageKey}/{pageName}
-    const fullviewMatch = hash.match(/^#\/fullview\/([^/]+)(?:\/(.+))?$/);
-    if (fullviewMatch) {
-      const storageKey = fullviewMatch[1];
-      const requestedPage = fullviewMatch[2] ? decodeURIComponent(fullviewMatch[2]) : '';
-      try {
-        const raw = localStorage.getItem(storageKey);
-        if (raw) {
-          const data = JSON.parse(raw);
-          const localFiles = data.files || {};
-          const title = data.title || 'Prototype';
-          const allKeys = Object.keys(localFiles);
-          const pageKeys = allKeys.filter((n: string) => n.endsWith('.page.html'));
-          const defaultPage = pageKeys.length > 0 ? pageKeys[0] : allKeys[0] || '';
-          const activePage = requestedPage && localFiles[requestedPage] ? requestedPage : defaultPage;
-          // Convert to GeneratedFile format for sharedView
-          const gFiles: Record<string, GeneratedFile> = {};
-          allKeys.forEach(k => { gFiles[k] = { name: k, content: localFiles[k], language: 'html' }; });
-          setSharedView({ files: gFiles, title, compressed: storageKey, activePage });
-          // Delay removal so React StrictMode double-mount can still read it
-          setTimeout(() => localStorage.removeItem(storageKey), 3000);
-        }
-      } catch (err) {
-        console.error('Failed to load full view session:', err);
-      }
-      return;
-    }
-
     // Shared link: #/{compressedData}/fullview/{pageName}
-    const shareMatch = hash.match(/^#\/([^/]+)\/fullview(?:\/(.+))?$/);
+    const shareMatch = hash.match(/^#\/([A-Za-z0-9_-]{10,})\/fullview(?:\/(.+))?$/);
     if (shareMatch) {
       const compressedData = shareMatch[1];
       const requestedPage = shareMatch[2] ? decodeURIComponent(shareMatch[2]) : '';
       decompressSession(compressedData).then(data => {
-        const sharedFiles = data.files || {};
+        const rawFiles = data.files || {};
         const title = data.title || data.chatHistory?.[0]?.text?.slice(0, 50) || 'Shared Project';
-        const allKeys = Object.keys(sharedFiles);
+        // Normalize: files might be Record<string, GeneratedFile> or Record<string, string>
+        const gFiles: Record<string, GeneratedFile> = {};
+        Object.keys(rawFiles).forEach(k => {
+          const v = rawFiles[k];
+          if (typeof v === 'string') {
+            gFiles[k] = { name: k, content: v, language: 'html' };
+          } else if (v && typeof v === 'object' && v.content) {
+            gFiles[k] = { name: v.name || k, content: v.content, language: v.language || 'html' };
+          }
+        });
+        const allKeys = Object.keys(gFiles);
         const pageKeys = allKeys.filter((n: string) => n.endsWith('.page.html'));
         const defaultPage = pageKeys.length > 0 ? pageKeys[0] : allKeys[0] || '';
-        const activePage = requestedPage && sharedFiles[requestedPage] ? requestedPage : defaultPage;
-        setSharedView({ files: sharedFiles, title, compressed: compressedData, activePage });
+        const activePage = requestedPage && gFiles[requestedPage] ? requestedPage : defaultPage;
+        setSharedView({ files: gFiles, title, compressed: compressedData, activePage });
       }).catch(err => {
         console.error('Failed to load shared session:', err);
       });
@@ -311,39 +293,27 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      // Handle local full view links
-      const fullviewMatch = hash.match(/^#\/fullview\/([^/]+)(?:\/(.+))?$/);
-      if (fullviewMatch) {
-        const storageKey = fullviewMatch[1];
-        const requestedPage = fullviewMatch[2] ? decodeURIComponent(fullviewMatch[2]) : '';
-        try {
-          const raw = localStorage.getItem(storageKey);
-          if (raw) {
-            const data = JSON.parse(raw);
-            const localFiles = data.files || {};
-            const allKeys = Object.keys(localFiles);
-            const pageKeys = allKeys.filter((n: string) => n.endsWith('.page.html'));
-            const defaultPage = pageKeys.length > 0 ? pageKeys[0] : allKeys[0] || '';
-            const activePage = requestedPage && localFiles[requestedPage] ? requestedPage : defaultPage;
-            const gFiles: Record<string, GeneratedFile> = {};
-            allKeys.forEach(k => { gFiles[k] = { name: k, content: localFiles[k], language: 'html' }; });
-            setSharedView({ files: gFiles, title: data.title || 'Prototype', compressed: storageKey, activePage });
-          }
-        } catch {}
-        return;
-      }
       // Handle shared links
-      const shareMatch = hash.match(/^#\/([^/]+)\/fullview(?:\/(.+))?$/);
+      const shareMatch = hash.match(/^#\/([A-Za-z0-9_-]{10,})\/fullview(?:\/(.+))?$/);
       if (shareMatch) {
         const compressedData = shareMatch[1];
         const requestedPage = shareMatch[2] ? decodeURIComponent(shareMatch[2]) : '';
         decompressSession(compressedData).then(data => {
-          const sharedFiles = data.files || {};
-          const allKeys = Object.keys(sharedFiles);
+          const rawFiles = data.files || {};
+          const gFiles: Record<string, GeneratedFile> = {};
+          Object.keys(rawFiles).forEach(k => {
+            const v = rawFiles[k];
+            if (typeof v === 'string') {
+              gFiles[k] = { name: k, content: v, language: 'html' };
+            } else if (v && typeof v === 'object' && v.content) {
+              gFiles[k] = { name: v.name || k, content: v.content, language: v.language || 'html' };
+            }
+          });
+          const allKeys = Object.keys(gFiles);
           const pageKeys = allKeys.filter((n: string) => n.endsWith('.page.html'));
           const defaultPage = pageKeys.length > 0 ? pageKeys[0] : allKeys[0] || '';
-          const activePage = requestedPage && sharedFiles[requestedPage] ? requestedPage : defaultPage;
-          setSharedView({ files: sharedFiles, title: data.title || 'Shared Project', compressed: compressedData, activePage });
+          const activePage = requestedPage && gFiles[requestedPage] ? requestedPage : defaultPage;
+          setSharedView({ files: gFiles, title: data.title || 'Shared Project', compressed: compressedData, activePage });
         }).catch(() => {});
         return;
       }
@@ -352,8 +322,8 @@ const App: React.FC = () => {
       if (chatMatch) {
         const target = sessions.find(s => s.id === chatMatch[1]);
         if (target && target.id !== sessionId) loadSessionIntoState(target);
-      } else {
-        setStep('selection');
+      } else if (!hash || hash === '#' || hash === '#/') {
+        setStep('landing');
       }
     };
     window.addEventListener('hashchange', handleHashChange);
@@ -1412,18 +1382,45 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
   const handleFullView = () => {
     if (!activeFile || !files[activeFile]) return;
 
-    // Default to a page file if current activeFile isn't a page
     const allFileNames = Object.keys(files);
     const pageFileNames = allFileNames.filter(n => n.endsWith('.page.html'));
     const initialFile = (pageFileNames.length > 0 && !activeFile.endsWith('.page.html'))
       ? pageFileNames[0] : activeFile;
 
-    // Store files in sessionStorage and open as a proper URL route
-    const storageKey = `fullview-${Date.now()}`;
-    const fullviewData: Record<string, string> = {};
-    (Object.values(files) as GeneratedFile[]).forEach(f => { fullviewData[f.name] = f.content; });
-    localStorage.setItem(storageKey, JSON.stringify({ files: fullviewData, title: chatHistory[0]?.text?.slice(0, 50) || 'Prototype' }));
-    window.open(`${window.location.pathname}#/fullview/${storageKey}/${encodeURIComponent(initialFile)}`, '_blank');
+    // Build a self-contained HTML page with all files embedded (no localStorage needed)
+    const allFileData: Record<string, string> = {};
+    (Object.values(files) as GeneratedFile[]).forEach(f => { allFileData[f.name] = f.content; });
+    const title = chatHistory[0]?.text?.slice(0, 50) || 'Prototype';
+    const escapedFiles = JSON.stringify(allFileData).replace(/<\/script>/gi, '<\\/script>');
+    const escapedInitial = initialFile.replace(/'/g, "\\'");
+    const escapedTitle = title.replace(/'/g, "\\'");
+    const fontsLink = googleFontsLink.replace(/"/g, '&quot;');
+
+    const viewerHtml = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${title}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff}iframe{width:100%;height:100vh;border:none;display:block}</style>
+</head><body>
+<iframe id="pv" sandbox="allow-scripts allow-same-origin"></iframe>
+<script>
+var F=${escapedFiles};
+var cur='${escapedInitial}';
+var fonts='${fontsLink}';
+var navJs='<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.getAttribute("href")){var h=a.getAttribute("href");if(h&&!h.startsWith("http")&&!h.startsWith("#")&&!h.startsWith("mailto:")&&!h.startsWith("tel:")){e.preventDefault();var f=h.split("/").pop().split("?")[0].split("#")[0];window.parent.postMessage({type:"fv-nav",file:f},"*");}}});<\\/scr'+'ipt>';
+function load(name){
+  if(!F[name])return;
+  cur=name;
+  document.title='${escapedTitle} — '+name.replace('.page.html','');
+  document.getElementById('pv').srcdoc=fonts+F[name]+navJs;
+}
+load(cur);
+window.addEventListener('message',function(e){
+  if(e.data&&e.data.type==='fv-nav'&&e.data.file&&F[e.data.file])load(e.data.file);
+});
+</script></body></html>`;
+
+    const blob = new Blob([viewerHtml], { type: 'text/html' });
+    window.open(URL.createObjectURL(blob), '_blank');
   };
 
   // --- COMPONENT: INPUT FORM (Refactored for reuse) ---
@@ -1510,10 +1507,7 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
         if (e.data?.type === 'shared-navigate' && e.data?.file && sharedFiles[e.data.file]) {
           const newPage = e.data.file;
           setSharedView(prev => prev ? { ...prev, activePage: newPage } : prev);
-          const isLocal = sharedView.compressed.startsWith('fullview-');
-          const newHash = isLocal
-            ? `#/fullview/${sharedView.compressed}/${encodeURIComponent(newPage)}`
-            : `#/${sharedView.compressed}/fullview/${encodeURIComponent(newPage)}`;
+          const newHash = `#/${sharedView.compressed}/fullview/${encodeURIComponent(newPage)}`;
           window.history.replaceState(null, '', newHash);
         }
       };
@@ -1523,15 +1517,21 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
 
     return (
       <div className="h-screen w-full flex flex-col bg-white overflow-hidden font-sans">
-        {/* Full-screen iframe — no nav bar, navigation via prototype routing */}
         <div className="flex-1 min-h-0 relative">
-          {currentFile && sharedFiles[currentFile] && (
+          {currentFile && sharedFiles[currentFile] ? (
             <iframe
               title="shared-preview"
               srcDoc={googleFontsLink + sharedFiles[currentFile].content + sharedNavScript}
               className="absolute inset-0 w-full h-full border-none bg-white"
               sandbox="allow-scripts allow-same-origin"
             />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
+              <div className="text-center">
+                <Loader className="w-8 h-8 text-indigo-500 animate-spin mx-auto mb-3" />
+                <p className="text-sm text-slate-500">Loading shared project...</p>
+              </div>
+            </div>
           )}
         </div>
       </div>
