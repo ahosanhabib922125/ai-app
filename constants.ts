@@ -378,5 +378,25 @@ export const PRESET_TEMPLATES = [
     name: "Orbit Health",
     description: "Wearable smart ring health dashboard with dark mode, floating animations, and real-time biometric data visualization.",
     path: "templates/WearableHealth.html"
+  },
+  {
+    name: "Meridian Editorial",
+    description: "Elegant editorial magazine layout with serif typography, drop caps, pull quotes, and classic newspaper-style grid.",
+    path: "templates/editorial.html"
+  },
+  {
+    name: "Brut.Haus",
+    description: "Raw brutalist design studio with thick borders, harsh shadows, monospace type, aggressive colors, and no rounded corners.",
+    path: "templates/brutalism.html"
+  },
+  {
+    name: "Synthwave Dev",
+    description: "Neon-soaked developer platform with cyberpunk gradients, glowing UI, terminal aesthetics, and dark synthwave palette.",
+    path: "templates/neo-retro.html"
+  },
+  {
+    name: "Helvetika Studio",
+    description: "Swiss International style design studio with strict grid system, oversized numbers, red accents, and typographic precision.",
+    path: "templates/swiss-typo.html"
   }
 ];

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELVETIKA — Swiss Design Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.3.0/dist/iconify-icon.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root {
+  --white: #FFFFFF;
+  --off-white: #F5F5F5;
+  --black: #000000;
+  --red: #E53935;
+  --gray-1: #333333;
+  --gray-2: #666666;
+  --gray-3: #999999;
+  --gray-4: #CCCCCC;
+  --gray-5: #EEEEEE;
+  --font-sans: 'Inter', -apple-system, Helvetica Neue, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--white);
+  color: var(--black);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: var(--red); color: white; }
+
+/* Swiss Grid Lines */
+.grid-line-h {
+  height: 1px;
+  background: var(--gray-5);
+  width: 100%;
+}
+.grid-line-v {
+  width: 1px;
+  background: var(--gray-5);
+  height: 100%;
+  position: absolute;
+}
+
+/* Oversize Numbers */
+.oversize-num {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: clamp(6rem, 15vw, 12rem);
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  color: var(--gray-5);
+  -webkit-text-stroke: 1px var(--gray-4);
+}
+
+/* Precise grid */
+.swiss-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+}
+
+.reveal-s { opacity: 0; transform: translateY(20px); }
+
+@media (max-width: 768px) {
+  .swiss-grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  .md-span-6 { grid-column: span 4 !important; }
+  .md-span-4 { grid-column: span 4 !important; }
+  .md-span-8 { grid-column: span 4 !important; }
+  .md-span-3 { grid-column: span 2 !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Info Bar -->
+<div class="px-6 md:px-12 py-2 flex justify-between items-center text-xs" style="font-family: var(--font-mono); color: var(--gray-3); border-bottom: 1px solid var(--gray-5);">
+  <span>47°22'N 8°32'E</span>
+  <span>Zürich, CH</span>
+</div>
+
+<!-- Nav -->
+<nav class="px-6 md:px-12 py-6 flex items-center justify-between" style="border-bottom: 2px solid var(--black);">
+  <div class="flex items-center gap-2">
+    <div class="w-4 h-4" style="background: var(--red);"></div>
+    <span class="text-lg font-black tracking-tight">HELVETIKA</span>
+  </div>
+  <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+    <a href="#" class="hover:text-red-600 transition-colors">Work</a>
+    <a href="#" class="hover:text-red-600 transition-colors">Studio</a>
+    <a href="#" class="hover:text-red-600 transition-colors">Process</a>
+    <a href="#" class="hover:text-red-600 transition-colors">Journal</a>
+    <a href="#" class="hover:text-red-600 transition-colors">Contact</a>
+  </div>
+  <button class="md:hidden">
+    <iconify-icon icon="lucide:menu" width="24"></iconify-icon>
+  </button>
+</nav>
+
+<!-- Hero -->
+<section class="px-6 md:px-12 py-16 md:py-24 relative">
+  <!-- Grid overlay lines -->
+  <div class="grid-line-v hidden md:block" style="left: 50%; top: 0; bottom: 0;"></div>
+
+  <div class="swiss-grid">
+    <div class="col-span-12 md:col-span-7 md-span-6">
+      <p class="text-xs uppercase tracking-[0.3em] mb-4 reveal-s" style="color: var(--red); font-family: var(--font-mono);">Design Studio — Est. 2018</p>
+      <h1 class="reveal-s" style="font-size: clamp(3rem, 8vw, 6.5rem); font-weight: 900; line-height: 0.92; letter-spacing: -0.04em;">
+        Form<br>
+        Follows<br>
+        <span style="color: var(--red);">Function</span>
+      </h1>
+      <div class="grid-line-h my-8"></div>
+      <p class="text-base leading-relaxed max-w-md reveal-s" style="color: var(--gray-2);">
+        We design systems, not decorations. Every element serves a purpose. Every pixel is intentional. Clarity is our craft.
+      </p>
+      <div class="mt-8 flex gap-4 reveal-s">
+        <a href="#" class="px-6 py-3 text-sm font-semibold text-white inline-flex items-center gap-2 hover:opacity-80 transition-opacity" style="background: var(--black);">
+          View Work <iconify-icon icon="lucide:arrow-right" width="16"></iconify-icon>
+        </a>
+        <a href="#" class="px-6 py-3 text-sm font-semibold inline-flex items-center gap-2 hover:bg-gray-100 transition-colors" style="border: 2px solid var(--black);">
+          Our Process
+        </a>
+      </div>
+    </div>
+    <div class="col-span-12 md:col-span-5 md-span-6 flex items-end justify-end">
+      <div class="oversize-num reveal-s select-none">Hk</div>
+    </div>
+  </div>
+</section>
+
+<div class="grid-line-h"></div>
+
+<!-- Discipline Section -->
+<section class="px-6 md:px-12 py-16 md:py-24">
+  <div class="swiss-grid">
+    <div class="col-span-12 md:col-span-4 md-span-4">
+      <p class="text-xs uppercase tracking-[0.3em] mb-2" style="color: var(--gray-3); font-family: var(--font-mono);">What We Do</p>
+      <h2 class="text-3xl md:text-4xl font-black tracking-tight reveal-s" style="line-height: 1.05;">
+        Discipline<span style="color: var(--red);">.</span>
+      </h2>
+    </div>
+    <div class="col-span-12 md:col-span-8 md-span-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+        <div class="py-8 pr-8 reveal-s" style="border-bottom: 1px solid var(--gray-5);">
+          <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--red); font-family: var(--font-mono);">01</span>
+          <h3 class="mt-3 text-xl font-bold tracking-tight">Brand Systems</h3>
+          <p class="mt-2 text-sm leading-relaxed" style="color: var(--gray-2);">Identity design rooted in systematic thinking. Logos, typography, color, and guidelines that scale across every touchpoint.</p>
+        </div>
+        <div class="py-8 md:pl-8 reveal-s" style="border-bottom: 1px solid var(--gray-5); border-left: none;" class="md:border-l md:border-gray-200">
+          <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--red); font-family: var(--font-mono);">02</span>
+          <h3 class="mt-3 text-xl font-bold tracking-tight">Digital Product</h3>
+          <p class="mt-2 text-sm leading-relaxed" style="color: var(--gray-2);">User interfaces built on research, tested with users, and refined through iteration. Clean, functional, purposeful.</p>
+        </div>
+        <div class="py-8 pr-8 reveal-s" style="border-bottom: 1px solid var(--gray-5);">
+          <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--red); font-family: var(--font-mono);">03</span>
+          <h3 class="mt-3 text-xl font-bold tracking-tight">Type Design</h3>
+          <p class="mt-2 text-sm leading-relaxed" style="color: var(--gray-2);">Custom typefaces and typographic systems. Letters as architecture — every curve, weight, and kerning pair considered.</p>
+        </div>
+        <div class="py-8 md:pl-8 reveal-s">
+          <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--red); font-family: var(--font-mono);">04</span>
+          <h3 class="mt-3 text-xl font-bold tracking-tight">Editorial Design</h3>
+          <p class="mt-2 text-sm leading-relaxed" style="color: var(--gray-2);">Publication design with rigorous grid systems. Books, magazines, and digital editorial that honor content through structure.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="grid-line-h"></div>
+
+<!-- Selected Work -->
+<section class="px-6 md:px-12 py-16 md:py-24">
+  <div class="flex items-end justify-between mb-12">
+    <div>
+      <p class="text-xs uppercase tracking-[0.3em] mb-2" style="color: var(--gray-3); font-family: var(--font-mono);">Portfolio</p>
+      <h2 class="text-3xl md:text-4xl font-black tracking-tight reveal-s" style="line-height: 1.05;">
+        Selected Work<span style="color: var(--red);">.</span>
+      </h2>
+    </div>
+    <span class="text-xs" style="font-family: var(--font-mono); color: var(--gray-3);">2022—2025</span>
+  </div>
+
+  <div class="space-y-0">
+    <!-- Project 1 -->
+    <a href="#" class="block group reveal-s" style="border-top: 1px solid var(--gray-5);">
+      <div class="swiss-grid py-6 items-center">
+        <div class="col-span-1 md-span-3">
+          <span class="text-xs font-bold" style="font-family: var(--font-mono); color: var(--gray-3);">001</span>
+        </div>
+        <div class="col-span-5 md-span-4">
+          <h3 class="text-lg md:text-xl font-bold tracking-tight group-hover:text-red-600 transition-colors">Basel Art Museum</h3>
+        </div>
+        <div class="col-span-3 md-span-3 hidden md:block">
+          <span class="text-sm" style="color: var(--gray-2);">Brand Identity</span>
+        </div>
+        <div class="col-span-2 md-span-3 hidden md:block">
+          <span class="text-sm" style="color: var(--gray-3);">2024</span>
+        </div>
+        <div class="col-span-1 text-right">
+          <iconify-icon icon="lucide:arrow-up-right" width="20" class="group-hover:rotate-45 transition-transform" style="color: var(--gray-3);"></iconify-icon>
+        </div>
+      </div>
+    </a>
+    <!-- Project 2 -->
+    <a href="#" class="block group reveal-s" style="border-top: 1px solid var(--gray-5);">
+      <div class="swiss-grid py-6 items-center">
+        <div class="col-span-1 md-span-3"><span class="text-xs font-bold" style="font-family: var(--font-mono); color: var(--gray-3);">002</span></div>
+        <div class="col-span-5 md-span-4"><h3 class="text-lg md:text-xl font-bold tracking-tight group-hover:text-red-600 transition-colors">Neue Grotesk Typeface</h3></div>
+        <div class="col-span-3 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-2);">Type Design</span></div>
+        <div class="col-span-2 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-3);">2024</span></div>
+        <div class="col-span-1 text-right"><iconify-icon icon="lucide:arrow-up-right" width="20" class="group-hover:rotate-45 transition-transform" style="color: var(--gray-3);"></iconify-icon></div>
+      </div>
+    </a>
+    <!-- Project 3 -->
+    <a href="#" class="block group reveal-s" style="border-top: 1px solid var(--gray-5);">
+      <div class="swiss-grid py-6 items-center">
+        <div class="col-span-1 md-span-3"><span class="text-xs font-bold" style="font-family: var(--font-mono); color: var(--gray-3);">003</span></div>
+        <div class="col-span-5 md-span-4"><h3 class="text-lg md:text-xl font-bold tracking-tight group-hover:text-red-600 transition-colors">Vitra Design System</h3></div>
+        <div class="col-span-3 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-2);">Digital Product</span></div>
+        <div class="col-span-2 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-3);">2023</span></div>
+        <div class="col-span-1 text-right"><iconify-icon icon="lucide:arrow-up-right" width="20" class="group-hover:rotate-45 transition-transform" style="color: var(--gray-3);"></iconify-icon></div>
+      </div>
+    </a>
+    <!-- Project 4 -->
+    <a href="#" class="block group reveal-s" style="border-top: 1px solid var(--gray-5);">
+      <div class="swiss-grid py-6 items-center">
+        <div class="col-span-1 md-span-3"><span class="text-xs font-bold" style="font-family: var(--font-mono); color: var(--gray-3);">004</span></div>
+        <div class="col-span-5 md-span-4"><h3 class="text-lg md:text-xl font-bold tracking-tight group-hover:text-red-600 transition-colors">ETH Zürich Annual Report</h3></div>
+        <div class="col-span-3 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-2);">Editorial</span></div>
+        <div class="col-span-2 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-3);">2023</span></div>
+        <div class="col-span-1 text-right"><iconify-icon icon="lucide:arrow-up-right" width="20" class="group-hover:rotate-45 transition-transform" style="color: var(--gray-3);"></iconify-icon></div>
+      </div>
+    </a>
+    <!-- Project 5 -->
+    <a href="#" class="block group reveal-s" style="border-top: 1px solid var(--gray-5); border-bottom: 1px solid var(--gray-5);">
+      <div class="swiss-grid py-6 items-center">
+        <div class="col-span-1 md-span-3"><span class="text-xs font-bold" style="font-family: var(--font-mono); color: var(--gray-3);">005</span></div>
+        <div class="col-span-5 md-span-4"><h3 class="text-lg md:text-xl font-bold tracking-tight group-hover:text-red-600 transition-colors">SBB Wayfinding Refresh</h3></div>
+        <div class="col-span-3 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-2);">Signage System</span></div>
+        <div class="col-span-2 md-span-3 hidden md:block"><span class="text-sm" style="color: var(--gray-3);">2022</span></div>
+        <div class="col-span-1 text-right"><iconify-icon icon="lucide:arrow-up-right" width="20" class="group-hover:rotate-45 transition-transform" style="color: var(--gray-3);"></iconify-icon></div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- Image + Quote -->
+<section class="px-6 md:px-12">
+  <div class="swiss-grid">
+    <div class="col-span-12 md:col-span-7 md-span-6 reveal-s">
+      <img src="https://images.unsplash.com/photo-1618004912476-29818d81ae2e?w=1000&q=80" alt="Typography" class="w-full object-cover" style="aspect-ratio: 3/2;" />
+      <p class="mt-2 text-xs" style="font-family: var(--font-mono); color: var(--gray-3);">Fig. 01 — Neue Grotesk specimen sheet, 2024</p>
+    </div>
+    <div class="col-span-12 md:col-span-5 md-span-6 flex flex-col justify-center md:pl-8 py-8">
+      <blockquote class="reveal-s">
+        <p class="text-2xl md:text-3xl font-black tracking-tight leading-tight" style="letter-spacing: -0.02em;">
+          "The grid system is an aid, not a guarantee. It permits a number of possible uses — and each designer can look for a solution appropriate to his personal style."
+        </p>
+        <footer class="mt-6">
+          <div class="w-12 h-0.5 mb-3" style="background: var(--red);"></div>
+          <cite class="text-sm not-italic font-semibold">Josef Müller-Brockmann</cite>
+          <p class="text-xs mt-1" style="color: var(--gray-3);">Grid Systems in Graphic Design, 1981</p>
+        </footer>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<div class="grid-line-h my-16"></div>
+
+<!-- Process -->
+<section class="px-6 md:px-12 pb-16 md:pb-24">
+  <div class="swiss-grid">
+    <div class="col-span-12 md:col-span-4 md-span-4">
+      <p class="text-xs uppercase tracking-[0.3em] mb-2" style="color: var(--gray-3); font-family: var(--font-mono);">Methodology</p>
+      <h2 class="text-3xl md:text-4xl font-black tracking-tight reveal-s" style="line-height: 1.05;">
+        Process<span style="color: var(--red);">.</span>
+      </h2>
+    </div>
+    <div class="col-span-12 md:col-span-8 md-span-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="reveal-s">
+          <div class="oversize-num" style="font-size: 5rem; -webkit-text-stroke: none; color: var(--gray-5);">01</div>
+          <h3 class="text-lg font-bold tracking-tight mt-2">Research</h3>
+          <p class="mt-2 text-sm leading-relaxed" style="color: var(--gray-2);">Understand the problem. Study the context. Define constraints. Every great solution begins with the right question.</p>
+        </div>
+        <div class="reveal-s">
+          <div class="oversize-num" style="font-size: 5rem; -webkit-text-stroke: none; color: var(--gray-5);">02</div>
+          <h3 class="text-lg font-bold tracking-tight mt-2">Design</h3>
+          <p class="mt-2 text-sm leading-relaxed" style="color: var(--gray-2);">Systematic exploration within a rigorous grid. Typography, space, and color — each decision justified, nothing arbitrary.</p>
+        </div>
+        <div class="reveal-s">
+          <div class="oversize-num" style="font-size: 5rem; -webkit-text-stroke: none; color: var(--gray-5);">03</div>
+          <h3 class="text-lg font-bold tracking-tight mt-2">Deliver</h3>
+          <p class="mt-2 text-sm leading-relaxed" style="color: var(--gray-2);">Production-ready assets, comprehensive guidelines, and ongoing support. Design that works in the real world.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="background: var(--black); color: var(--white);">
+  <div class="px-6 md:px-12 py-16 md:py-24">
+    <div class="swiss-grid items-center">
+      <div class="col-span-12 md:col-span-8 md-span-6">
+        <h2 class="text-3xl md:text-5xl font-black tracking-tight reveal-s" style="line-height: 1;">
+          Have a project?<br>Let's talk<span style="color: var(--red);">.</span>
+        </h2>
+        <p class="mt-4 text-sm reveal-s" style="color: var(--gray-3);">We take on a limited number of projects each year. Quality over quantity — always.</p>
+      </div>
+      <div class="col-span-12 md:col-span-4 md-span-6 mt-8 md:mt-0 text-left md:text-right reveal-s">
+        <a href="#" class="inline-flex items-center gap-2 px-8 py-4 text-sm font-bold text-black hover:opacity-80 transition-opacity" style="background: var(--white);">
+          Start a Conversation <iconify-icon icon="lucide:arrow-right" width="16"></iconify-icon>
+        </a>
+        <p class="mt-4 text-xs" style="font-family: var(--font-mono); color: var(--gray-3);">hello@helvetika.ch</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="px-6 md:px-12 py-8" style="border-top: 2px solid var(--black);">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div class="flex items-center gap-2">
+      <div class="w-3 h-3" style="background: var(--red);"></div>
+      <span class="text-sm font-bold">HELVETIKA</span>
+      <span class="text-xs ml-4" style="color: var(--gray-3);">&copy; 2025</span>
+    </div>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-red-600 transition-colors" style="color: var(--gray-3);"><iconify-icon icon="lucide:instagram" width="18"></iconify-icon></a>
+      <a href="#" class="hover:text-red-600 transition-colors" style="color: var(--gray-3);"><iconify-icon icon="lucide:dribbble" width="18"></iconify-icon></a>
+      <a href="#" class="hover:text-red-600 transition-colors" style="color: var(--gray-3);"><iconify-icon icon="lucide:linkedin" width="18"></iconify-icon></a>
+      <a href="#" class="hover:text-red-600 transition-colors" style="color: var(--gray-3);"><iconify-icon icon="lucide:twitter" width="18"></iconify-icon></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+gsap.utils.toArray('.reveal-s').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
+    scrollTrigger: { trigger: el, start: 'top 88%', once: true }
+  });
+});
+</script>
+</body>
+</html>
