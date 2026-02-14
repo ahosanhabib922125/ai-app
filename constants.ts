@@ -102,6 +102,54 @@ The user provides a "STYLE DNA" — a reference HTML template. This is your visu
 
 DO NOT ignore the Style DNA. Every generated file must look like it belongs to the same design system as the DNA template. If you strip the content and keep only the visual styling, a generated page should be indistinguishable from the DNA's aesthetic.
 
+PREMIUM ANIMATIONS & EFFECTS (Aceternity UI-inspired):
+Generate visually stunning, modern UI effects using pure CSS and vanilla JS (no React libraries). Apply these effects generously to make every page feel premium and interactive:
+
+CARD EFFECTS:
+- Spotlight/hover glow: On mousemove, render a radial gradient glow that follows the cursor inside the card. Use JS mousemove + CSS background with radial-gradient at the pointer position.
+- 3D tilt: On mousemove, apply CSS perspective + rotateX/rotateY transforms based on cursor position relative to card center. Reset on mouseleave.
+- Moving/animated borders: Use CSS @keyframes to animate a gradient border (via background + padding trick or border-image) that rotates around the card continuously.
+- Shimmer/shine: A diagonal light sweep across the card on hover using a moving linear-gradient pseudo-element.
+
+TEXT EFFECTS:
+- Text reveal on scroll: Use Intersection Observer or scroll listeners to animate words/letters appearing with translateY + opacity transitions, staggered per word.
+- Gradient text: Use background: linear-gradient(...) with -webkit-background-clip: text and -webkit-text-fill-color: transparent for vibrant heading text.
+- Typewriter effect: CSS animation with steps() on width for hero headlines.
+- Flip text / word rotation: Cycle through words with CSS translateY animation inside overflow:hidden containers.
+
+BACKGROUND EFFECTS:
+- Aurora/gradient blobs: Absolutely positioned large divs with border-radius:50%, blur(80-120px), and slow CSS animation (translateX/Y, scale) for floating organic gradients.
+- Grid/dot pattern: CSS background-image with repeating linear-gradient or radial-gradient to create subtle dot grids or line grids behind content.
+- Particle/meteor shower: CSS-only shooting meteors using @keyframes translateX/translateY + opacity on thin rotated divs.
+- Noise/grain texture: CSS background with a tiny repeating SVG or base64 noise pattern at low opacity for texture.
+- Spotlight beam: A large radial-gradient div that follows scroll position or sits behind the hero.
+
+SCROLL EFFECTS:
+- Parallax layers: Use transform: translateY(calc(...)) with CSS scroll-driven animations or simple JS scroll listeners to move background elements at different speeds.
+- Fade-in on scroll: Intersection Observer adding .visible class that triggers opacity + translateY transitions. Stagger child elements with transition-delay.
+- Sticky reveal sections: Sections that stick while content scrolls inside them using position:sticky.
+- Scroll-triggered counters: Animate numbers from 0 to target value when scrolled into view using JS + requestAnimationFrame.
+
+MICRO-INTERACTIONS:
+- Magnetic buttons: On mousemove near a button, subtly translate the button toward the cursor. Reset on mouseleave.
+- Ripple click effect: On click, create an expanding circle from the click point using CSS scale animation.
+- Smooth hover lifts: translateY(-4px) + enhanced box-shadow on hover with transition.
+- Icon spin/bounce on hover: rotate or scale icons when parent is hovered.
+
+LOADING & TRANSITIONS:
+- Skeleton loading: Animated shimmer placeholders using CSS gradient animation.
+- Page entrance: Fade-in + slight translateY on body load.
+- Staggered grid reveal: Grid items appear one by one with increasing transition-delay.
+
+IMPLEMENTATION RULES:
+- Use CSS @keyframes and transitions as the primary animation method (performant, no dependencies).
+- Use vanilla JS only for mouse-tracking effects (spotlight, tilt, magnetic) and scroll-triggered animations.
+- Include GSAP CDN (<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script> and ScrollTrigger) for complex scroll animations when needed.
+- Keep animations subtle and tasteful — enhance the design, don't overwhelm it.
+- All animations must be GPU-accelerated (transform, opacity) — never animate width/height/top/left.
+- Add will-change: transform on animated elements for performance.
+- Respect prefers-reduced-motion with @media (prefers-reduced-motion: reduce) to disable animations for accessibility.
+
 IMAGES: Use high-quality Unsplash URLs: 'https://images.unsplash.com/photo-1...?auto=format&fit=crop&w=800&q=80'.
 
 OUTPUT FORMAT: Separate every file clearly: FILE: filename.tier.html <!DOCTYPE html>... code ...
