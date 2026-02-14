@@ -282,10 +282,16 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Update URL hash when sessionId changes
+  // Update URL hash based on current step
   useEffect(() => {
+    const currentHash = window.location.hash;
     if (step === 'studio' && chatHistory.length > 0) {
-      window.history.replaceState(null, '', `#/chat/${sessionId}`);
+      const target = `#/chat/${sessionId}`;
+      if (currentHash !== target) window.history.pushState(null, '', target);
+    } else if (step === 'selection') {
+      if (currentHash !== '#/templates') window.history.pushState(null, '', '#/templates');
+    } else if (step === 'landing') {
+      if (currentHash && currentHash !== '#' && currentHash !== '#/') window.history.pushState(null, '', window.location.pathname);
     }
   }, [sessionId, step, chatHistory.length]);
 
@@ -322,12 +328,15 @@ const App: React.FC = () => {
       if (chatMatch) {
         const target = sessions.find(s => s.id === chatMatch[1]);
         if (target && target.id !== sessionId) loadSessionIntoState(target);
+      } else if (hash === '#/templates') {
+        setStep('selection');
       } else if (!hash || hash === '#' || hash === '#/') {
         setStep('landing');
       }
     };
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+    return () => { window.removeEventListener('hashchange', handleHashChange); window.removeEventListener('popstate', handleHashChange); };
   }, [sessions, sessionId, loadSessionIntoState]);
 
   // Save current session state whenever it changes (debounced to avoid lag during streaming)
