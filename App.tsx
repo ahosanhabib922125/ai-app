@@ -264,7 +264,8 @@ const App: React.FC = () => {
           const gFiles: Record<string, GeneratedFile> = {};
           allKeys.forEach(k => { gFiles[k] = { name: k, content: localFiles[k], language: 'html' }; });
           setSharedView({ files: gFiles, title, compressed: storageKey, activePage });
-          localStorage.removeItem(storageKey);
+          // Delay removal so React StrictMode double-mount can still read it
+          setTimeout(() => localStorage.removeItem(storageKey), 3000);
         }
       } catch (err) {
         console.error('Failed to load full view session:', err);
