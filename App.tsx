@@ -1480,8 +1480,61 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
       return () => window.removeEventListener('message', handler);
     }, [sharedFiles, sharedView.compressed]);
 
+    const sharedPageKeys = Object.keys(sharedFiles).filter(n => n.endsWith('.page.html'));
+    const [sharedLinkCopied, setSharedLinkCopied] = useState(false);
+
     return (
       <div className="h-screen w-full flex flex-col bg-white overflow-hidden font-sans">
+        {/* Shared View Header */}
+        <header className="shrink-0 bg-white border-b border-slate-100 px-4 h-12 flex items-center gap-3 z-10">
+          {/* Branding */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-bold text-sm text-slate-800 hidden sm:block truncate max-w-[200px]">{sharedView.title}</span>
+          </div>
+
+          {/* Page Tabs */}
+          {sharedPageKeys.length > 1 && (
+            <>
+              <div className="w-px h-6 bg-slate-200 mx-1 hidden sm:block" />
+              <div className="flex items-center gap-1 overflow-x-auto flex-1 min-w-0 scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
+                {sharedPageKeys.map(pageKey => (
+                  <button
+                    key={pageKey}
+                    onClick={() => {
+                      setSharedView(prev => prev ? { ...prev, activePage: pageKey } : prev);
+                      const newHash = `#/${sharedView.compressed}/fullview/${encodeURIComponent(pageKey)}`;
+                      window.history.replaceState(null, '', newHash);
+                    }}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${currentFile === pageKey ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+                  >
+                    {pageKey.replace(/\.page\.html$/, '')}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          {sharedPageKeys.length <= 1 && <div className="flex-1" />}
+
+          {/* Copy Link Button */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                setSharedLinkCopied(true);
+                setTimeout(() => setSharedLinkCopied(false), 2000);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600"
+            >
+              {sharedLinkCopied ? <><CheckCheck className="w-3.5 h-3.5 text-emerald-500" /> Copied!</> : <><Link2 className="w-3.5 h-3.5" /> Copy Link</>}
+            </button>
+            <span className="text-[10px] text-slate-400 hidden md:block">Built with <span className="font-semibold text-indigo-500">AI Architect Studio</span></span>
+          </div>
+        </header>
+
+        {/* Full-screen preview */}
         <div className="flex-1 min-h-0 relative">
           {currentFile && sharedFiles[currentFile] ? (
             <iframe
@@ -2503,6 +2556,36 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
                 title="Copy shareable link"
               >
                 {linkCopied ? <CheckCheck className="w-4 h-4 text-emerald-500" /> : <Link2 className="w-4 h-4" />}
+              </button>
+            )}
+
+            {/* Full View Button — opens shareable live link in new tab */}
+            {Object.keys(files).length > 0 && (
+              <button
+                onClick={async () => {
+                  try {
+                    const sessionData = {
+                      id: sessionId,
+                      title: chatHistory[0]?.text.slice(0, 50) || 'Project',
+                      template: selectedTemplate,
+                      chatHistory,
+                      roadmap,
+                      files
+                    };
+                    const compressed = await compressSession(sessionData);
+                    const fileKeys = Object.keys(files);
+                    const pageKeys = fileKeys.filter(n => n.endsWith('.page.html'));
+                    const firstPage = pageKeys.length > 0 ? pageKeys[0] : fileKeys[0] || '';
+                    const url = `${window.location.origin}${window.location.pathname}#/${compressed}/fullview${firstPage ? '/' + encodeURIComponent(firstPage) : ''}`;
+                    window.open(url, '_blank');
+                  } catch (err) {
+                    console.error('Failed to generate full view link:', err);
+                  }
+                }}
+                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors"
+                title="Open Full View (shareable live link)"
+              >
+                <ExternalLink className="w-4 h-4" />
               </button>
             )}
           </div>
