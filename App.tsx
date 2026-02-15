@@ -7,7 +7,7 @@ import {
   ChevronLeft, MessageSquare, Bot, User, BrainCircuit,
   Download, Package, Terminal, AlertTriangle,
   ChevronDown, Copy, Figma, History, Plus, Trash2, Calendar,
-  PanelTop, Workflow, PanelTopOpen, Maximize, Minimize2, Undo2, Redo2, Eye, PenTool, Search, ExternalLink,
+  PanelTop, Workflow, PanelTopOpen, Undo2, Redo2, Eye, PenTool, Search, ExternalLink,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, ArrowUpFromLine, ArrowDownFromLine,
   FolderOpen, ChevronRight, Component, Menu, Link2, CheckCheck,
   Zap, ArrowRight, Layers, Globe, MousePointer, Code2, Palette, Share2
@@ -1388,50 +1388,6 @@ IMPORTANT: Do NOT regenerate files that already exist. ONLY generate the missing
     designDirtyRef.current = false;
   };
 
-  const handleFullView = () => {
-    if (!activeFile || !files[activeFile]) return;
-
-    const allFileNames = Object.keys(files);
-    const pageFileNames = allFileNames.filter(n => n.endsWith('.page.html'));
-    const initialFile = (pageFileNames.length > 0 && !activeFile.endsWith('.page.html'))
-      ? pageFileNames[0] : activeFile;
-
-    // Build a self-contained HTML page with all files embedded (no localStorage needed)
-    const allFileData: Record<string, string> = {};
-    (Object.values(files) as GeneratedFile[]).forEach(f => { allFileData[f.name] = f.content; });
-    const title = chatHistory[0]?.text?.slice(0, 50) || 'Prototype';
-    const escapedFiles = JSON.stringify(allFileData).replace(/<\/script>/gi, '<\\/script>');
-    const escapedInitial = initialFile.replace(/'/g, "\\'");
-    const escapedTitle = title.replace(/'/g, "\\'");
-    const fontsLink = googleFontsLink.replace(/"/g, '&quot;');
-
-    const viewerHtml = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${title}</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff}iframe{width:100%;height:100vh;border:none;display:block}</style>
-</head><body>
-<iframe id="pv" sandbox="allow-scripts allow-same-origin"></iframe>
-<script>
-var F=${escapedFiles};
-var cur='${escapedInitial}';
-var fonts='${fontsLink}';
-var navJs='<scr'+'ipt>document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.getAttribute("href")){var h=a.getAttribute("href");if(h&&!h.startsWith("http")&&!h.startsWith("#")&&!h.startsWith("mailto:")&&!h.startsWith("tel:")){e.preventDefault();var f=h.split("/").pop().split("?")[0].split("#")[0];window.parent.postMessage({type:"fv-nav",file:f},"*");}}});<\\/scr'+'ipt>';
-function load(name){
-  if(!F[name])return;
-  cur=name;
-  document.title='${escapedTitle} — '+name.replace('.page.html','');
-  document.getElementById('pv').srcdoc=fonts+F[name]+navJs;
-}
-load(cur);
-window.addEventListener('message',function(e){
-  if(e.data&&e.data.type==='fv-nav'&&e.data.file&&F[e.data.file])load(e.data.file);
-});
-</script></body></html>`;
-
-    const blob = new Blob([viewerHtml], { type: 'text/html' });
-    window.open(URL.createObjectURL(blob), '_blank');
-  };
-
   // --- COMPONENT: INPUT FORM (Refactored for reuse) ---
   const renderInputForm = (isCompact: boolean) => (
     <div className={`flex flex-col gap-2`}>
@@ -2461,14 +2417,6 @@ window.addEventListener('message',function(e){
               >
                 <PenTool className="w-4 h-4" />
                 <span className="hidden lg:inline">{designMode ? 'Exit Design' : 'Design'}</span>
-              </button>
-              <button
-                onClick={handleFullView}
-                className="p-2 md:px-3 md:py-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5"
-                title="Open in Full View"
-              >
-                <Maximize className="w-4 h-4" />
-                <span className="hidden lg:inline">Full View</span>
               </button>
               <div className="relative">
                 <button
